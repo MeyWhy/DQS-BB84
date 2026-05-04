@@ -28,9 +28,10 @@ async def lifespan(app: FastAPI):
 
  
 app=FastAPI(
-    title="Orchestrator",
-    description="Orchestrator BB84",
-    version="0.6.0",
+    title="KME - Key Management Entity",
+    description="ESTI GS QKD 014 compliant QKD Key Management Entity."
+                "Implements BB84 via distributed microservices.",
+    version="0.7.0",
     lifespan=lifespan,)
 
 async def _http(method: str, url: str, client: httpx.AsyncClient,  **kwargs) -> dict:
@@ -103,7 +104,7 @@ async def _run_session(session_id: str)-> None:
             _abort(r, session, f"Alice emit failed: {e.detail}")
             return
         
-
+@app.post("/keys", response_model=SessionStatusResponse)
 @app.post("/session/start", response_model=SessionStatusResponse)
 async def start_session(req: SessionStartReq, background_tasks:BackgroundTasks):
     session_id=new_session_id()
@@ -123,9 +124,10 @@ async def start_session(req: SessionStartReq, background_tasks:BackgroundTasks):
     logger.info(f"[Orch] Session {session_id} created ({req.n_qubits} qubits)")
     return session_to_response(session)
 
-
+@app.get("/keys/{key_ID}", response_model=SessionStatusResponse)
 @app.get("/session/{session_id}", response_model=SessionStatusResponse)
-async def get_session_status(session_id: str):
+async def get_session_status(session_id: str=None, key_ID: str=None):
+    sid=session_id or key_ID
     r = get_redis()
     session = load_orch_session(r, session_id)
     if not session:

@@ -148,9 +148,9 @@ async def lifespan(app: FastAPI):
     logger.info("[QNS] Service stopped")
    
 app=FastAPI(
-    title="Quantum Network Service",
+    title="QKDL - QKD Link LAyer (QuNetSim)",
     description="QuNetSim wrapper for BB84",
-    version="0.5.0",
+    version="0.7.0",
     lifespan=lifespan,
 ) 
 @app.post("/network/init", response_model=NetworkInitResp)

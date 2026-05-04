@@ -71,15 +71,25 @@ class SessionStartReq(BaseModel):
     batch_size: int=Field(default=10, gt=0, le=100)
 
 class SessionStartResp(BaseModel):
-    session_id: str
-    statut: str
+    session_id: str #key id in etsi
+    statut: str 
     n_qubits_sent: int
     n_qubits_received: int
-    n_sifted: int
+    n_sifted: int #key size in etsi
     qber: float
-    key_final:str #TODO to be changed to its hash for more secu
+    key_final:str #TODO to be changed to its hash for more secu | key in etsi
     latency:float
     error_message: str=""
+
+    model_config={"populate_by_name": True}
+
+    @property
+    def key_ID(self)   -> str: return self.session_id
+    @property
+    def key(self)      -> str: return self.key_final
+    @property
+    def key_size(self) -> int: return self.n_sifted
+
 
 class SiftReq(BaseModel):
     session_id:str

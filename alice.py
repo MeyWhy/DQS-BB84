@@ -29,9 +29,9 @@ async def lifespan(app: FastAPI):
 
  
 app=FastAPI(
-    title="Alice Service",
+    title="SAE-A - Secure Application Entity (Alice)",
     description="Emitter of qubits for BB84",
-    version="0.6.0",
+    version="0.7.0",
     lifespan=lifespan,)
 
 #here alice gen les bits & bases et divides them as batches to be put in redis broker
