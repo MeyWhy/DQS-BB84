@@ -250,13 +250,22 @@ def parse_args():
     p.add_argument("--no-orchestrator",action="store_true")
     return p.parse_args()
 
+#after consuming key, it triggers consume of orch
+def consume_key(session_id: str):
+    try:
+        r = httpx.post(f"{ORCH_URL}/session/{session_id}/consume-key", timeout=10.0)
+        r.raise_for_status()
+        return True
+    except Exception as e:
+        print(f"{R}consume failed: {e}{D}")
+        return False
 
 def main():
     args=parse_args()
 
     print("\nBB84 test start")
 
-    if args.no_orchestrator:
+    if args.no_orchestrator: #cas local in case echec de l'orch service
         fake=hashlib.sha256(b"local").hexdigest()
         session={"session_id":"local","qber":0.0,"n_sifted":100}
         key_bits=key_bits_from_hash(fake,100)
@@ -264,7 +273,9 @@ def main():
         sid=start_session(args.n_qubits,args.batch_size,args.loss_rate)
         session=poll_session(sid)
         key_bits=key_bits_from_hash(session.get("key_final",""),session.get("n_sifted",0))
-
+        if not args.no_orchestrator and session.get("session_id"):
+            consume_key(session["session_id"])
+            
     print("session ready, key:",len(key_bits))
 
     t0=time.perf_counter()

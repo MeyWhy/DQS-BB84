@@ -219,17 +219,6 @@ async def send_batch(req: SendBatchReq):
 
 @app.post("/classical/send", response_model=ClassicalSendResp)
 async def send_classical(req: ClassicalSendReq):
-    """
-    Sends ciphertext from Alice to Bob over the already-running
-    QuNetSim network for this session.
-
-    Uses the live alice_host/bob_host that were created during
-    /network/init — no new network is spun up.
-
-    Bob's receive runs in a thread (QuNetSim is blocking),
-    and the result is stored in _classical_inbox for the
-    /classical/recv poll.
-    """
     with _sessions_lock:
         session = _sessions.get(req.session_id)
 

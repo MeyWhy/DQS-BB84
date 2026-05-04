@@ -130,6 +130,8 @@ async def get_session_status(session_id: str):
     session = load_orch_session(r, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    session.is_key_valid()
+    update_orch_session(r, session)
     return session_to_response(session)
 
 
@@ -141,7 +143,7 @@ async def complete_session(session_id: str, result: dict):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Idempotence : déjà terminé
+    #idempotence: already done
     if session.is_terminal:
         logger.info(f"[Orch] Session {session_id} already finished == ignored")
         return {"status": "already_complete"}
@@ -161,6 +163,7 @@ async def complete_session(session_id: str, result: dict):
         session.qber       = result.get("qber", 0.0)
         session.n_sifted   = result.get("n_sifted", 0)
         session.n_delivered = result.get("n_delivered", 0)
+        session.activate_key()
     else:
         session.transition(SessionStatus.ABORTED)
         session.error_message = result.get("error_message", "Erreur inconnue")
@@ -208,6 +211,28 @@ async def cancel_session(session_id: str):
     logger.info(f"[Orch] Session {session_id}  cancelled")
     return {"status": "cancelled", "session_id": session_id}
 
+
+@app.post("/session/{session_id}/consume-key")
+async def consume_key(session_id: str):
+    r =get_redis()
+    session = load_orch_session(r, session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    if not session.consume_key():
+        raise HTTPException(
+            status_code=409,
+            detail=f"Key not available: status={session.key_status.value}"
+        )
+
+    update_orch_session(r, session)
+    logger.info(f"[Orch] Key consumed for session {session_id}")
+
+    return {
+        "session_id": session_id,
+        "key_final":  session.key_final,
+        "key_status": session.key_status.value,
+    }
 
 
 @app.get("/sessions")

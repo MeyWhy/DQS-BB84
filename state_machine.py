@@ -4,6 +4,17 @@ from typing import Optional
 from pydantic import BaseModel, Field
 import uuid
 import time
+import os
+
+KEY_TTL_SECONDS=int(os.getenv("BB84_KEY_TTL", "180"))
+
+
+class KeyStatus(str, Enum):
+    NONE    =   "none"
+    ACTIVE      =   "active"
+    CONSUMED    =   "consumed"
+    EXPIRED     =   "expired"
+
 
 class SessionStatus(str, Enum):
     CREATED      = "created"       #Session créee, pas encore demarré
@@ -47,6 +58,8 @@ class OrchestratorSession(BaseModel):
     n_qubits:     int
     batch_size:   int
     loss_rate:    float
+    key_status:     KeyStatus=KeyStatus.NONE
+    key_expires_at: Optional[float] = None
 
     #timestamps pour metrics de latence
     created_at:      float = Field(default_factory=time.time)
@@ -79,6 +92,24 @@ class OrchestratorSession(BaseModel):
 
         return self
 
+    def activate_key(self) -> None:
+        self.key_status = KeyStatus.ACTIVE
+        self.key_expires_at = time.time() + KEY_TTL_SECONDS
+
+    def consume_key(self) -> bool:
+        if not self.is_key_valid():
+            return False
+        self.key_status = KeyStatus.CONSUMED
+        return True
+    
+    def is_key_valid(self) -> bool:
+        if self.key_status != KeyStatus.ACTIVE:
+            return False
+        if self.key_expires_at and time.time() > self.key_expires_at:
+            self.key_status = KeyStatus.EXPIRED
+            return False
+        return True
+    
     @property
     def elapsed_s(self) -> float:
         if self.completed_at and self.created_at:
@@ -104,8 +135,11 @@ class SessionStatusResponse(BaseModel):
     progress_pct:  float = 0.0   # 0-100
     phase_label:   str   = ""
 
+    key_status:     KeyStatus=KeyStatus.NONE
+    key_expires_at: Optional[float] = None
 
 def session_to_response(s: OrchestratorSession) -> SessionStatusResponse:
+    s.is_key_valid()
 
     progress = {
         SessionStatus.CREATED:      0.0,
@@ -136,6 +170,8 @@ def session_to_response(s: OrchestratorSession) -> SessionStatusResponse:
         error_message=s.error_message,
         progress_pct=progress.get(s.status, 0.0),
         phase_label=labels.get(s.status, ""),
+        key_status=s.key_status,
+        key_expires_at=s.key_expires_at,
     )
 
 
