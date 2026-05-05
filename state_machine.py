@@ -18,6 +18,7 @@ class KeyStatus(str, Enum):
 
 class SessionStatus(str, Enum):
     CREATED      = "created"       #Session créee, pas encore demarré
+    WAITING      = "waiting"       #en attente de nodes
     INITIALIZING = "initializing"  #QNS + Bob en cours d'init
     SENDING      = "sending"       #Qubits en transit (workers Celery)
     SIFTING      = "sifting"       #Chord done, sifting en cours
@@ -27,7 +28,8 @@ class SessionStatus(str, Enum):
 
 #Transitions valides: etat_courant->>> {etats_suivants autorises}
 VALID_TRANSITIONS: dict[SessionStatus, set[SessionStatus]] = {
-    SessionStatus.CREATED:      {SessionStatus.INITIALIZING, SessionStatus.ABORTED},
+    SessionStatus.CREATED:      {SessionStatus.WAITING, SessionStatus.ABORTED},
+    SessionStatus.WAITING:      {SessionStatus.INITIALIZING, SessionStatus.ABORTED},
     SessionStatus.INITIALIZING: {SessionStatus.SENDING,      SessionStatus.ABORTED},
     SessionStatus.SENDING:      {SessionStatus.SIFTING,      SessionStatus.ABORTED},
     SessionStatus.SIFTING:      {SessionStatus.DONE,         SessionStatus.ABORTED},
@@ -58,8 +60,12 @@ class OrchestratorSession(BaseModel):
     n_qubits:     int
     batch_size:   int
     loss_rate:    float
+    
     key_status:     KeyStatus=KeyStatus.NONE
     key_expires_at: Optional[float] = None
+
+    sender_node_id:    Optional[str] =None
+    receiver_node_id:   Optional[str]= None
 
     #timestamps pour metrics de latence
     created_at:      float = Field(default_factory=time.time)
@@ -110,6 +116,9 @@ class OrchestratorSession(BaseModel):
             return False
         return True
     
+    def is_ready_to_start(self)-> bool:
+        return (self.sender_node_id is not None and self.receiver_node_id is not None)
+    
     @property
     def elapsed_s(self) -> float:
         if self.completed_at and self.created_at:
@@ -138,11 +147,15 @@ class SessionStatusResponse(BaseModel):
     key_status:     KeyStatus=KeyStatus.NONE
     key_expires_at: Optional[float] = None
 
+    sender_node_id:   Optional[str] = None
+    receiver_node_id: Optional[str] = None
+
 def session_to_response(s: OrchestratorSession) -> SessionStatusResponse:
     s.is_key_valid()
 
     progress = {
         SessionStatus.CREATED:      0.0,
+        SessionStatus.WAITING:      5.0,
         SessionStatus.INITIALIZING: 10.0,
         SessionStatus.SENDING:      40.0,
         SessionStatus.SIFTING:      80.0,
@@ -151,6 +164,7 @@ def session_to_response(s: OrchestratorSession) -> SessionStatusResponse:
     }
     labels = {
         SessionStatus.CREATED:      "En attente",
+        SessionStatus.WAITING:      "Attente des nodes",
         SessionStatus.INITIALIZING: "Initialisation reseau quantique",
         SessionStatus.SENDING:      "Transmission des qubits",
         SessionStatus.SIFTING:      "Sifting & calcul QBER",
@@ -172,6 +186,8 @@ def session_to_response(s: OrchestratorSession) -> SessionStatusResponse:
         phase_label=labels.get(s.status, ""),
         key_status=s.key_status,
         key_expires_at=s.key_expires_at,
+        sender_node_id=s.sender_node_id,
+        receiver_node_id=s.receiver_node_id,
     )
 
 

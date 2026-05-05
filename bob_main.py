@@ -1,0 +1,167 @@
+"""
+Bob service — FastAPI wrapper around BobNode.
+
+Exposes:
+  POST /session/register   (legacy — kept for backward compat, now a no-op)
+  POST /sift               sifting endpoint called by Celery (unchanged)
+  GET  /session/{id}/sifted-bits
+  DELETE /session/{id}
+  GET  /status
+  GET  /health
+"""
+import logging
+import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException
+
+from nodes.bob_node import BobNode
+from models import SiftReq, SiftResp
+from redis_store import (
+    get_redis,
+    load_all_bob_measurements,
+    save_session_result,
+    load_session_result,
+    delete_session,
+)
+
+logger = logging.getLogger("bob.main")
+logging.basicConfig(level=logging.INFO)
+
+ORCH_URL     = os.getenv("ORCH_URL",   "http://localhost:8000")
+CALLBACK_URL = os.getenv("BOB_URL",   "http://localhost:8002")
+
+_node: BobNode | None = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global _node
+    _node = BobNode(
+        orch_url=ORCH_URL,
+        callback_url=CALLBACK_URL,
+    )
+    await _node.start()
+    logger.info("[Bob] Service started")
+    yield
+    await _node.stop()
+    logger.info("[Bob] Service stopped")
+
+
+app = FastAPI(
+    title="Bob Node",
+    description="BB84 receiver — self-registering node",
+    version="0.7.0",
+    lifespan=lifespan,
+)
+
+
+# ─── Legacy endpoint (no-op — kept so old Celery workers don't 404) ──────────
+
+@app.post("/session/register")
+async def register_session(session_id: str):
+    logger.debug(f"[Bob] /session/register called for {session_id} (no-op in v0.7)")
+    return {"statut": "ready", "session_id": session_id}
+
+
+# ─── Sifting (completely unchanged from bob.py) ───────────────────────────────
+
+@app.post("/sift", response_model=SiftResp)
+async def sift(req: SiftReq):
+    r = get_redis()
+    bob_meas = load_all_bob_measurements(r, req.session_id)
+    if not bob_meas:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No measurements for session {req.session_id}",
+        )
+
+    alice_bases_map: dict[int, str] = {qid: basis for qid, basis in req.alice_bases}
+    bob_sifted_bits: list[int]      = []
+    bob_bases_for_alice: list[tuple[int, str]] = []
+    matched_ids: list[int]          = []
+
+    for qid in sorted(bob_meas.keys()):
+        meas = bob_meas[qid]
+        bob_bases_for_alice.append((qid, meas.basis.value))
+        if qid in alice_bases_map and alice_bases_map[qid] == meas.basis.value:
+            bob_sifted_bits.append(meas.bit_res)
+            matched_ids.append(qid)
+
+    import random
+    rng = random.Random(req.sample_seed)
+    n = len(bob_sifted_bits)
+    n_sample   = max(1, int(n * 0.20)) if n > 0 else 0
+    sample_idx = set(rng.sample(range(n), n_sample)) if n >= n_sample > 0 else set()
+    bob_final_key = [b for i, b in enumerate(bob_sifted_bits) if i not in sample_idx]
+
+    save_session_result(r, f"{req.session_id}:bob", {
+        "sifted_bits":  bob_sifted_bits,
+        "final_key_len": len(bob_final_key),
+        "n_sifted":     n,
+        "matched_ids":  matched_ids,
+    })
+
+    logger.info(
+        f"[Bob] Session {req.session_id} sifted: "
+        f"{len(bob_sifted_bits)} bits retained, {len(bob_final_key)} bits final key"
+    )
+
+    return SiftResp(
+        session_id=req.session_id,
+        bob_bases=bob_bases_for_alice,
+        n_sifted=len(bob_sifted_bits),
+        bob_key_len=len(bob_final_key),
+        matched_ids=matched_ids,
+        bob_sifted_bits=bob_sifted_bits,
+    )
+
+
+@app.get("/session/{session_id}/sifted-bits")
+async def get_sifted_bits(session_id: str):
+    r = get_redis()
+    data = load_session_result(r, f"{session_id}:bob")
+    if not data:
+        raise HTTPException(status_code=404, detail="Sifting not done yet")
+    return {
+        "session_id":  session_id,
+        "sifted_bits": data["sifted_bits"],
+        "n_sifted":    data["n_sifted"],
+    }
+
+
+@app.delete("/session/{session_id}")
+async def cleanup_session(session_id: str):
+    r = get_redis()
+    delete_session(r, session_id)
+    r.delete(f"session:{session_id}:bob:result")
+    return {"statut": "cleaned", "session_id": session_id}
+
+
+# ─── Status & health ─────────────────────────────────────────────────────────
+
+@app.get("/status")
+async def status():
+    if _node is None:
+        raise HTTPException(status_code=503, detail="Node not initialised")
+    return {
+        "node_id":         _node.node_id,
+        "role":            _node.role.value,
+        "active_sessions": list(_node._active_sessions),
+    }
+
+
+@app.get("/health")
+async def health():
+    try:
+        r = get_redis()
+        r.ping()
+        redis_ok = True
+    except Exception:
+        redis_ok = False
+    return {"statut": "ok", "redis": redis_ok, "version": "0.7.0"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002, log_level="warning")

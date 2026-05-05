@@ -65,31 +65,53 @@ class QubitMeasurement(BaseModel):
 class NetworkStopReq(BaseModel):
     session_id:str
 
-class SessionStartReq(BaseModel):
+class SessionCreateReq(BaseModel):
     n_qubits:int=Field(default=200, gt=0, le=5000)
     loss_rate:float=Field(default=0.0, ge=0.0, le=1.0)
     batch_size: int=Field(default=10, gt=0, le=100)
 
-class SessionStartResp(BaseModel):
-    session_id: str #key id in etsi
-    statut: str 
-    n_qubits_sent: int
-    n_qubits_received: int
-    n_sifted: int #key size in etsi
-    qber: float
-    key_final:str #TODO to be changed to its hash for more secu | key in etsi
-    latency:float
-    error_message: str=""
+SessionStartReq=SessionCreateReq #backward compat pour eviter les soucis if old file calls
 
-    model_config={"populate_by_name": True}
+class NodeRole(str, Enum):
+    SENDER   = "sender"    #Alice
+    RECEIVER = "receiver"  #Bob
+    RELAY    = "relay"     #future
+    EVE      = "eve"       #eavesdropper simulation for later
 
-    @property
-    def key_ID(self)   -> str: return self.session_id
-    @property
-    def key(self)      -> str: return self.key_final
-    @property
-    def key_size(self) -> int: return self.n_sifted
+class NodeCapabilities(BaseModel):
+    max_qubits: int = 5000
+    supported_loss_rates: list[float] = Field(default_factory=list)
+    protocol_version: str = "bb84-v1"
 
+
+class NodeRegistrationReq(BaseModel):
+    node_id:    str
+    role:   NodeRole
+    callback_url: str
+    capabilities: NodeCapabilities=Field(default_factory=NodeCapabilities)
+
+class NodeRegistrationResp(BaseModel):
+    node_id:    str
+    role:   NodeRole
+    registered:    bool
+
+class NodeRecord(BaseModel):
+    node_id: str
+    role: NodeRole
+    callback_url: str
+    capabilities: NodeCapabilities
+    registered_at: float
+    current_session_id: Optional[str]=None
+
+class JoinSessionReq(BaseModel):
+    node_id: str
+    role: NodeRole
+
+class JoinSessionResp(BaseModel):
+    session_id: str
+    role: NodeRole
+    accepted: bool
+    detail: str=""
 
 class SiftReq(BaseModel):
     session_id:str
