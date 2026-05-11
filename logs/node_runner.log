@@ -1,0 +1,106 @@
+
+Starting 2 node(s)...
+
+  Started alice-1         (port 8001) pid=951
+  Started bob-1           (port 8002) pid=953
+
+All nodes started. Ctrl+C to stop.
+
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Node 'alice-1' exited with code 1
+
+Node 'bob-1' exited with code 1
+
+Stopping nodes...

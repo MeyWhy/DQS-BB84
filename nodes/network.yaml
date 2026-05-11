@@ -1,0 +1,64 @@
+# network.yaml
+# ==============
+# Defines the QKD network topology.
+# Add a new node here → it starts, registers, and participates automatically.
+# No code changes required for new Alice/Bob instances.
+
+kme:
+  url: "http://localhost:8000"
+  key_ttl_seconds: 300
+  retry_on_insufficient_bits: false
+
+qkdl:
+  url: "http://localhost:8003"
+
+nodes:
+
+  - label:    alice-1
+    role:     sender
+    module:   nodes.alice.main
+    port:     8001
+    env:
+      ALICE_LABEL:  alice-1
+      ALICE_URL:    "http://localhost:8001"
+      BATCH_SIZE:   "10"
+
+  - label:    bob-1
+    role:     receiver
+    module:   nodes.bob.main
+    port:     8002
+    env:
+      BOB_LABEL: bob-1
+      BOB_URL:   "http://localhost:8002"
+
+  # ── Add new nodes below — no code changes needed ──────────────
+
+  # Second Alice (parallel sender):
+  # - label:    alice-2
+  #   role:     sender
+  #   module:   nodes.alice.main    ← same module, different label+port
+  #   port:     8011
+  #   env:
+  #     ALICE_LABEL: alice-2
+  #     ALICE_URL:   "http://localhost:8011"
+
+  # Second Bob:
+  # - label:    bob-2
+  #   role:     receiver
+  #   module:   nodes.bob.main
+  #   port:     8012
+  #   env:
+  #     BOB_LABEL: bob-2
+  #     BOB_URL:   "http://localhost:8012"
+
+  # Future: relay node (just create nodes/relay/main.py + BaseNode subclass)
+  # - label:    relay-1
+  #   role:     relay
+  #   module:   nodes.relay.main
+  #   port:     8020
+
+  # Future: passive monitor / Eve
+  # - label:    eve-1
+  #   role:     monitor
+  #   module:   nodes.eve.main
+  #   port:     8030
