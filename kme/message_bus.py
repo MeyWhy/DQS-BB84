@@ -1,34 +1,3 @@
-"""
-kme/message_bus.py
-===================
-Redis pub/sub wrapper for real-time event delivery between the KME and nodes.
-
-This is the second delivery mechanism alongside webhooks:
-
-  Webhooks (HTTP POST to node callback_url)
-    + Low latency when delivered
-    + No persistent connection needed
-    - Fire-and-forget: no guarantee of delivery
-    - Node must have a reachable HTTP endpoint
-
-  Message bus (Redis pub/sub, this file)
-    + Node subscribes and receives events in real time
-    + Works even when the node has no public HTTP endpoint
-    + Survives transient network glitches (subscriber reconnects)
-    - Requires a persistent TCP connection to Redis
-    - Messages are lost if no subscriber is listening at publish time
-
-How they work together:
-  KME always publishes to the bus AND sends a webhook.
-  The node receives whichever arrives first.
-  The polling fallback in BaseNode catches anything that slips through both.
-
-Channel naming:
-  kme:events:{node_id}      → events for a specific node
-  kme:events:broadcast      → events for all nodes (e.g. topology changes)
-  kme:session:{session_id}  → events scoped to a session (any participant)
-"""
-
 import json
 import logging
 import os
@@ -41,15 +10,8 @@ logger   = logging.getLogger("kme.bus")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 
-# ─────────────────────────────────────────────
-# Publisher (used by KME)
-# ─────────────────────────────────────────────
-
 class MessageBus:
-    """
-    Publishes events to Redis channels.
-    Used by the KME to notify nodes of session state changes.
-    """
+
 
     def __init__(self):
         self._r = redis.from_url(REDIS_URL, decode_responses=True)
@@ -61,11 +23,7 @@ class MessageBus:
         session_id: str,
         payload: dict = {},
     ) -> int:
-        """
-        Publishes one event to a Redis channel.
-        Returns the number of subscribers that received it.
-        0 means no active subscriber — webhooks are the fallback.
-        """
+ 
         message = json.dumps({
             "event":      event,
             "session_id": session_id,
@@ -82,7 +40,7 @@ class MessageBus:
         session_id: str,
         payload:    dict = {},
     ) -> int:
-        """Publishes an event to a specific node's private channel."""
+        
         return self.publish(
             channel=f"kme:events:{node_id}",
             event=event,
@@ -96,10 +54,7 @@ class MessageBus:
         event:      str,
         payload:    dict = {},
     ) -> int:
-        """
-        Publishes to the session channel.
-        All nodes participating in the session receive this.
-        """
+
         return self.publish(
             channel=f"kme:session:{session_id}",
             event=event,
@@ -108,7 +63,6 @@ class MessageBus:
         )
 
     def broadcast(self, event: str, payload: dict = {}) -> int:
-        """Publishes to all nodes (topology changes, KME restarts, etc.)."""
         return self.publish(
             channel="kme:events:broadcast",
             event=event,
@@ -116,24 +70,8 @@ class MessageBus:
             payload=payload,
         )
 
-
-# ─────────────────────────────────────────────
-# Subscriber (used by nodes)
-# ─────────────────────────────────────────────
-
 class NodeSubscriber:
-    """
-    Subscribes to Redis channels and calls a handler for each message.
-    Runs in a background thread — non-blocking for the node's event loop.
 
-    Usage in a node:
-        sub = NodeSubscriber(node_id="abc-123", handler=my_callback)
-        sub.start()
-        # ... node runs ...
-        sub.stop()
-
-    The handler receives (event: str, session_id: str, payload: dict).
-    """
 
     def __init__(
         self,
@@ -160,10 +98,7 @@ class NodeSubscriber:
             self._thread.join(timeout=3.0)
 
     def _listen(self) -> None:
-        """
-        Blocking Redis pub/sub loop.
-        Reconnects automatically on connection errors.
-        """
+
         while not self._stop.is_set():
             try:
                 r      = redis.from_url(REDIS_URL, decode_responses=True)

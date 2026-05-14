@@ -1,20 +1,3 @@
-"""
-Any new node (Alice, Bob, Eve, Relay) inherits from BaseNode and
-overrides only the methods it needs. The base class handles:
-  - Registration with the KME on startup
-  - Webhook server (receives KME notifications)
-  - Session state (local cache, source of truth is KME Redis)
-  - HTTP client for KME/QKDL calls
-  - Agent loop (poll-based fallback if webhook delivery fails)
-
-To add a new node type:
-  1. Create nodes/mynode/main.py
-  2. class MyNode(BaseNode)
-  3. Override on_session_open(), on_receiver_joined(), etc.
-  4. Add to network.yaml
-
-"""
-
 import asyncio
 import logging
 import os
@@ -67,7 +50,7 @@ class BaseNode(ABC):
         self.node_id = await self._register()
         self._running = True
         logger.info(
-            f"[{self.label}] Started — node_id={self.node_id[:8]} "
+            f"[{self.label}] Started  node_id={self.node_id[:8]} "
             f"role={self.role.value}"
         )
         asyncio.create_task(self._agent_loop())
@@ -134,7 +117,7 @@ class BaseNode(ABC):
             await self.join_session(session_id)
 
     async def on_receiver_joined(self, session_id: str, payload: dict) -> None:
-        pass   # Sender starts transmitting -> overridden in AliceNode
+        pass   #Sender starts transmitting -> overridden in AliceNode
 
     async def on_measurements_ready(self, session_id: str, payload: dict) -> None:
         pass   #is overridden in AliceNode

@@ -11,7 +11,7 @@ from models import NodeInfo, NodeRole, NodeRegistration, WebhookEvent
 
 logger = logging.getLogger("kme.registry")
 REDIS_URL   = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-NODE_TTL    = 86400   # 24h nodes re-register on startup
+NODE_TTL    = 86400   #24h nodes re-register on startup
 
 
 def get_redis() -> redis.Redis:

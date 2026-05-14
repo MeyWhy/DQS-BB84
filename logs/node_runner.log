@@ -1,8 +1,8 @@
 
 Starting 2 node(s)...
 
-  Started alice-1         (port 8001) pid=3008
-  Started bob-1           (port 8002) pid=3010
+  Started alice-1         (port 8001) pid=820
+  Started bob-1           (port 8002) pid=822
 
 All nodes started. Ctrl+C to stop.
 

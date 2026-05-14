@@ -43,7 +43,7 @@ class BobNode(BaseNode):
             "measuring_done": False,
         }
         logger.info(
-            f"[Bob] Joined session {session_id[:8]} — "
+            f"[Bob] Joined session {session_id[:8]}   "
             f"waiting for qubits"
         )
         #start qubit reception loop
@@ -58,19 +58,18 @@ class BobNode(BaseNode):
         qber = payload.get("qber", 0.0)
         logger.info(
             f"[Bob] Key available session={session_id[:8]} "
-            f"QBER={qber*100:.2f}% — ready for consumption"
+            f"QBER={qber*100:.2f}%   ready for consumption"
         )
 
-    # Qubit reception (Bob polls QKDL directly)
+    #Qubit reception (Bob polls QKDL directly)
     async def _receive_and_measure(self, session_id: str) -> None:
-   
-        state    = self._bob_state.get(session_id)
+        state = self._bob_state.get(session_id)
         if not state:
             return
 
         n_qubits     = state["n_qubits"]
         measurements = []
-        deadline     = time.time() + 120   # 2 min max
+        deadline     = time.time() + 120
 
         while len(measurements) < n_qubits and time.time() < deadline:
             try:
@@ -81,19 +80,20 @@ class BobNode(BaseNode):
                 if resp.status_code == 200:
                     data = resp.json()
                     if data.get("qubit_id") is not None:
-                        bob_basis  = random.choice(list(Basis))
+                        #The QKDL has already measured the qubit with a random
+                        #basis   we must use that exact measurement, not override it
+                        raw_basis  = data.get("basis")
                         bit_result = data.get("bit_result")
 
-                        if bit_result is None:
-                            #QKDL returns the raw qubit for Bob to measure
-                            #In the full implementation, QKDL measures it
-                            #and returns bit_result. Fallback: random.
-                            bit_result = random.randint(0, 1)
+                        if raw_basis is None or bit_result is None:
+                            #Qubit was lost in transit   skip it
+                            await asyncio.sleep(0.05)
+                            continue
 
                         measurements.append(MeasurementRecord(
                             qubit_id=data["qubit_id"],
-                            basis=bob_basis,
-                            bit_result=bit_result,
+                            basis=Basis(raw_basis),   #use the QKDL's basis
+                            bit_result=bit_result,     #use the QKDL's measurement
                         ))
                     elif data.get("queue_empty"):
                         await asyncio.sleep(0.1)
@@ -113,10 +113,8 @@ class BobNode(BaseNode):
             f"[Bob] Measured {len(measurements)}/{n_qubits} qubits "
             f"session={session_id[:8]}"
         )
-
-        #Post measurements to KME bus
         await self._post_measurements(session_id, measurements)
-
+    
     async def _post_measurements(
         self,
         session_id:   str,
@@ -145,7 +143,7 @@ class BobNode(BaseNode):
         if not state:
             return
 
-        # Get Alice's bases from KME
+        #Get Alice's bases from KME
         try:
             sift_data = await self.kme_get(f"/sessions/{session_id}/sift")
         except Exception as e:
@@ -166,7 +164,7 @@ class BobNode(BaseNode):
             if qid in alice_bases_map and alice_bases_map[qid] == meas.basis.value:
                 sifted_bits.append(meas.bit_result)
 
-        # Apply same QBER sample removal as Alice
+        #Apply same QBER sample removal as Alice
         import random as _r
         rng      = _r.Random(sample_seed)
         n        = len(sifted_bits)
@@ -182,29 +180,9 @@ class BobNode(BaseNode):
             f"n_sifted={len(sifted_bits)} key_len={len(bob_final)}"
         )
 
-    
-    """async def _poll_tick(self) -> None:
-        try:
-            resp = await self._client.get(
-                f"{KME_URL}/sessions", params={"active_only": True}
-            )
-            if resp.status_code != 200:
-                return
-            data = resp.json()
-            for sid in data.get("sessions", []):
-                if sid not in self._bob_state:
-                    session = await self.get_session(sid)
-                    if (session.get("status") == "open"
-                            and session.get("receiver_node_id") == self.node_id):
-                        await self.on_session_open(
-                            sid, {"n_qubits": session.get("n_qubits", 200)}
-                        )
-        except Exception:
-            pass
-"""
 
 bob = BobNode()
-app = bob.build_app(title="SAE-B — Bob (Receiver)", port=8002)
+app = bob.build_app(title="SAE-B   Bob (Receiver)", port=8002)
 
 
 @app.get("/session/{session_id}/key")

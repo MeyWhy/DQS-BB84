@@ -26,33 +26,6 @@ class SessionStatus(str, Enum):
     ABORTED      = "aborted"       #Erreur non recup
 
 
-#Transitions valides: etat_courant->>> {etats_suivants autorises}
-VALID_TRANSITIONS: dict[SessionStatus, set[SessionStatus]] = {
-    SessionStatus.CREATED:      {SessionStatus.WAITING, SessionStatus.ABORTED},
-    SessionStatus.WAITING:      {SessionStatus.INITIALIZING, SessionStatus.ABORTED},
-    SessionStatus.INITIALIZING: {SessionStatus.SENDING,      SessionStatus.ABORTED},
-    SessionStatus.SENDING:      {SessionStatus.SIFTING,      SessionStatus.ABORTED},
-    SessionStatus.SIFTING:      {SessionStatus.DONE,         SessionStatus.ABORTED},
-    SessionStatus.DONE:         set(),
-    SessionStatus.ABORTED:      set(),
-}
-
-#etats terminaux => aucune transition possible
-TERMINAL_STATES = {SessionStatus.DONE, SessionStatus.ABORTED}
-
-
-class TransitionError(Exception):
-    pass
-
-
-def validate_transition(current: SessionStatus, target: SessionStatus) -> None:
-    if target not in VALID_TRANSITIONS.get(current, set()):
-        raise TransitionError(
-            f"Transition interdite : {current.value} -> {target.value}. "
-            f"Transitions valides : {[s.value for s in VALID_TRANSITIONS[current]]}"
-        )
-
-
 class OrchestratorSession(BaseModel):
 
     session_id:   str
@@ -82,22 +55,7 @@ class OrchestratorSession(BaseModel):
     key_final:        str   = ""
     error_message:   str   = ""
 
-    def transition(self, target: SessionStatus) -> "OrchestratorSession":
-        validate_transition(self.status, target)
-        self.status = target
-
-        now = time.time()
-        if target == SessionStatus.INITIALIZING:
-            self.started_at  = now
-        elif target == SessionStatus.SENDING:
-            self.sending_at  = now
-        elif target == SessionStatus.SIFTING:
-            self.sifting_at  = now
-        elif target in TERMINAL_STATES:
-            self.completed_at = now
-
-        return self
-
+  
     def activate_key(self) -> None:
         self.key_status = KeyStatus.ACTIVE
         self.key_expires_at = time.time() + KEY_TTL_SECONDS
@@ -125,9 +83,6 @@ class OrchestratorSession(BaseModel):
             return self.completed_at - self.created_at
         return time.time() - self.created_at
 
-    @property
-    def is_terminal(self) -> bool:
-        return self.status in TERMINAL_STATES
 
 class SessionStatusResponse(BaseModel):
     session_id:    str
@@ -141,7 +96,7 @@ class SessionStatusResponse(BaseModel):
     error_message: str   = ""
 
     #champs de progression pour le client not necessary
-    progress_pct:  float = 0.0   # 0-100
+    progress_pct:  float = 0.0   #0-100
     phase_label:   str   = ""
 
     key_status:     KeyStatus=KeyStatus.NONE

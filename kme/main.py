@@ -96,7 +96,7 @@ async def get_node(node_id: str):
 
 #session lifecycle =>> nodes drive it
 @app.post("/sessions", status_code=202)
-@app.post("/keys",     status_code=202)    # ETSI alias
+@app.post("/keys",     status_code=202)    #ETSI alias
 async def create_session(
     req: SessionCreateReq,
     background_tasks: BackgroundTasks,
@@ -119,18 +119,27 @@ async def create_session(
     session = {
         "session_id":      session_id,
         "status":          "open",
+        
         "sender_node_id":  req.sender_node_id,
         "receiver_node_id": bob_node.node_id,
+        
         "n_qubits":        req.n_qubits,
         "batch_size":      req.batch_size,
         "loss_rate":       req.loss_rate,
         "retry_enabled":   req.retry_enabled,
+        
         "created_at":      time.time(),
+        "started_at": None,
+        "sending_at": None,
+        "completed_at": None,
+        
         "key_status":      KeyStatus.NONE.value,
         "key_expires_at":  None,
+        
         "n_delivered":     0,
         "n_sifted":        0,
         "qber":            0.0,
+        
         "key_final":       "",
         "error_message":   "",
     }
@@ -156,7 +165,7 @@ async def create_session(
     )
 
     logger.info(
-        f"[KME] Session {session_id} created — "
+        f"[KME] Session {session_id} created  "
         f"sender={req.sender_node_id[:8]} receiver={bob_node.label}"
     )
     return {"session_id": session_id, "status": "open"}
@@ -173,7 +182,13 @@ async def join_session(session_id: str, req: SessionJoinReq):
             detail=f"Session not open (status={session['status']})"
         )
 
-    update_session(r, session_id, status="joined")
+    update_session(
+        r,
+        session_id,
+        status="sending",
+        started_at=time.time(),
+        sending_at=time.time(),
+    )
 
     #notify Alice that Bob is ready
     asyncio.create_task(_notify(
@@ -196,7 +211,7 @@ async def join_session(session_id: str, req: SessionJoinReq):
     )
 
 
-# Alice posts qubit batches here in form of bus
+#Alice posts qubit batches here in form of bus
 @app.post("/sessions/{session_id}/qubits", status_code=202)
 async def upload_qubits(session_id: str, req: QubitUpload):
     r = get_redis()
@@ -284,7 +299,7 @@ async def get_sift(session_id: str):
     return upload
 
 
-# key publish
+#key publish
 @app.post("/sessions/{session_id}/key")
 async def publish_key(
     session_id: str,
@@ -300,10 +315,16 @@ async def publish_key(
     if upload.status == "success":
         expires_at = activate_key(r, session_id)
         update_session(
-            r, session_id,
+            r,
+            session_id,
+
             status="done",
+
+            completed_at=time.time(),
+
             key_final=upload.key_final,
             key_hash=upload.key_hash,
+
             qber=upload.qber,
             n_sifted=upload.n_sifted,
         )
@@ -319,8 +340,12 @@ async def publish_key(
         )
     else:
         update_session(
-            r, session_id,
+            r,
+            session_id,
+
             status="aborted",
+            completed_at=time.time(),
+
             key_final="",
             qber=0.0,
             error_message=upload.error_message,
@@ -342,9 +367,9 @@ async def publish_key(
     return {"session_id": session_id, "status": upload.status}
 
 
-# key consume here
+#key consume here
 @app.post("/sessions/{session_id}/consume-key")
-@app.post("/keys/{session_id}/consume")           # ETSI alias
+@app.post("/keys/{session_id}/consume")           #ETSI alias
 async def consume_session_key(session_id: str):
     r = get_redis()
     ok, key = consume_key(r, session_id)
@@ -359,20 +384,51 @@ async def consume_session_key(session_id: str):
             "key_status": KeyStatus.CONSUMED.value}
 
 
-
 @app.get("/sessions/{session_id}", response_model=SessionStatusResponse)
-@app.get("/keys/{session_id}",     response_model=SessionStatusResponse)
+@app.get("/keys/{session_id}", response_model=SessionStatusResponse)
 async def get_session(session_id: str):
+
     r = get_redis()
     session = _get_session_or_404(r, session_id)
+
+    created_at = session.get("created_at", time.time())
+    completed_at = session.get("completed_at")
+
+    if completed_at:
+        elapsed_s = round(completed_at - created_at, 3)
+    else:
+        elapsed_s = round(time.time() - created_at, 3)
+
+    progress = {
+        "open": 5,
+        "joined": 20,
+        "sending": 50,
+        "done": 100,
+        "aborted": 0,
+    }
+
+    labels = {
+        "open": "Waiting for receiver",
+        "joined": "Receiver connected",
+        "sending": "Quantum transmission",
+        "done": "Key generated",
+        "aborted": "Session aborted",
+    }
+
     valid_data = {
-        k: session[k] 
-        for k in SessionStatusResponse.model_fields 
+        k: session[k]
+        for k in SessionStatusResponse.model_fields
         if k in session
     }
-    valid_data["session_id"]=session_id
-    return SessionStatusResponse(**valid_data)
 
+    valid_data.update({
+        "session_id": session_id,
+        "elapsed_s": elapsed_s,
+        "progress_pct": progress.get(session["status"], 0),
+        "phase_label": labels.get(session["status"], ""),
+    })
+
+    return SessionStatusResponse(**valid_data)
 
 @app.get("/sessions")
 async def list_sessions(active_only: bool = True):
@@ -391,7 +447,7 @@ async def cancel_session(session_id: str):
     return {"status": "cancelled", "session_id": session_id}
 
 
-# QKDL coordination (KME still manages network init/stop
+#QKDL coordination (KME still manages network init/stop
 async def _init_qkdl(session_id: str, n_qubits: int, loss_rate: float):
     try:
         async with httpx.AsyncClient(timeout=HTTP_TO) as client:

@@ -2,9 +2,9 @@
 Adding a new node to network.yaml is the only step required.
 
 Usage:
-    python -m node.node_runner                    # start all nodes
-    python -m node.node_runner --node alice-1     # start one node
-    python -m node.node_runner --list             # list configured nodes
+    python -m node.node_runner                    #start all nodes
+    python -m node.node_runner --node alice-1     #start one node
+    python -m node.node_runner --list             #list configured nodes
 """
 
 import argparse
@@ -31,7 +31,7 @@ def start_node(node_cfg: dict) -> subprocess.Popen:
     env = {**os.environ}
     env.update(node_cfg.get("env", {}))
 
-    # Always pass KME and QKDL URLs from top-level config
+    #Always pass KME and QKDL URLs from top-level config
     cfg = load_config()
     env.setdefault("KME_URL",  cfg["kme"]["url"])
     env.setdefault("QKDL_URL", cfg["qkdl"]["url"])
@@ -98,7 +98,7 @@ def main():
     for node_cfg in nodes:
         proc = start_node(node_cfg)
         procs.append(proc)
-        time.sleep(0.5)   # stagger startup
+        time.sleep(0.5)   #stagger startup
 
     print(f"\nAll nodes started. Ctrl+C to stop.\n")
 

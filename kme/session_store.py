@@ -11,7 +11,7 @@ from models import (
 )
 
 REDIS_URL   = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-SESSION_TTL = 7200   # 2 hours
+SESSION_TTL = 7200   #2 hours
 
 
 def get_redis() -> redis.Redis:
