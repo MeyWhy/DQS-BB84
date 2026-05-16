@@ -51,23 +51,27 @@ class NetworkSession:
     def __init__(self, session_id: str, loss_rate: float = 0.0):
         self.session_id   = session_id
         self.loss_rate    = loss_rate
-        self.backend      = EQSNBackend()
-        self.network      = Network.get_instance()
-        self.alice_host:  Optional[Host] = None
-        self.bob_host:    Optional[Host] = None
+        self.backend      = None   # assigned in start()
+        self.network      = None   # assigned in start()
+        self.alice_host   = None
+        self.bob_host     = None
         self._send_lock   = threading.Lock()
         self._active      = False
-
-        #FIX 3: in-memory measurement queue for Bob to poll
-        self._meas_queue:  list[dict] = []
-        self._meas_lock    = threading.Lock()
+        self._meas_queue: list[dict] = []
+        self._meas_lock   = threading.Lock()
+        # Unique names prevent host registry collision after singleton reset
+        sid6 = session_id.replace("-", "")[:6]
+        self._alice_name  = f"Alice-{sid6}"
+        self._bob_name    = f"Bob-{sid6}"
 
     def start(self):
-        self.network.start(['Alice', 'Bob'], self.backend)
-        self.alice_host = Host('Alice', self.backend)
-        self.bob_host   = Host('Bob',   self.backend)
-        self.alice_host.add_connection('Bob')
-        self.bob_host.add_connection('Alice')
+        self.backend = EQSNBackend()
+        self.network = Network.get_instance()
+        self.network.start([self._alice_name, self._bob_name], self.backend)
+        self.alice_host = Host(self._alice_name, self.backend)
+        self.bob_host   = Host(self._bob_name,   self.backend)
+        self.alice_host.add_connection(self._bob_name)
+        self.bob_host.add_connection(self._alice_name)
         if self.loss_rate > 0:
             self.network.packet_drop_rate = self.loss_rate
         self.alice_host.start()
@@ -76,7 +80,7 @@ class NetworkSession:
         self.network.add_host(self.bob_host)
         self._active = True
         logger.info(f"[QKDL] Session {self.session_id} started")
-
+    
     def stop(self):
         if self._active:
             try:
@@ -84,8 +88,18 @@ class NetworkSession:
             except Exception as e:
                 logger.warning(f"[QKDL] Stop error: {e}")
             self._active = False
-            logger.info(f"[QKDL] Session {self.session_id} stopped")
 
+            # Reset the QuNetSim singleton so next session gets a fresh Network
+            try:
+                if hasattr(Network, '_instance'):
+                    Network._instance = None
+                # Allow internal threads ~300ms to exit their loops
+                time.sleep(0.3)
+            except Exception as e:
+                logger.warning(f"[QKDL] Singleton reset error: {e}")
+
+            logger.info(f"[QKDL] Session {self.session_id} stopped + singleton reset")
+    
     def is_active(self) -> bool:
         return self._active
 
@@ -132,8 +146,8 @@ def _process_batch_sync(
         bob_res   = {}
         bob_ready = threading.Event()
 
-        def bob_receive(res=bob_res, ready=bob_ready):
-            q = session.bob_host.get_qubit("Alice", wait=3)
+        def bob_receive(res=bob_res, ready=bob_ready,bh=session.bob_host, an=session._alice_name ):
+            q = bh.get_qubit(an, wait=3)
             if q is None:
                 res["bit"]   = None
                 res["basis"] = None
@@ -155,7 +169,7 @@ def _process_batch_sync(
                 q.X()
             if basis == Basis.DIAGONAL:
                 q.H()
-            session.alice_host.send_qubit('Bob', q, await_ack=False)
+            session.alice_host.send_qubit(session._bob_name, q, await_ack=False)
 
         bob_ready.wait(timeout=4.0)
         t_bob.join(timeout=4.0)
@@ -199,22 +213,30 @@ app = FastAPI(
 @app.post("/network/init", response_model=NetworkInitResp)
 async def init_network(req: NetworkInitReq):
     with _sessions_lock:
-        #clean dead sessions
+        # Always clean dead sessions first
         dead = [sid for sid, s in _sessions.items() if not s.is_active()]
         for sid in dead:
             del _sessions[sid]
 
+        # Same session already active → idempotent return
         if req.session_id in _sessions:
             return NetworkInitResp(
                 session_id=req.session_id,
                 statut="ready",
                 message="Already active",
             )
+
+        # Different session still alive → real conflict
         if _sessions:
-            raise HTTPException(status_code=409, detail="A session is already active")
+            active = list(_sessions.keys())
+            raise HTTPException(
+                status_code=409,
+                detail=f"Session already active: {active[0][:8]}. "
+                       f"Stop it first via POST /network/stop."
+            )
 
     session = NetworkSession(req.session_id, loss_rate=req.loss_rate)
-    loop    = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
     try:
         await loop.run_in_executor(None, session.start)
     except Exception as e:
@@ -241,7 +263,37 @@ async def stop_network(req: NetworkStopReq):
         await loop.run_in_executor(None, session.stop)
     return {"statut": "stopped", "session_id": req.session_id}
 
+@app.post("/network/reset")
+async def reset_network():
+    """
+    Force-stop ALL sessions. Use between test runs to clear stale state.
+    This is safe — QuNetSim's Network is a singleton that needs a clean
+    stop before a new session can init.
+    """
+    loop = asyncio.get_event_loop()
+    with _sessions_lock:
+        sessions_to_stop = list(_sessions.values())
+        _sessions.clear()
+    with _classical_lock:
+        _classical_inbox.clear()
 
+    for session in sessions_to_stop:
+        await loop.run_in_executor(None, session.stop)
+
+    # Extra: force QuNetSim's global Network instance to reset
+    # so the next Network.get_instance().start() works cleanly
+    try:
+        from qunetsim.components import Network
+        net = Network.get_instance()
+        net.stop(stop_hosts=True)
+    except Exception:
+        pass
+
+    return {
+        "statut":   "reset",
+        "stopped":  len(sessions_to_stop),
+    }
+    
 @app.post("/batch/send", response_model=SendBatchResp)
 async def send_batch(req: SendBatchReq):
 

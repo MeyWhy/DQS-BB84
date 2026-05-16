@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models import (
-    NodeRegistration, NodeInfo, NodeRole,
+     NodeRegistration, NodeInfo, NodeRole,
     SessionCreateReq, SessionJoinReq, SessionJoinResp,
     QubitUpload, MeasurementUpload,
     SiftUpload, SiftResult, KeyUpload,
@@ -18,14 +18,16 @@ from models import (
     NetworkInitReq, NetworkStopReq,
     new_session_id,
 )
+from kme.state_machine import SessionStatus
+from collections import defaultdict
 from kme.session_store import (
     get_redis, save_session, load_session, update_session,
     push_qubit_batch, pop_qubit_batch, qubit_batch_count,
     save_measurements, load_measurements,
     save_sift_upload, load_sift_upload,
     save_key_upload, load_key_upload,
-    activate_key, consume_key, delete_session,
-    list_open_sessions, list_active_sessions,
+    activate_key, consume_key, delete_session, release_qkd_lock,
+    list_open_sessions, list_active_sessions, get_active_qkd_session, acquire_qkd_lock,
 )
 from kme.node_registry import (
     register_node, load_node, find_node_by_label,
@@ -37,6 +39,25 @@ logging.basicConfig(level=logging.INFO)
 
 QKDL_URL = os.getenv("QKDL_URL",  "http://localhost:8003")
 HTTP_TO  = 30.0
+METRICS = {
+    "sessions_created": 0,
+    "sessions_completed": 0,
+    "sessions_aborted": 0,
+
+    "total_qubits": 0,
+    "total_batches": 0,
+
+    "registry_hits": 0,
+    "webhook_events": 0,
+
+    "coordination_latency_ms": [],
+    "session_latency_s": [],
+    "batch_latency_ms": [],
+
+    "active_nodes_peak": 0,
+}
+
+NODE_SESSION_COUNT = defaultdict(int)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -68,7 +89,7 @@ async def _notify(node_id: str, event: WebhookEvent) -> None:
     node = load_node(r, node_id)
     if node:
         await notify_node(node, event)
-
+        METRICS["webhook_events"] += 1
 
 #node registry endpoints
 @app.post("/nodes/register", response_model=NodeInfo)
@@ -76,6 +97,13 @@ async def register(reg: NodeRegistration):
     #any node registers here on startup
     r =get_redis()
     info = register_node(r, reg)
+    METRICS["registry_hits"] += 1
+
+    count = len(list_nodes(r))
+    if count > METRICS["active_nodes_peak"]:
+        METRICS["active_nodes_peak"] = count
+
+    NODE_SESSION_COUNT[info.node_id] = 0
     return info
 
 
@@ -107,6 +135,14 @@ async def create_session(
     r = get_redis()
     session_id = new_session_id()
 
+    active = get_active_qkd_session(r)
+
+    if active:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Quantum channel busy with session {active}"
+        )
+
     #find target receiver aka bob for now
     bob_node = find_node_by_label(r, req.receiver_label)
     if not bob_node:
@@ -118,7 +154,7 @@ async def create_session(
     #create session record
     session = {
         "session_id":      session_id,
-        "status":          "open",
+        "status": SessionStatus.WAITING.value,
         
         "sender_node_id":  req.sender_node_id,
         "receiver_node_id": bob_node.node_id,
@@ -144,7 +180,11 @@ async def create_session(
         "error_message":   "",
     }
     save_session(r, session)
-
+    update_session(
+    r,
+    session_id,
+    status=SessionStatus.INITIALIZING.value,
+    )
     #init QKDL network in background (qunestim service)
     background_tasks.add_task(
         _init_qkdl, session_id, req.n_qubits, req.loss_rate
@@ -168,6 +208,14 @@ async def create_session(
         f"[KME] Session {session_id} created  "
         f"sender={req.sender_node_id[:8]} receiver={bob_node.label}"
     )
+    acquire_qkd_lock(r, session_id)
+
+    METRICS["sessions_created"] += 1
+
+    NODE_SESSION_COUNT[req.sender_node_id] += 1
+    NODE_SESSION_COUNT[bob_node.node_id] += 1
+
+
     return {"session_id": session_id, "status": "open"}
 
 
@@ -176,7 +224,10 @@ async def join_session(session_id: str, req: SessionJoinReq):
     r = get_redis()
     session = _get_session_or_404(r, session_id)
 
-    if session["status"] != "open":
+    if session["status"] not in [
+        SessionStatus.WAITING.value,
+        SessionStatus.INITIALIZING.value,
+    ]:
         raise HTTPException(
             status_code=409,
             detail=f"Session not open (status={session['status']})"
@@ -185,11 +236,14 @@ async def join_session(session_id: str, req: SessionJoinReq):
     update_session(
         r,
         session_id,
-        status="sending",
+        status=SessionStatus.SENDING.value,
         started_at=time.time(),
         sending_at=time.time(),
     )
-
+    #metrics
+    coord_ms = (time.time() - session["created_at"]) * 1000
+    METRICS["coordination_latency_ms"].append(round(coord_ms, 2))
+    
     #notify Alice that Bob is ready
     asyncio.create_task(_notify(
         session["sender_node_id"],
@@ -217,6 +271,19 @@ async def upload_qubits(session_id: str, req: QubitUpload):
     r = get_redis()
     _get_session_or_404(r, session_id)
     push_qubit_batch(r, session_id, req.batch.model_dump())
+    
+    METRICS["total_batches"] += 1
+    METRICS["total_qubits"] += len(req.batch.qubits)
+
+    if "created_at" in req.batch.model_dump():
+        try:
+            latency_ms = (
+                time.time() - req.batch.created_at
+            ) * 1000
+            METRICS["batch_latency_ms"].append(round(latency_ms, 2))
+        except Exception:
+            pass
+        
     return {"session_id": session_id, "batch_id": req.batch.batch_id,
             "queued": True}
 
@@ -318,8 +385,8 @@ async def publish_key(
             r,
             session_id,
 
-            status="done",
-
+            status=SessionStatus.DONE.value,
+            
             completed_at=time.time(),
 
             key_final=upload.key_final,
@@ -338,12 +405,16 @@ async def publish_key(
             f"[KME] Key ACTIVE session={session_id} "
             f"QBER={upload.qber*100:.2f}%"
         )
+        elapsed = time.time() - session["created_at"]
+
+        METRICS["sessions_completed"] += 1
+        METRICS["session_latency_s"].append(round(elapsed, 3))
     else:
         update_session(
             r,
             session_id,
 
-            status="aborted",
+            status=SessionStatus.ABORTED.value,
             completed_at=time.time(),
 
             key_final="",
@@ -355,7 +426,8 @@ async def publish_key(
         logger.warning(
             f"[KME] Session {session_id} aborted: {upload.error_message}"
         )
-
+        METRICS["sessions_aborted"] += 1
+        
     background_tasks.add_task(
         _notify, session["receiver_node_id"],
         WebhookEvent(event=event, session_id=session_id, payload=payload)
@@ -433,16 +505,22 @@ async def get_session(session_id: str):
 @app.get("/sessions")
 async def list_sessions(active_only: bool = True):
     r  = get_redis()
-    ids = list_active_sessions(r) if active_only else list_open_sessions(r)
+    if active_only:
+        ids = list_active_sessions(r)
+    else:
+        ids = list_open_sessions(r) + list_active_sessions(r)
+
     return {"sessions": ids, "count": len(ids)}
+
 
 
 @app.delete("/sessions/{session_id}")
 async def cancel_session(session_id: str):
     r= get_redis()
     session = _get_session_or_404(r, session_id)
-    update_session(r, session_id, status="aborted",
+    update_session(r, session_id, status=SessionStatus.ABORTED.value,
                    error_message="Cancelled by user")
+    release_qkd_lock(r, session_id)
     asyncio.create_task(_stop_qkdl(session_id))
     return {"status": "cancelled", "session_id": session_id}
 
@@ -461,22 +539,70 @@ async def _init_qkdl(session_id: str, n_qubits: int, loss_rate: float):
             )
             resp.raise_for_status()
         logger.info(f"[KME] QKDL initialised for session {session_id}")
+
     except Exception as e:
         logger.error(f"[KME] QKDL init failed {session_id}: {e}")
-        update_session(get_redis(), session_id, status="aborted",
+        r = get_redis()
+        update_session(r, session_id,
+                       status=SessionStatus.ABORTED.value,
                        error_message=f"QKDL init failed: {e}")
-
+        release_qkd_lock(r, session_id)   # ← was missing
+        await _stop_qkdl(session_id)       # ← also missing
 
 async def _stop_qkdl(session_id: str):
+    r=get_redis()
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             await client.post(
                 f"{QKDL_URL}/network/stop",
                 json={"session_id": session_id},
             )
+        release_qkd_lock(r, session_id)
     except Exception as e:
         logger.warning(f"[KME] QKDL teardown partial {session_id}: {e}")
 
+@app.get("/metrics")
+async def metrics():
+
+    def avg(lst):
+        return round(sum(lst) / len(lst), 3) if lst else 0.0
+
+    return {
+        "sessions_created": METRICS["sessions_created"],
+        "sessions_completed": METRICS["sessions_completed"],
+        "sessions_aborted": METRICS["sessions_aborted"],
+
+        "total_qubits": METRICS["total_qubits"],
+        "total_batches": METRICS["total_batches"],
+
+        "throughput_qubits_per_session":
+            round(
+                METRICS["total_qubits"] /
+                max(METRICS["sessions_completed"], 1),
+                2,
+            ),
+
+        "avg_session_latency_s":
+            avg(METRICS["session_latency_s"]),
+
+        "avg_coordination_latency_ms":
+            avg(METRICS["coordination_latency_ms"]),
+
+        "avg_batch_latency_ms":
+            avg(METRICS["batch_latency_ms"]),
+
+        "registry_hits":
+            METRICS["registry_hits"],
+
+        "webhook_events":
+            METRICS["webhook_events"],
+
+        "active_nodes_peak":
+            METRICS["active_nodes_peak"],
+
+        "active_sessions":
+            len(list_active_sessions(get_redis())),
+    }
 
 @app.get("/health")
 async def health():

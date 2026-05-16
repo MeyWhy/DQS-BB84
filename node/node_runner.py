@@ -55,9 +55,10 @@ def start_node(node_cfg: dict) -> subprocess.Popen:
         cmd,
         env=env,
         cwd=str(ROOT),
-        stdout=open(log_path, "w"),
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
     )
+    print(f"Launching {label} from {module}")
     print(f"  Started {label:<15} (port {port}) pid={proc.pid}")
     return proc
 
@@ -99,7 +100,7 @@ def main():
         proc = start_node(node_cfg)
         procs.append(proc)
         time.sleep(0.5)   #stagger startup
-
+    
     print(f"\nAll nodes started. Ctrl+C to stop.\n")
 
     #wait for any node to exit unexpectedly

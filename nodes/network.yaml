@@ -30,6 +30,24 @@ nodes:
       BOB_LABEL: bob-1
       BOB_URL:   "http://localhost:8002"
 
+
+  - label: alice-2
+    role: sender
+    module: nodes.alice.main
+    port: 8102
+    env:
+      ALICE_LABEL:  alice-2
+      ALICE_URL:    "http://localhost:8102"
+      BATCH_SIZE:   "10"
+
+  - label: bob-2
+    role: receiver
+    module: nodes.bob.main
+    port: 8202
+    env:
+      BOB_LABEL: bob-2
+      BOB_URL:   "http://localhost:8202"
+
   # ── Add new nodes below — no code changes needed ──────────────
 
   # Second Alice (parallel sender):

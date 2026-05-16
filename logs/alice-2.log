@@ -1,12 +1,12 @@
-INFO:     Started server process [5257]
+INFO:     Started server process [5263]
 INFO:     Waiting for application startup.
 INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
-INFO:node.base:[alice-1] Registered → node_id=c1b8b3a1
-INFO:node.base:[alice-1] Started  node_id=c1b8b3a1 role=sender
+INFO:node.base:[alice-1] Registered → node_id=a0a6253c
+INFO:node.base:[alice-1] Started  node_id=a0a6253c role=sender
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8101 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:8102 (Press CTRL+C to quit)
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:node.base:[alice-1] Stopped
 INFO:     Application shutdown complete.
-INFO:     Finished server process [5257]
+INFO:     Finished server process [5263]

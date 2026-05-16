@@ -29,7 +29,7 @@ class NodeRegistration(BaseModel):
     role:        NodeRole
     callback_url: str          #URL the KME calls for webhook notifications
     label:       str = ""      #name
-    metadata:    dict = {}     #extensible: location, capabilities, etc.
+    metadata: dict = Field(default_factory=dict) #extensible: location, capabilities, etc.
 
 
 class NodeInfo(BaseModel):
@@ -38,7 +38,7 @@ class NodeInfo(BaseModel):
     role:         NodeRole
     callback_url: str
     label:        str   = ""
-    metadata:     dict  = {}
+    metadata: dict = Field(default_factory=dict)
     registered_at: float = 0.0
 
 
@@ -149,10 +149,16 @@ class SendBatchReq(BaseModel):
     batch:      QubitBatch
 
 
+class BatchResult(BaseModel):
+    qubit_id: int
+    delivered: bool
+    bob_basis: Optional[str]
+    bob_bit: Optional[int]
+
 class SendBatchResp(BaseModel):
     session_id: str
     batch_id:   int
-    results:    list[dict]
+    results:    list[BatchResult]
 
 
 class NetworkStopReq(BaseModel):
@@ -190,7 +196,7 @@ class WebhookEvent(BaseModel):
                              #"measurements_ready" | "sift_ready" |
                              #"key_available" | "session_aborted"
     session_id: str
-    payload:    dict = {}    #event-specific data
+    payload: dict = Field(default_factory=dict)  #event-specific data
 
 
 class SiftReq(BaseModel):
