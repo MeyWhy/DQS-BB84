@@ -61,10 +61,10 @@ class SessionJoinResp(BaseModel):
     sender_node_id:  str
     n_qubits:        int
     status:          str
-    # ── NEW: QKDL URL assigned to this session by KME ──────────────────────
-    # Nodes must use this URL for all quantum channel operations
-    # (POST /batch/send, GET /qubit/receive) so they always hit the
-    # same QKDL instance that the KME initialized the session on.
+    #NEW: QKDL URL assigned to this session by KME 
+    #Nodes must use this URL for all quantum channel operations
+    #(POST /batch/send, GET /qubit/receive) so they always hit the
+    #same QKDL instance that the KME initialized the session on.
     qkdl_url:        str = ""
 
 
@@ -177,7 +177,7 @@ class SessionStatusResponse(BaseModel):
     elapsed_s:      float = 0.0
     progress_pct:   float = 0.0
     phase_label:    str   = ""
-    # ── NEW ────────────────────────────────────────────────────────────────
+    #NEW 
     qkdl_url:       str   = ""
 
     @property

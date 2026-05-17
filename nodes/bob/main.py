@@ -1,5 +1,5 @@
 """
-nodes/bob/main.py  — v0.8.0
+nodes/bob/main.py  -- v0.8.0
 
 Fix: _receive_and_measure now uses the qkdl_url returned in the
 join_session response, instead of the module-level QKDL_URL env var.
@@ -40,25 +40,25 @@ class BobNode(BaseNode):
         )
         self._bob_state: dict[str, dict] = {}
 
-    # ── Webhook handlers ──────────────────────────────────────────────────────
+    #Webhook handlers 
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
-        # ── FIX: grab qkdl_url from payload early ─────────────────────────
-        # KME now includes it in the session_open webhook so Bob knows which
-        # QKDL to poll before join_session even returns.
+        #FIX: grab qkdl_url from payload early 
+        #KME now includes it in the session_open webhook so Bob knows which
+        #QKDL to poll before join_session even returns.
         early_qkdl = payload.get(
             "qkdl_url",
             os.getenv("QKDL_URL", "http://localhost:8003"),
         )
 
         join_data = await self.join_session(session_id)
-        # join_session response now carries qkdl_url; prefer it over payload
+        #join_session response now carries qkdl_url; prefer it over payload
         qkdl_url  = join_data.get("qkdl_url", early_qkdl)
 
         n_qubits  = payload.get("n_qubits", 200)
         self._bob_state[session_id] = {
             "n_qubits":       n_qubits,
-            "qkdl_url":       qkdl_url,   # stored per-session
+            "qkdl_url":       qkdl_url,   #stored per-session
             "measurements":   [],
             "sifted_bits":    [],
             "bob_final":      [],
@@ -88,7 +88,7 @@ class BobNode(BaseNode):
         self._bob_state.pop(session_id, None)
         self._sessions.pop(session_id, None)
 
-    # ── Qubit reception ───────────────────────────────────────────────────────
+    #Qubit reception 
 
     async def _receive_and_measure(self, session_id: str) -> None:
         state = self._bob_state.get(session_id)
@@ -96,7 +96,7 @@ class BobNode(BaseNode):
             return
 
         n_qubits = state["n_qubits"]
-        qkdl_url = state["qkdl_url"]   # ← per-session QKDL URL
+        qkdl_url = state["qkdl_url"]   #← per-session QKDL URL
         measurements: list[MeasurementRecord] = []
         deadline = (
             time.time()
@@ -113,7 +113,7 @@ class BobNode(BaseNode):
         while len(measurements) < n_qubits and time.time() < deadline:
             try:
                 resp = await self._client.get(
-                    f"{qkdl_url}/qubit/receive/{session_id}",  # ← per-session
+                    f"{qkdl_url}/qubit/receive/{session_id}",  #← per-session
                     timeout=5.0,
                 )
 
@@ -121,7 +121,7 @@ class BobNode(BaseNode):
                     logger.warning(
                         f"[Bob] QKDL 404 session={session_id[:8]} "
                         f"qkdl={qkdl_url} got={len(measurements)}/{n_qubits} "
-                        f"— QKDL session not found, stopping poll"
+                        f"-- QKDL session not found, stopping poll"
                     )
                     break
 
@@ -179,7 +179,7 @@ class BobNode(BaseNode):
 
         if not measurements:
             logger.error(
-                f"[Bob] Zero measurements — aborting post session={session_id[:8]}"
+                f"[Bob] Zero measurements -- aborting post session={session_id[:8]}"
             )
             return
 
@@ -212,7 +212,7 @@ class BobNode(BaseNode):
                 f"session={session_id[:8]}: {e}"
             )
 
-    # ── Local sifting ─────────────────────────────────────────────────────────
+    #Local sifting 
 
     async def _do_local_sift(self, session_id: str) -> None:
         state = self._bob_state.get(session_id)
@@ -260,10 +260,10 @@ class BobNode(BaseNode):
         )
 
 
-# ── FastAPI app ───────────────────────────────────────────────────────────────
+#FastAPI app 
 
 bob = BobNode()
-app = bob.build_app(title="SAE-B — Bob (Receiver)", port=8002)
+app = bob.build_app(title="SAE-B -- Bob (Receiver)", port=8002)
 
 
 @app.get("/session/{session_id}/key")

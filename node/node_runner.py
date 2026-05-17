@@ -1,5 +1,5 @@
 """
-node/node_runner.py  — v0.8.0
+node/node_runner.py  -- v0.8.0
 
 Fixes vs v0.7:
 1. Logs are written to logs/<label>.log AND streamed to console via a
@@ -32,7 +32,7 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
-# ── Log streaming ─────────────────────────────────────────────────────────────
+#Log streaming 
 
 def _stream_output(proc: subprocess.Popen, label: str, log_path: Path) -> None:
     """
@@ -57,7 +57,7 @@ def _tail(log_path: Path, n: int = 20) -> list[str]:
         return []
 
 
-# ── Process launchers ─────────────────────────────────────────────────────────
+#Process launchers 
 
 def start_qkdl(port: int) -> tuple[subprocess.Popen, Path]:
     label    = f"qkdl-{port}"
@@ -116,7 +116,7 @@ def start_node(node_cfg: dict, global_cfg: dict) -> tuple[subprocess.Popen, Path
     return proc, log_path
 
 
-# ── QKDL port extraction ──────────────────────────────────────────────────────
+#QKDL port extraction 
 
 def _qkdl_port(node_cfg: dict, global_cfg: dict) -> int:
     url = node_cfg.get("env", {}).get("QKDL_URL", global_cfg["qkdl"]["url"])
@@ -126,7 +126,7 @@ def _qkdl_port(node_cfg: dict, global_cfg: dict) -> int:
         return 8003
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+#Main 
 
 def main():
     parser = argparse.ArgumentParser(description="QKD Node Runner v0.8")
@@ -168,7 +168,7 @@ def main():
     signal.signal(signal.SIGINT,  shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    # ── Launch QKDL instances ─────────────────────────────────────────────
+    #Launch QKDL instances 
     if not args.no_qkdl:
         qkdl_ports = sorted({_qkdl_port(n, cfg) for n in nodes})
         print(f"\nStarting {len(qkdl_ports)} QKDL instance(s)...\n")
@@ -180,7 +180,7 @@ def main():
         print(f"\n  Waiting 3s for QKDL instances to bind...\n")
         time.sleep(3.0)
 
-    # ── Launch nodes ──────────────────────────────────────────────────────
+    #Launch nodes 
     print(f"Starting {len(nodes)} node(s)...\n")
     for node_cfg in nodes:
         proc, log = start_node(node_cfg, cfg)
@@ -191,7 +191,7 @@ def main():
 
     print(f"\n[runner] All processes started. Logs → {LOG_DIR}/  Ctrl+C to stop.\n")
 
-    # ── Watch for unexpected exits ────────────────────────────────────────
+    #Watch for unexpected exits 
     while True:
         for i, proc in enumerate(procs):
             ret = proc.poll()

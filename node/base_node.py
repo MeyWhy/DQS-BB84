@@ -1,5 +1,5 @@
 """
-node/base_node.py  — v0.8.0
+node/base_node.py  -- v0.8.0
 
 Fix: join_session() now returns the full response dict (including qkdl_url)
 instead of storing it into self._sessions and returning it silently.
@@ -46,7 +46,7 @@ class BaseNode(ABC):
         self._client  = httpx.AsyncClient(timeout=30.0)
         self._running = False
 
-    # ── Lifecycle ─────────────────────────────────────────────────────────────
+    #Lifecycle 
 
     async def start(self) -> None:
         self.node_id = await self._register()
@@ -87,7 +87,7 @@ class BaseNode(ABC):
                 )
                 await asyncio.sleep(REGISTER_RETRY_DELAY)
 
-    # ── Webhook dispatch ──────────────────────────────────────────────────────
+    #Webhook dispatch 
 
     async def handle_webhook(self, event: WebhookEvent) -> None:
         sid = event.session_id
@@ -113,7 +113,7 @@ class BaseNode(ABC):
         else:
             logger.warning(f"[{self.label}] Unknown event: {event.event}")
 
-    # ── Default handlers (override in subclasses) ─────────────────────────────
+    #Default handlers (override in subclasses) 
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
         if self.role == NodeRole.RECEIVER:
@@ -141,7 +141,7 @@ class BaseNode(ABC):
         )
         self._sessions.pop(session_id, None)
 
-    # ── KME helpers ───────────────────────────────────────────────────────────
+    #KME helpers 
 
     async def join_session(self, session_id: str) -> dict:
         """
@@ -177,7 +177,7 @@ class BaseNode(ABC):
         resp.raise_for_status()
         return resp.json()
 
-    # ── Agent loop ────────────────────────────────────────────────────────────
+    #Agent loop 
 
     async def _agent_loop(self) -> None:
         while self._running:
@@ -190,7 +190,7 @@ class BaseNode(ABC):
     async def _poll_tick(self) -> None:
         pass
 
-    # ── FastAPI app factory ───────────────────────────────────────────────────
+    #FastAPI app factory 
 
     def build_app(self, title: str, port: int) -> FastAPI:
         node = self

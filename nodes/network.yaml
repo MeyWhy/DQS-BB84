@@ -1,14 +1,9 @@
-# nodes/network.yaml  — v0.8.0
-#
 # Each alice/bob pair declares its own QKDL_URL so that:
-#   - KME initialises the session on the right QKDL instance
-#   - Alice sends batches to that same instance
-#   - Bob polls that same instance
-#
+
 # node_runner reads the unique QKDL ports and auto-launches one
 # qunetsim_service process per port before starting the nodes.
 #
-# KME must know the full pool — pass QKDL_URLS when starting it:
+# KME must know the full pool => pass QKDL_URLS when starting it:
 #   QKDL_URLS=http://localhost:8003,http://localhost:8013 python kme/main.py
 
 kme:
@@ -16,11 +11,11 @@ kme:
   key_ttl_seconds: 300
 
 qkdl:
-  url: "http://localhost:8003"   # default fallback for single-pair setups
+  url: "http://localhost:8003"   # default fallback for single-pair setups to be verif
 
 nodes:
 
-  # ── Pair 1: alice-1 ↔ bob-1  ─────────────────────────────────────────────
+  # Pair 1: alice-1 <-> bob-1 
   - label:   alice-1
     role:    sender
     module:  nodes.alice.main
@@ -40,7 +35,7 @@ nodes:
       BOB_URL:   "http://localhost:8002"
       QKDL_URL:  "http://localhost:8003"
 
-  # ── Pair 2: alice-2 ↔ bob-2  ─────────────────────────────────────────────
+  #Pair 2: alice-2 <-> bob-2  
   - label:   alice-2
     role:    sender
     module:  nodes.alice.main
@@ -60,11 +55,10 @@ nodes:
       BOB_URL:   "http://localhost:8202"
       QKDL_URL:  "http://localhost:8013"
 
-  # ── Add more pairs below ──────────────────────────────────────────────────
-  # Each new pair needs:
-  #   1. A new QKDL port (8023, 8033, ...)
-  #   2. Unique alice/bob ports (8103/8203, 8104/8204, ...)
-  #   3. Add the new port to QKDL_URLS when starting KME
+  #Each new pair needs:
+  #1. A new QKDL port (8023, 8033, ...)
+  #2. Unique alice/bob ports (8103/8203, 8104/8204, ...)
+  #3. Add the new port to QKDL_URLS when starting KME
   #
   - label:   alice-3
     role:    sender

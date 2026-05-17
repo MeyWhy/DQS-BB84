@@ -52,15 +52,15 @@ class NetworkSession:
     def __init__(self, session_id: str, loss_rate: float = 0.0):
         self.session_id   = session_id
         self.loss_rate    = loss_rate
-        self.backend      = None   # assigned in start()
-        self.network      = None   # assigned in start()
+        self.backend      = None   #assigned in start()
+        self.network      = None   #assigned in start()
         self.alice_host   = None
         self.bob_host     = None
         self._send_lock   = threading.Lock()
         self._active      = False
         self._meas_queue: list[dict] = []
         self._meas_lock   = threading.Lock()
-        # Unique names prevent host registry collision after singleton reset
+        #Unique names prevent host registry collision after singleton reset
         sid6 = session_id.replace("-", "")[:6]
         self._alice_name  = f"Alice-{sid6}"
         self._bob_name    = f"Bob-{sid6}"
@@ -90,11 +90,11 @@ class NetworkSession:
                 logger.warning(f"[QKDL] Stop error: {e}")
             self._active = False
 
-            # Reset the QuNetSim singleton so next session gets a fresh Network
+            #Reset the QuNetSim singleton so next session gets a fresh Network
             try:
                 if hasattr(Network, '_instance'):
                     Network._instance = None
-                # Allow internal threads ~300ms to exit their loops
+                #Allow internal threads ~300ms to exit their loops
                 time.sleep(0.3)
             except Exception as e:
                 logger.warning(f"[QKDL] Singleton reset error: {e}")
@@ -162,7 +162,7 @@ def _process_batch_sync(
 
         t_bob = threading.Thread(target=bob_receive, daemon=True)
         t_bob.start()
-        time.sleep(0.003)   #reduced from 0.01 → 0.003 for better latency
+        time.sleep(0.003)   #reduced from 0.01 -> 0.003 for better latency
 
         with session._send_lock:
             q = Qubit(session.alice_host)
@@ -214,12 +214,12 @@ app = FastAPI(
 @app.post("/network/init", response_model=NetworkInitResp)
 async def init_network(req: NetworkInitReq):
     with _sessions_lock:
-        # Always clean dead sessions first
+        #Always clean dead sessions first
         dead = [sid for sid, s in _sessions.items() if not s.is_active()]
         for sid in dead:
             del _sessions[sid]
 
-        # Same session already active → idempotent return
+        #Same session already active -> idempotent return
         if req.session_id in _sessions:
             return NetworkInitResp(
                 session_id=req.session_id,
@@ -227,7 +227,7 @@ async def init_network(req: NetworkInitReq):
                 message="Already active",
             )
 
-        # Different session still alive → real conflict
+        #Different session still alive -> real conflict
         if _sessions:
             active = list(_sessions.keys())
             raise HTTPException(
@@ -268,7 +268,7 @@ async def stop_network(req: NetworkStopReq):
 async def reset_network():
     """
     Force-stop ALL sessions. Use between test runs to clear stale state.
-    This is safe — QuNetSim's Network is a singleton that needs a clean
+    This is safe -- QuNetSim's Network is a singleton that needs a clean
     stop before a new session can init.
     """
     loop = asyncio.get_event_loop()
@@ -281,8 +281,8 @@ async def reset_network():
     for session in sessions_to_stop:
         await loop.run_in_executor(None, session.stop)
 
-    # Extra: force QuNetSim's global Network instance to reset
-    # so the next Network.get_instance().start() works cleanly
+    #Extra: force QuNetSim's global Network instance to reset
+    #so the next Network.get_instance().start() works cleanly
     try:
         from qunetsim.components import Network
         net = Network.get_instance()

@@ -1,8 +1,8 @@
 """
-kme/main.py  — v0.8.0
+kme/main.py  -- v0.8.0
 
 Key fixes vs v0.7:
-─────────────────
+
 1. QKDL URL routing (the transmission stall bug)
    KME now maintains a pool of QKDL URLs (QKDL_URLS env var, comma-separated).
    When a session is created, KME picks a free QKDL, stores the chosen URL
@@ -61,10 +61,10 @@ logging.basicConfig(level=logging.INFO)
 
 HTTP_TO = 30.0
 
-# ── QKDL pool ────────────────────────────────────────────────────────────────
-# Comma-separated list of QKDL base URLs.
-# Example: QKDL_URLS=http://localhost:8003,http://localhost:8013
-# Falls back to single QKDL_URL for backward compatibility.
+#QKDL pool 
+#Comma-separated list of QKDL base URLs.
+#Example: QKDL_URLS=http://localhost:8003,http://localhost:8013
+#Falls back to single QKDL_URL for backward compatibility.
 _raw = os.getenv(
     "QKDL_URLS",
     os.getenv("QKDL_URL", "http://localhost:8003"),
@@ -88,11 +88,11 @@ METRICS = {
 NODE_SESSION_COUNT: dict[str, int] = defaultdict(int)
 
 
-# ── QKDL pool helpers ─────────────────────────────────────────────────────────
+#QKDL pool helpers 
 
 def _qkdl_lock_key(qkdl_url: str) -> str:
     """Redis key for per-QKDL lock."""
-    # Sanitise URL into a safe key suffix
+    #Sanitise URL into a safe key suffix
     safe = qkdl_url.replace("://", "_").replace("/", "_").replace(":", "_")
     return f"kme:qkdl_lock:{safe}"
 
@@ -125,7 +125,7 @@ def pick_free_qkdl(r) -> str | None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"[KME] Started — QKDL pool: {QKDL_POOL}")
+    logger.info(f"[KME] Started -- QKDL pool: {QKDL_POOL}")
     yield
     logger.info("[KME] Stopped")
 
@@ -141,7 +141,7 @@ app = FastAPI(
 )
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+#Helpers 
 
 def _get_session_or_404(r, session_id: str) -> dict:
     session = load_session(r, session_id)
@@ -158,7 +158,7 @@ async def _notify(node_id: str, event: WebhookEvent) -> None:
         METRICS["webhook_events"] += 1
 
 
-# ── Node registry ─────────────────────────────────────────────────────────────
+#Node registry 
 
 @app.post("/nodes/register", response_model=NodeInfo)
 async def register(reg: NodeRegistration):
@@ -188,7 +188,7 @@ async def get_node(node_id: str):
     return node
 
 
-# ── Session lifecycle ─────────────────────────────────────────────────────────
+#Session lifecycle 
 
 @app.post("/sessions", status_code=202)
 @app.post("/keys",     status_code=202)
@@ -201,7 +201,7 @@ async def create_session(
 
     Steps (order matters for correctness):
       1. Pick a free QKDL instance from the pool.
-      2. Lock it atomically — if lost race, return 409.
+      2. Lock it atomically -- if lost race, return 409.
       3. Find Bob node.
       4. Persist session record (includes qkdl_url).
       5. Dispatch background tasks.
@@ -209,7 +209,7 @@ async def create_session(
     r          = get_redis()
     session_id = new_session_id()
 
-    # ── 1 + 2: pick and lock a free QKDL ─────────────────────────────────
+    #1 + 2: pick and lock a free QKDL 
     qkdl_url = pick_free_qkdl(r)
     if not qkdl_url:
         raise HTTPException(
@@ -219,7 +219,7 @@ async def create_session(
 
     locked = _acquire_qkdl_lock(r, qkdl_url, session_id)
     if not locked:
-        # Lost atomic race on this QKDL; try again (another request grabbed it)
+        #Lost atomic race on this QKDL; try again (another request grabbed it)
         qkdl_url = pick_free_qkdl(r)
         if not qkdl_url:
             raise HTTPException(
@@ -233,11 +233,11 @@ async def create_session(
                 detail="All QKDL instances are busy."
             )
 
-    # Also acquire the legacy global lock for backward compat with
-    # get_active_qkd_session() used elsewhere.
+    #Also acquire the legacy global lock for backward compat with
+    #get_active_qkd_session() used elsewhere.
     acquire_qkd_lock(r, session_id)
 
-    # ── 3: find receiver ──────────────────────────────────────────────────
+    #3: find receiver 
     bob_node = find_node_by_label(r, req.receiver_label)
     if not bob_node:
         _release_qkdl_lock(r, qkdl_url, session_id)
@@ -247,7 +247,7 @@ async def create_session(
             detail=f"Receiver node '{req.receiver_label}' not registered"
         )
 
-    # ── 4: persist session ────────────────────────────────────────────────
+    #4: persist session 
     session = {
         "session_id":       session_id,
         "status":           SessionStatus.INITIALIZING.value,
@@ -260,8 +260,8 @@ async def create_session(
         "loss_rate":        req.loss_rate,
         "retry_enabled":    req.retry_enabled,
 
-        # ── The QKDL URL assigned to this session ─────────────────────────
-        # Alice and Bob MUST use this URL for all quantum channel calls.
+        #The QKDL URL assigned to this session 
+        #Alice and Bob MUST use this URL for all quantum channel calls.
         "qkdl_url":         qkdl_url,
 
         "created_at":       time.time(),
@@ -281,7 +281,7 @@ async def create_session(
     }
     save_session(r, session)
 
-    # ── 5: background tasks ───────────────────────────────────────────────
+    #5: background tasks 
     background_tasks.add_task(
         _init_qkdl, session_id, req.n_qubits, req.loss_rate, qkdl_url
     )
@@ -294,7 +294,7 @@ async def create_session(
                 "role":           "receiver",
                 "sender_node_id": req.sender_node_id,
                 "n_qubits":       req.n_qubits,
-                "qkdl_url":       qkdl_url,   # Bob needs this too
+                "qkdl_url":       qkdl_url,   #Bob needs this too
             },
         )
     )
@@ -312,7 +312,7 @@ async def create_session(
     return {
         "session_id": session_id,
         "status":     "open",
-        "qkdl_url":   qkdl_url,   # Alice stores this for _send_qubits
+        "qkdl_url":   qkdl_url,   #Alice stores this for _send_qubits
     }
 
 
@@ -357,7 +357,7 @@ async def join_session(session_id: str, req: SessionJoinReq):
         sender_node_id=session["sender_node_id"],
         n_qubits=session["n_qubits"],
         status="joined",
-        qkdl_url=session.get("qkdl_url", ""),   # Bob uses this for polling
+        qkdl_url=session.get("qkdl_url", ""),   #Bob uses this for polling
     )
 
 
@@ -592,13 +592,13 @@ async def cancel_session(session_id: str):
     return {"status": "cancelled", "session_id": session_id}
 
 
-# ── QKDL coordination ─────────────────────────────────────────────────────────
+#QKDL coordination 
 
 async def _init_qkdl(
     session_id: str,
     n_qubits:   int,
     loss_rate:  float,
-    qkdl_url:   str,          # explicit — no more global QKDL_URL guessing
+    qkdl_url:   str,          #explicit -- no more global QKDL_URL guessing
 ) -> None:
     r = get_redis()
     try:
@@ -639,12 +639,12 @@ async def _stop_qkdl(session_id: str) -> None:
     except Exception as e:
         logger.warning(f"[KME] QKDL teardown partial session={session_id}: {e}")
     finally:
-        # Always release locks whether stop succeeded or not
+        #Always release locks whether stop succeeded or not
         _release_qkdl_lock(r, qkdl_url, session_id)
         release_qkd_lock(r, session_id)
 
 
-# ── Metrics + health ──────────────────────────────────────────────────────────
+#Metrics + health 
 
 @app.get("/metrics")
 async def metrics():
