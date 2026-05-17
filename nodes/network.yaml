@@ -2,6 +2,18 @@
 # Defines the QKD network topology.
 # Add a new node here -> it starts, registers, and participates automatically.
 # No code changes required for new Alice/Bob instances.
+# nodes/network.yaml
+#
+# SCALABILITY FIX: each alice/bob pair gets its own QKDL_URL.
+# QuNetSim's Network is a singleton — it cannot run two sessions
+# simultaneously in the same process. So parallel pairs need separate
+# qunetsim_service instances on different ports.
+#
+# How to run two QKDL instances:
+#   QKDL_PORT=8003 python qunetsim_service.py   # for pair 1
+#   QKDL_PORT=8013 python qunetsim_service.py   # for pair 2
+#
+# Or add them to your docker-compose / process manager.
 
 kme:
   url: "http://localhost:8000"
@@ -9,44 +21,57 @@ kme:
   retry_on_insufficient_bits: false
 
 qkdl:
-  url: "http://localhost:8003"
+  url: "http://localhost:8003"   # default (used by node_runner as fallback)
 
 nodes:
 
-  - label:    alice-1
-    role:     sender
-    module:   nodes.alice.main
-    port:     8001
+  # ── Pair 1: alice-1 ↔ bob-1  (uses QKDL on port 8003) ───────────────────
+  - label:   alice-1
+    role:    sender
+    module:  nodes.alice.main
+    port:    8001
     env:
-      ALICE_LABEL:  alice-1
-      ALICE_URL:    "http://localhost:8001"
-      BATCH_SIZE:   "10"
+      ALICE_LABEL: alice-1
+      ALICE_URL:   "http://localhost:8001"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:8003"   # ← explicit per-pair QKDL
 
-  - label:    bob-1
-    role:     receiver
-    module:   nodes.bob.main
-    port:     8002
+  - label:   bob-1
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8002
     env:
       BOB_LABEL: bob-1
       BOB_URL:   "http://localhost:8002"
+      QKDL_URL:  "http://localhost:8003"
 
-
-  - label: alice-2
-    role: sender
-    module: nodes.alice.main
-    port: 8102
+  # ── Pair 2: alice-2 ↔ bob-2  (uses QKDL on port 8013) ───────────────────
+  # Start a second QKDL first:
+  #   QKDL_PORT=8013 python qunetsim_service.py
+  - label:   alice-2
+    role:    sender
+    module:  nodes.alice.main
+    port:    8102
     env:
-      ALICE_LABEL:  alice-2
-      ALICE_URL:    "http://localhost:8102"
-      BATCH_SIZE:   "10"
+      ALICE_LABEL: alice-2
+      ALICE_URL:   "http://localhost:8102"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:8013"   # ← own QKDL instance
 
-  - label: bob-2
-    role: receiver
-    module: nodes.bob.main
-    port: 8202
+  - label:   bob-2
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8202
     env:
       BOB_LABEL: bob-2
       BOB_URL:   "http://localhost:8202"
+      QKDL_URL:  "http://localhost:8013"
+
+  # ── Add more pairs below ──────────────────────────────────────────────────
+  # Each pair needs:
+  #   1. A unique QKDL port (8003, 8013, 8023, ...)
+  #   2. Unique alice/bob ports
+  #   3. A running qunetsim_service on that QKDL port
 
   # ── Add new nodes below — no code changes needed ──────────────
 

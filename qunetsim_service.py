@@ -10,6 +10,7 @@ from typing import Optional
 import random
 import threading
 import time
+import os
 
 try:
     from models import (
@@ -459,4 +460,5 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8003, log_level="warning")
+    port = int(os.getenv("QKDL_PORT", "8003"))
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")

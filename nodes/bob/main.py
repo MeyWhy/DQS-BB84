@@ -1,10 +1,16 @@
+"""
+nodes/bob/main.py  — v0.8.0
+
+Fix: _receive_and_measure now uses the qkdl_url returned in the
+join_session response, instead of the module-level QKDL_URL env var.
+Also reads qkdl_url from the session_open webhook payload as early hint.
+"""
 import asyncio
 import logging
 import os
 import random
 import sys
 import time
-
 import uvicorn
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
@@ -14,17 +20,14 @@ from models import (
     NodeRole, MeasurementUpload, MeasurementRecord, Basis,
 )
 
-logger = logging.getLogger("bob")
+logger  = logging.getLogger("bob")
 logging.basicConfig(level=logging.INFO)
 
-KME_URL  = os.getenv("KME_URL",   "http://localhost:8000")
-QKDL_URL = os.getenv("QKDL_URL", "http://localhost:8003")
-MY_URL   = os.getenv("BOB_URL",   "http://localhost:8002")
+KME_URL  = os.getenv("KME_URL",  "http://localhost:8000")
+MY_URL   = os.getenv("BOB_URL",  "http://localhost:8002")
 
-# How long to wait per qubit for QuNetSim to process it.
-# QuNetSim worst case: ~4s/qubit. We use 8s as safe upper bound.
 QKDL_SECS_PER_QUBIT = 8.0
-QKDL_FIXED_OVERHEAD = 30.0   # startup + batch overhead
+QKDL_FIXED_OVERHEAD  = 30.0
 
 
 class BobNode(BaseNode):
@@ -37,21 +40,33 @@ class BobNode(BaseNode):
         )
         self._bob_state: dict[str, dict] = {}
 
-    # ── Webhook handlers ─────────────────────────────────────────────────────
+    # ── Webhook handlers ──────────────────────────────────────────────────────
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
-        await self.join_session(session_id)
-        n_qubits = payload.get("n_qubits", 200)
+        # ── FIX: grab qkdl_url from payload early ─────────────────────────
+        # KME now includes it in the session_open webhook so Bob knows which
+        # QKDL to poll before join_session even returns.
+        early_qkdl = payload.get(
+            "qkdl_url",
+            os.getenv("QKDL_URL", "http://localhost:8003"),
+        )
+
+        join_data = await self.join_session(session_id)
+        # join_session response now carries qkdl_url; prefer it over payload
+        qkdl_url  = join_data.get("qkdl_url", early_qkdl)
+
+        n_qubits  = payload.get("n_qubits", 200)
         self._bob_state[session_id] = {
             "n_qubits":       n_qubits,
+            "qkdl_url":       qkdl_url,   # stored per-session
             "measurements":   [],
             "sifted_bits":    [],
             "bob_final":      [],
             "measuring_done": False,
         }
         logger.info(
-            f"[Bob] Joined session {session_id[:8]} "
-            f"n_qubits={n_qubits}"
+            f"[Bob] Joined session={session_id[:8]} "
+            f"n_qubits={n_qubits} qkdl={qkdl_url}"
         )
         asyncio.create_task(self._receive_and_measure(session_id))
 
@@ -76,44 +91,37 @@ class BobNode(BaseNode):
     # ── Qubit reception ───────────────────────────────────────────────────────
 
     async def _receive_and_measure(self, session_id: str) -> None:
-        """
-        Poll QKDL until we have received all n_qubits measurements.
-
-        Key design decisions:
-        - Exit condition: len(measurements) == n_qubits  (count-based, not idle-based)
-        - An empty queue means Alice is still mid-batch — we wait and retry.
-        - A 404 from QKDL means the session was stopped (Alice aborted) — exit.
-        - Deadline = 30s + n_qubits * 8s gives ample margin for QuNetSim.
-        - NO idle_rounds / MAX_IDLE — that was the root cause of the stall at
-          n_qubits > ~37 (3s idle / 0.08s per poll ≈ 37 qubits before timeout).
-        """
         state = self._bob_state.get(session_id)
         if not state:
             return
 
         n_qubits = state["n_qubits"]
+        qkdl_url = state["qkdl_url"]   # ← per-session QKDL URL
         measurements: list[MeasurementRecord] = []
-        deadline = time.time() + QKDL_FIXED_OVERHEAD + n_qubits * QKDL_SECS_PER_QUBIT
+        deadline = (
+            time.time()
+            + QKDL_FIXED_OVERHEAD
+            + n_qubits * QKDL_SECS_PER_QUBIT
+        )
 
         logger.info(
             f"[Bob] Receive loop started session={session_id[:8]} "
-            f"target={n_qubits} "
+            f"target={n_qubits} qkdl={qkdl_url} "
             f"deadline_s={int(QKDL_FIXED_OVERHEAD + n_qubits * QKDL_SECS_PER_QUBIT)}"
         )
 
         while len(measurements) < n_qubits and time.time() < deadline:
             try:
                 resp = await self._client.get(
-                    f"{QKDL_URL}/qubit/receive/{session_id}",
+                    f"{qkdl_url}/qubit/receive/{session_id}",  # ← per-session
                     timeout=5.0,
                 )
 
                 if resp.status_code == 404:
-                    # QKDL session gone — Alice aborted, stop polling
                     logger.warning(
-                        f"[Bob] QKDL session gone (404) — stopping "
-                        f"session={session_id[:8]} "
-                        f"received={len(measurements)}/{n_qubits}"
+                        f"[Bob] QKDL 404 session={session_id[:8]} "
+                        f"qkdl={qkdl_url} got={len(measurements)}/{n_qubits} "
+                        f"— QKDL session not found, stopping poll"
                     )
                     break
 
@@ -124,12 +132,11 @@ class BobNode(BaseNode):
                 data = resp.json()
 
                 if data.get("queue_empty"):
-                    # Alice is between batches — brief wait, then retry.
-                    # Do NOT count this as "done". We must reach n_qubits.
                     if len(measurements) > 0 and len(measurements) % 25 == 0:
                         logger.info(
                             f"[Bob] Queue empty mid-session={session_id[:8]} "
-                            f"got={len(measurements)} remaining={n_qubits - len(measurements)}"
+                            f"got={len(measurements)} "
+                            f"remaining={n_qubits - len(measurements)}"
                         )
                     await asyncio.sleep(0.05)
                     continue
@@ -138,11 +145,7 @@ class BobNode(BaseNode):
                 raw_basis  = data.get("basis")
                 bit_result = data.get("bit_result")
 
-                # Qubit lost in transit (loss_rate > 0 path)
                 if qid is None or raw_basis is None or bit_result is None:
-                    # Lost qubits are not queued by QKDL, so this branch
-                    # should never be reached via /qubit/receive.
-                    # Guard here for safety.
                     await asyncio.sleep(0.02)
                     continue
 
@@ -164,7 +167,6 @@ class BobNode(BaseNode):
                 )
                 await asyncio.sleep(0.5)
 
-        # ── Loop exited ───────────────────────────────────────────────────
         state["measurements"]   = measurements
         state["measuring_done"] = True
 
@@ -177,16 +179,10 @@ class BobNode(BaseNode):
 
         if not measurements:
             logger.error(
-                f"[Bob] Zero measurements — aborting post "
-                f"session={session_id[:8]}"
+                f"[Bob] Zero measurements — aborting post session={session_id[:8]}"
             )
             return
 
-        logger.info(
-            f"[Bob] Posting {len(measurements)} measurements "
-            f"session={session_id[:8]} "
-            f"first_ids={sorted(m.qubit_id for m in measurements)[:5]}"
-        )
         await self._post_measurements(session_id, measurements)
 
     async def _post_measurements(
@@ -223,11 +219,12 @@ class BobNode(BaseNode):
         if not state:
             return
 
-        # Fetch Alice's bases from KME
         try:
             sift_data = await self.kme_get(f"/sessions/{session_id}/sift")
         except Exception as e:
-            logger.error(f"[Bob] Failed to get sift data session={session_id[:8]}: {e}")
+            logger.error(
+                f"[Bob] Failed to get sift data session={session_id[:8]}: {e}"
+            )
             return
 
         alice_bases_map: dict[int, str] = {
@@ -244,7 +241,6 @@ class BobNode(BaseNode):
             if qid in alice_bases_map and alice_bases_map[qid] == meas.basis.value:
                 sifted_bits.append(meas.bit_result)
 
-        # Apply same QBER sample removal as Alice (same seed → same indices)
         import random as _r
         rng       = _r.Random(sample_seed)
         n         = len(sifted_bits)

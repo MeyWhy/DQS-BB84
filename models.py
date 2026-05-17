@@ -17,44 +17,41 @@ def new_session_id() -> str:
 def new_node_id() -> str:
     return str(uuid.uuid4())
 
+
 class NodeRole(str, Enum):
-    SENDER   = "sender"     #Alice equivalent
-    RECEIVER = "receiver"   #Bob equivalent
-    RELAY    = "relay"      #future: intermediate node
-    MONITOR  = "monitor"    #future: Eve / passive listener
+    SENDER   = "sender"
+    RECEIVER = "receiver"
+    RELAY    = "relay"
+    MONITOR  = "monitor"
 
 
 class NodeRegistration(BaseModel):
-
-    role:        NodeRole
-    callback_url: str          #URL the KME calls for webhook notifications
-    label:       str = ""      #name
-    metadata: dict = Field(default_factory=dict) #extensible: location, capabilities, etc.
+    role:         NodeRole
+    callback_url: str
+    label:        str = ""
+    metadata:     dict = Field(default_factory=dict)
 
 
 class NodeInfo(BaseModel):
-    """KME's view of a registered node."""
-    node_id:      str
-    role:         NodeRole
-    callback_url: str
-    label:        str   = ""
-    metadata: dict = Field(default_factory=dict)
+    node_id:       str
+    role:          NodeRole
+    callback_url:  str
+    label:         str  = ""
+    metadata:      dict = Field(default_factory=dict)
     registered_at: float = 0.0
 
 
 class SessionCreateReq(BaseModel):
-
-    sender_node_id:   str
-    receiver_label:   str        #label of the target Bob node
-    n_qubits:         int   = Field(default=200, ge=0, le=5000)
-    batch_size:       int   = Field(default=10,  gt=0,  le=100)
-    loss_rate:        float = Field(default=0.0, ge=0.0, le=1.0)
-    retry_enabled:    bool  = False
+    sender_node_id: str
+    receiver_label: str
+    n_qubits:       int   = Field(default=200, ge=0, le=5000)
+    batch_size:     int   = Field(default=10,  gt=0, le=100)
+    loss_rate:      float = Field(default=0.0, ge=0.0, le=1.0)
+    retry_enabled:  bool  = False
 
 
 class SessionJoinReq(BaseModel):
-
-    node_id:   str
+    node_id:    str
     session_id: str
 
 
@@ -64,6 +61,11 @@ class SessionJoinResp(BaseModel):
     sender_node_id:  str
     n_qubits:        int
     status:          str
+    # ── NEW: QKDL URL assigned to this session by KME ──────────────────────
+    # Nodes must use this URL for all quantum channel operations
+    # (POST /batch/send, GET /qubit/receive) so they always hit the
+    # same QKDL instance that the KME initialized the session on.
+    qkdl_url:        str = ""
 
 
 class QubitRecord(BaseModel):
@@ -79,7 +81,6 @@ class QubitBatch(BaseModel):
 
 
 class QubitUpload(BaseModel):
-
     session_id: str
     batch:      QubitBatch
 
@@ -91,25 +92,22 @@ class MeasurementRecord(BaseModel):
 
 
 class MeasurementUpload(BaseModel):
-
-    session_id:    str
-    node_id:       str
-    measurements:  list[MeasurementRecord]
+    session_id:   str
+    node_id:      str
+    measurements: list[MeasurementRecord]
 
 
 class SiftUpload(BaseModel):
-    
-    session_id:   str
-    alice_bases:  list[tuple[int, str]]   #[(qubit_id, basis_str), ...]
-    sample_seed:  int = Field(ge=0)
+    session_id:  str
+    alice_bases: list[tuple[int, str]]
+    sample_seed: int = Field(ge=0)
 
 
 class SiftResult(BaseModel):
-
-    session_id:    str
-    node_id:       str
-    bob_bases:     list[tuple[int, str]]
-    n_sifted:      int
+    session_id:      str
+    node_id:         str
+    bob_bases:       list[tuple[int, str]]
+    n_sifted:        int
     bob_sifted_bits: list[int]
 
 
@@ -121,14 +119,13 @@ class KeyStatus(str, Enum):
 
 
 class KeyUpload(BaseModel):
-
-    session_id:  str
-    node_id:     str
-    key_final:   str          #the key material (or hash for security)
-    key_hash:    str          #SHA-256
-    qber:        float
-    n_sifted:    int
-    status:      str          #"success" | "aborted"
+    session_id:    str
+    node_id:       str
+    key_final:     str
+    key_hash:      str
+    qber:          float
+    n_sifted:      int
+    status:        str
     error_message: str = ""
 
 
@@ -150,10 +147,11 @@ class SendBatchReq(BaseModel):
 
 
 class BatchResult(BaseModel):
-    qubit_id: int
+    qubit_id:  int
     delivered: bool
     bob_basis: Optional[str]
-    bob_bit: Optional[int]
+    bob_bit:   Optional[int]
+
 
 class SendBatchResp(BaseModel):
     session_id: str
@@ -166,7 +164,6 @@ class NetworkStopReq(BaseModel):
 
 
 class SessionStatusResponse(BaseModel):
-
     session_id:     str
     status:         str
     n_qubits:       int   = 0
@@ -180,8 +177,9 @@ class SessionStatusResponse(BaseModel):
     elapsed_s:      float = 0.0
     progress_pct:   float = 0.0
     phase_label:    str   = ""
+    # ── NEW ────────────────────────────────────────────────────────────────
+    qkdl_url:       str   = ""
 
-    #ETSI GS QKD 014 aliases
     @property
     def key_ID(self)   -> str: return self.session_id
     @property
@@ -191,12 +189,9 @@ class SessionStatusResponse(BaseModel):
 
 
 class WebhookEvent(BaseModel):
-
-    event:      str          #"session_open" | "qubits_ready" |
-                             #"measurements_ready" | "sift_ready" |
-                             #"key_available" | "session_aborted"
+    event:      str
     session_id: str
-    payload: dict = Field(default_factory=dict)  #event-specific data
+    payload:    dict = Field(default_factory=dict)
 
 
 class SiftReq(BaseModel):
@@ -212,6 +207,7 @@ class SiftResp(BaseModel):
     bob_key_len:     int
     matched_ids:     list[int]
     bob_sifted_bits: list[int]
+
 
 class ErrorCode:
     SESSION_NOT_FOUND   = "SESSION_NOT_FOUND"
