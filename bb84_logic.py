@@ -17,7 +17,7 @@ def compute_qber(
     n = min(len(alice_sifted), len(bob_sifted))
     
     if len(alice_sifted) != len(bob_sifted):
-        raise ValueError("Alice/Bob sifted mismatch — desync detected")
+        raise ValueError("Alice/Bob sifted mismatch  desync detected")
     if n == 0:
         return 1.0, [], []
 

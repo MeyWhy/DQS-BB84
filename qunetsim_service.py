@@ -17,12 +17,14 @@ try:
         Basis, NetworkInitReq, NetworkInitResp,
         MeasurementRecord, SendBatchReq, SendBatchResp,
         QubitBatch, NetworkStopReq,
+        InterceptRegisterReq, InterceptRegisterResp,
     )
 except ModuleNotFoundError:
     from models import (
         Basis, NetworkInitReq, NetworkInitResp,
         MeasurementRecord, SendBatchReq, SendBatchResp,
         QubitBatch, NetworkStopReq,
+        InterceptRegisterReq, InterceptRegisterResp,
     )
 
 logging.basicConfig(level=logging.WARNING)
@@ -47,13 +49,9 @@ class ClassicalRecvResp(BaseModel):
     available:   bool
 
 
-#Cooldown state 
-#After a session stops, we block new /network/init for COOLDOWN_S seconds
-#so QuNetSim's internal threads can exit cleanly before a new Network is
-#started on the same singleton.
-
+#Cooldown state
 COOLDOWN_S        = 2.5
-_cooldown_until:  float         = 0.0          #epoch time when cooldown expires
+_cooldown_until:  float          = 0.0
 _cooldown_lock:   threading.Lock = threading.Lock()
 
 
@@ -74,7 +72,7 @@ def _clear_cooldown() -> None:
         _cooldown_until = 0.0
 
 
-#NetworkSession 
+#NetworkSession
 
 class NetworkSession:
     def __init__(self, session_id: str, loss_rate: float = 0.0):
@@ -91,6 +89,23 @@ class NetworkSession:
         sid6             = session_id.replace("-", "")[:6]
         self._alice_name = f"Alice-{sid6}"
         self._bob_name   = f"Bob-{sid6}"
+
+        #Eve intercept state
+        #When Eve registers via POST /intercept/{session_id}, this is set.
+        #_process_batch_sync checks this flag per qubit and routes through Eve.
+        self._eve_registered: bool = False
+        self._eve_label:      str  = ""
+        #Eve's own measurement log  for thesis stats
+        self._eve_meas_queue: list[dict] = []
+        self._eve_meas_lock  = threading.Lock()
+
+    def register_interceptor(self, eve_node_id: str, eve_label: str) -> None:
+        self._eve_registered = True
+        self._eve_label      = eve_label
+        logger.warning(
+            f"[QKDL] *** Eve registered as interceptor "
+            f"session={self.session_id[:8]} label={eve_label} ***"
+        )
 
     def start(self):
         self.backend = EQSNBackend()
@@ -120,12 +135,10 @@ class NetworkSession:
             try:
                 if hasattr(Network, '_instance'):
                     Network._instance = None
-                #Give internal threads time to die before cooldown expires
                 time.sleep(0.3)
             except Exception as e:
                 logger.warning(f"[QKDL] Singleton reset error: {e}")
 
-            #Start cooldown so the next /network/init waits for full cleanup
             _set_cooldown()
             logger.info(
                 f"[QKDL] Session {self.session_id} stopped "
@@ -147,6 +160,19 @@ class NetworkSession:
         with self._meas_lock:
             return len(self._meas_queue)
 
+    def push_eve_measurement(self, result: dict) -> None:
+        with self._eve_meas_lock:
+            self._eve_meas_queue.append(result)
+
+    def pop_eve_measurement(self) -> Optional[dict]:
+        with self._eve_meas_lock:
+            return (self._eve_meas_queue.pop(0)
+                    if self._eve_meas_queue else None)
+
+    def eve_measurement_count(self) -> int:
+        with self._eve_meas_lock:
+            return len(self._eve_meas_queue)
+
 
 _sessions:     dict[str, NetworkSession] = {}
 _sessions_lock = threading.Lock()
@@ -155,7 +181,53 @@ _classical_inbox: dict[str, list[str]] = {}
 _classical_lock   = threading.Lock()
 
 
-#Qubit processing 
+#Qubit processing  the core of BB84 and the Eve intercept
+
+def _eve_intercept_qubit(
+    alice_bit:   int,
+    alice_basis: Basis,
+    session:     NetworkSession,
+    qubit_id:    int,
+) -> tuple[int, str]:
+    """
+    Simulate Eve's intercept-resend attack on one qubit
+
+    Eve picks a random basis and measures Alice's qubit.
+    She then re-prepares a new qubit in her measured basis and bit,
+    which is what Bob will ultimately receive.
+
+    This is the intercept-resend attack.  When Eve guesses the wrong basis
+    (~50% of the time) she sends Bob a qubit that is random from his
+    perspective, introducing ~25% errors in the sifted key (QBER~~ 0.25).
+
+    Returns:
+        (bob_bit, bob_basis_value)  what Bob's detector will see.
+    """
+    eve_basis = random.choice(list(Basis))
+
+    #Eve measures Alice's qubit in her chosen basis.
+    #If eve_basis == alice_basis: she gets alice_bit (correct).
+    #If eve_basis != alice_basis: quantum mechanics gives her a random bit.
+    if eve_basis == alice_basis:
+        eve_bit = alice_bit
+    else:
+        eve_bit = random.randint(0, 1)
+
+    #Log Eve's measurement for thesis stats
+    session.push_eve_measurement({
+        "qubit_id":        qubit_id,
+        "alice_basis":     alice_basis.value,
+        "alice_bit":       alice_bit,
+        "eve_basis":       eve_basis.value,
+        "eve_bit":         eve_bit,
+        "basis_match":     eve_basis == alice_basis,
+    })
+
+    #Eve re-prepares a new qubit: bit=eve_bit, basis=eve_basis.
+    #This is what Bob will receive and measure  he has no idea it's a
+    #re-prepared qubit rather than Alice's original.
+    return eve_bit, eve_basis.value
+
 
 def _process_batch_sync(
     session: NetworkSession,
@@ -168,6 +240,7 @@ def _process_batch_sync(
         bit   = qrec.bit
         basis = qrec.basis
 
+        #Loss model (applied before Eve  a lost qubit is never intercepted)
         if session.loss_rate > 0 and random.random() < session.loss_rate:
             results.append({
                 "qubit_id": qid, "delivered": False,
@@ -175,6 +248,38 @@ def _process_batch_sync(
             })
             continue
 
+        #Eve intercept-resend 
+        #If Eve is registered, she intercepts the qubit here before it
+        #reaches Bob's detector.  The re-prepared values replace the
+        #original Alice values for Bob's measurement.
+        if session._eve_registered:
+            bit, basis_value = _eve_intercept_qubit(bit, basis, session, qid)
+            #Bob will measure what Eve re-prepared
+            bob_bit   = bit
+            bob_basis = random.choice(list(Basis))   #Bob still picks randomly
+            #When bob_basis == eve_basis (~50%): Bob gets the correct eve_bit.
+            #When bob_basis != eve_basis (~50%): Bob gets a random result.
+            #Combined with Alice's sifting: only basis-matched pairs survive.
+            #Net effect: ~25% of surviving pairs have errors → QBER ≈ 0.25.
+            if bob_basis.value != basis_value:
+                bob_bit = random.randint(0, 1)
+            results.append({
+                "qubit_id":  qid,
+                "delivered": True,
+                "bob_basis": bob_basis.value,
+                "bob_bit":   bob_bit,
+            })
+            session.push_measurement({
+                "qubit_id":   qid,
+                "basis":      bob_basis.value,
+                "bit_result": bob_bit,
+                "delivered":  True,
+                "intercepted": True,
+            })
+            continue
+        #
+
+        #Normal (non-intercepted) path: QuNetSim quantum channel
         bob_res   = {}
         bob_ready = threading.Event()
 
@@ -228,12 +333,13 @@ def _process_batch_sync(
                 "basis":      bob_res.get("basis"),
                 "bit_result": bob_res.get("bit"),
                 "delivered":  True,
+                "intercepted": False,
             })
 
     return results
 
 
-#App 
+#App
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -248,14 +354,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="QKDL - QKD Link Layer (QuNetSim)",
     description="Quantum transport layer for BB84",
-    version="0.8.1",
+    version="0.9.0",
     lifespan=lifespan,
 )
 
 
 @app.post("/network/init", response_model=NetworkInitResp)
 async def init_network(req: NetworkInitReq):
-    #Cooldown check 
     remaining = _cooldown_remaining()
     if remaining > 0:
         raise HTTPException(
@@ -314,16 +419,11 @@ async def stop_network(req: NetworkStopReq):
     if session:
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, session.stop)
-        #session.stop() already sets the cooldown
     return {"statut": "stopped", "session_id": req.session_id}
 
 
 @app.post("/network/reset")
 async def reset_network():
-    """
-    Force-stop ALL sessions and clear cooldown.
-    Use between test runs to get a clean slate immediately.
-    """
     loop = asyncio.get_event_loop()
     with _sessions_lock:
         sessions_to_stop = list(_sessions.values())
@@ -340,9 +440,36 @@ async def reset_network():
     except Exception:
         pass
 
-    _clear_cooldown()   #reset clears cooldown so next init works immediately
-
+    _clear_cooldown()
     return {"statut": "reset", "stopped": len(sessions_to_stop)}
+
+
+#Eve intercept registration endpoint
+#Eve calls this after receiving her session_open webhook.
+#Once registered, every qubit in this session routes through _eve_intercept_qubit.
+
+@app.post("/intercept/{session_id}", response_model=InterceptRegisterResp)
+async def register_interceptor(session_id: str, req: InterceptRegisterReq):
+    with _sessions_lock:
+        session = _sessions.get(session_id)
+
+    if not session:
+        #QKDL may still be initialising  return 202 and Eve will retry
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session {session_id[:8]} not yet active on this QKDL. "
+                   f"Retry in 1s."
+        )
+
+    if not session.is_active():
+        raise HTTPException(status_code=409, detail="Session is not active")
+
+    session.register_interceptor(req.eve_node_id, req.eve_label)
+    return InterceptRegisterResp(
+        session_id=session_id,
+        registered=True,
+        message=f"Eve '{req.eve_label}' registered as interceptor",
+    )
 
 
 @app.post("/batch/send", response_model=SendBatchResp)
@@ -401,6 +528,35 @@ async def qubit_count(session_id: str):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return {"session_id": session_id, "count": session.measurement_count()}
+
+
+#Eve's own measurement log  she polls this to log her interceptions
+
+@app.get("/intercept/{session_id}/measurements")
+async def eve_measurements(session_id: str):
+    """
+    Eve polls this to retrieve her own measurement records.
+    Each record contains: qubit_id, alice_basis, alice_bit, eve_basis,
+    eve_bit, basis_match.  This is the data for the thesis QBER plot.
+    """
+    with _sessions_lock:
+        session = _sessions.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    records = []
+    while True:
+        m = session.pop_eve_measurement()
+        if m is None:
+            break
+        records.append(m)
+
+    return {
+        "session_id":    session_id,
+        "intercepted_n": len(records),
+        "measurements":  records,
+        "eve_label":     session._eve_label,
+    }
 
 
 @app.post("/classical/send", response_model=ClassicalSendResp)
@@ -476,12 +632,14 @@ async def recv_classical(session_id: str):
 async def health():
     remaining = _cooldown_remaining()
     with _sessions_lock:
-        active = list(_sessions.keys())
-        counts = {sid: _sessions[sid].measurement_count() for sid in active}
+        active  = list(_sessions.keys())
+        counts  = {sid: _sessions[sid].measurement_count() for sid in active}
+        eve_on  = {sid: _sessions[sid]._eve_registered for sid in active}
     return {
         "statut":             "ok",
         "active_sessions":    active,
         "measurement_queues": counts,
+        "eve_active":         eve_on,
         "cooldown_remaining": round(remaining, 2),
         "ready":              remaining == 0 and not active,
     }

@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO)
 
 HTTP_TO = 30.0
 
-#QKDL pool 
+#QKDL pool
 _raw = os.getenv(
     "QKDL_URLS",
     os.getenv("QKDL_URL", "http://localhost:8003"),
@@ -51,6 +51,7 @@ METRICS = {
     "sessions_created":        0,
     "sessions_completed":      0,
     "sessions_aborted":        0,
+    "sessions_intercepted":    0,   #Eve sessions
     "total_qubits":            0,
     "total_batches":           0,
     "registry_hits":           0,
@@ -64,7 +65,7 @@ METRICS = {
 NODE_SESSION_COUNT: dict[str, int] = defaultdict(int)
 
 
-#QKDL pool helpers 
+#QKDL pool helpers
 
 def _qkdl_lock_key(qkdl_url: str) -> str:
     safe = qkdl_url.replace("://", "_").replace("/", "_").replace(":", "_")
@@ -101,7 +102,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="KME - Key Management Entity",
-    version="0.8.1",
+    version="0.9.0",
     lifespan=lifespan,
 )
 
@@ -121,7 +122,7 @@ async def _notify(node_id: str, event: WebhookEvent) -> None:
         METRICS["webhook_events"] += 1
 
 
-#Node registry 
+#Node registry
 
 @app.post("/nodes/register", response_model=NodeInfo)
 async def register(reg: NodeRegistration):
@@ -151,7 +152,7 @@ async def get_node(node_id: str):
     return node
 
 
-#Session lifecycle 
+#Session lifecycle
 
 @app.post("/sessions", status_code=202)
 @app.post("/keys",     status_code=202)
@@ -162,7 +163,7 @@ async def create_session(
     r          = get_redis()
     session_id = new_session_id()
 
-    #Pick + lock a free QKDL (atomic, no race window) 
+    #Pick + lock a free QKDL (atomic, no race window)
     qkdl_url = pick_free_qkdl(r)
     if not qkdl_url:
         raise HTTPException(
@@ -182,7 +183,7 @@ async def create_session(
             raise HTTPException(status_code=409,
                                 detail="All QKDL instances are busy.")
 
-    #Find receiver 
+    #Find receiver
     bob_node = find_node_by_label(r, req.receiver_label)
     if not bob_node:
         _release_qkdl_lock(r, qkdl_url, session_id)
@@ -191,35 +192,51 @@ async def create_session(
             detail=f"Receiver node '{req.receiver_label}' not registered",
         )
 
-    #Persist session 
+    #Resolve Eve (optional) — fail fast if label given but not found
+    eve_node = None
+    if req.interceptor_label:
+        eve_node = find_node_by_label(r, req.interceptor_label)
+        if not eve_node:
+            _release_qkdl_lock(r, qkdl_url, session_id)
+            raise HTTPException(
+                status_code=404,
+                detail=f"Interceptor node '{req.interceptor_label}' not registered",
+            )
+
+    #Persist session
     session = {
-        "session_id":       session_id,
-        "status":           SessionStatus.INITIALIZING.value,
-        "sender_node_id":   req.sender_node_id,
-        "receiver_node_id": bob_node.node_id,
-        "n_qubits":         req.n_qubits,
-        "batch_size":       req.batch_size,
-        "loss_rate":        req.loss_rate,
-        "retry_enabled":    req.retry_enabled,
-        "qkdl_url":         qkdl_url,
-        "created_at":       time.time(),
-        "started_at":       None,
-        "sending_at":       None,
-        "completed_at":     None,
-        "key_status":       KeyStatus.NONE.value,
-        "key_expires_at":   None,
-        "n_delivered":      0,
-        "n_sifted":         0,
-        "qber":             0.0,
-        "key_final":        "",
-        "error_message":    "",
+        "session_id":          session_id,
+        "status":              SessionStatus.INITIALIZING.value,
+        "sender_node_id":      req.sender_node_id,
+        "receiver_node_id":    bob_node.node_id,
+        "interceptor_node_id": eve_node.node_id if eve_node else None,
+        "interceptor_label":   req.interceptor_label,
+        "intercepted":         eve_node is not None,
+        "n_qubits":            req.n_qubits,
+        "batch_size":          req.batch_size,
+        "loss_rate":           req.loss_rate,
+        "retry_enabled":       req.retry_enabled,
+        "qkdl_url":            qkdl_url,
+        "created_at":          time.time(),
+        "started_at":          None,
+        "sending_at":          None,
+        "completed_at":        None,
+        "key_status":          KeyStatus.NONE.value,
+        "key_expires_at":      None,
+        "n_delivered":         0,
+        "n_sifted":            0,
+        "qber":                0.0,
+        "key_final":           "",
+        "error_message":       "",
     }
     save_session(r, session)
 
-    #Background tasks 
+    #Background tasks — QKDL init
     background_tasks.add_task(
         _init_qkdl, session_id, req.n_qubits, req.loss_rate, qkdl_url
     )
+
+    #Notify Bob
     background_tasks.add_task(
         _notify, bob_node.node_id,
         WebhookEvent(
@@ -234,10 +251,29 @@ async def create_session(
         )
     )
 
+    #Notify Eve if present
+    #Eve receives session_open with role="monitor" so she knows to register
+    #as interceptor on the QKDL before Alice starts sending.
+    if eve_node:
+        background_tasks.add_task(
+            _notify, eve_node.node_id,
+            WebhookEvent(
+                event="session_open",
+                session_id=session_id,
+                payload={
+                    "role":     "monitor",
+                    "n_qubits": req.n_qubits,
+                    "qkdl_url": qkdl_url,
+                },
+            )
+        )
+        METRICS["sessions_intercepted"] += 1
+
     logger.info(
         f"[KME] Session {session_id} created "
         f"sender={req.sender_node_id[:8]} receiver={bob_node.label} "
         f"qkdl={qkdl_url}"
+        + (f" interceptor={req.interceptor_label}" if req.interceptor_label else "")
     )
 
     METRICS["sessions_created"] += 1
@@ -245,9 +281,10 @@ async def create_session(
     NODE_SESSION_COUNT[bob_node.node_id]   += 1
 
     return {
-        "session_id": session_id,
-        "status":     "open",
-        "qkdl_url":   qkdl_url,
+        "session_id":  session_id,
+        "status":      "open",
+        "qkdl_url":    qkdl_url,
+        "intercepted": eve_node is not None,
     }
 
 
@@ -415,18 +452,34 @@ async def publish_key(
             status=SessionStatus.ABORTED.value,
             completed_at=time.time(),
             key_final="",
-            qber=0.0,
+            qber=upload.qber if upload.qber else 0.0,
             error_message=upload.error_message,
         )
         event   = "session_aborted"
-        payload = {"reason": upload.error_message}
+        payload = {"reason": upload.error_message, "qber": upload.qber}
         METRICS["sessions_aborted"] += 1
-        logger.warning(f"[KME] Session {session_id} aborted: {upload.error_message}")
+        logger.warning(
+            f"[KME] Session {session_id} aborted: {upload.error_message} "
+            + (f"QBER={upload.qber*100:.2f}%" if upload.qber else "")
+        )
 
     background_tasks.add_task(
         _notify, session["receiver_node_id"],
         WebhookEvent(event=event, session_id=session_id, payload=payload)
     )
+
+    #Also notify Eve of the outcome so she can log her stats
+    interceptor_id = session.get("interceptor_node_id")
+    if interceptor_id:
+        background_tasks.add_task(
+            _notify, interceptor_id,
+            WebhookEvent(
+                event=event,
+                session_id=session_id,
+                payload={**payload, "intercepted": True},
+            )
+        )
+
     background_tasks.add_task(_stop_qkdl, session_id)
     return {"session_id": session_id, "status": upload.status}
 
@@ -473,11 +526,13 @@ async def get_session(session_id: str):
     valid_data = {k: session[k] for k in SessionStatusResponse.model_fields
                   if k in session}
     valid_data.update({
-        "session_id":   session_id,
-        "elapsed_s":    elapsed_s,
-        "progress_pct": progress.get(session["status"], 0),
-        "phase_label":  labels.get(session["status"], ""),
-        "qkdl_url":     session.get("qkdl_url", ""),
+        "session_id":        session_id,
+        "elapsed_s":         elapsed_s,
+        "progress_pct":      progress.get(session["status"], 0),
+        "phase_label":       labels.get(session["status"], ""),
+        "qkdl_url":          session.get("qkdl_url", ""),
+        "intercepted":       session.get("intercepted", False),
+        "interceptor_label": session.get("interceptor_label"),
     })
     return SessionStatusResponse(**valid_data)
 
@@ -500,10 +555,10 @@ async def cancel_session(session_id: str):
     return {"status": "cancelled", "session_id": session_id}
 
 
-#QKDL coordination 
+#QKDL coordination
 
-INIT_RETRIES   = 5
-INIT_RETRY_S   = 1.2   #slightly more than COOLDOWN_S / INIT_RETRIES
+INIT_RETRIES = 5
+INIT_RETRY_S = 1.2
 
 
 async def _init_qkdl(
@@ -528,7 +583,6 @@ async def _init_qkdl(
                 )
 
                 if resp.status_code == 503:
-                    #QKDL is in cooldown after previous session
                     wait = INIT_RETRY_S
                     try:
                         wait = float(
@@ -549,12 +603,11 @@ async def _init_qkdl(
                     f"[KME] QKDL initialised session={session_id[:8]} "
                     f"url={qkdl_url} (attempt {attempt})"
                 )
-                return   #success
+                return
 
         except httpx.HTTPStatusError as e:
             last_err = e
             if e.response.status_code == 409:
-                #Another session is active on this QKDL — hard fail
                 break
             logger.warning(
                 f"[KME] QKDL init attempt {attempt} failed "
@@ -570,7 +623,6 @@ async def _init_qkdl(
             )
             await asyncio.sleep(INIT_RETRY_S)
 
-    #All retries exhausted
     logger.error(
         f"[KME] QKDL init failed after {INIT_RETRIES} attempts "
         f"session={session_id[:8]}: {last_err}"
@@ -598,7 +650,7 @@ async def _stop_qkdl(session_id: str) -> None:
         _release_qkdl_lock(r, qkdl_url, session_id)
 
 
-#Metrics + health 
+#Metrics + health
 
 @app.get("/metrics")
 async def metrics():
@@ -614,6 +666,7 @@ async def metrics():
         "sessions_created":              METRICS["sessions_created"],
         "sessions_completed":            METRICS["sessions_completed"],
         "sessions_aborted":              METRICS["sessions_aborted"],
+        "sessions_intercepted":          METRICS["sessions_intercepted"],
         "total_qubits":                  METRICS["total_qubits"],
         "total_batches":                 METRICS["total_batches"],
         "throughput_qubits_per_session": round(

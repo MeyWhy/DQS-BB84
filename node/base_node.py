@@ -39,7 +39,7 @@ class BaseNode(ABC):
         self._client  = httpx.AsyncClient(timeout=30.0)
         self._running = False
 
-    #Lifecycle 
+    # Lifecycle
 
     async def start(self) -> None:
         self.node_id = await self._register()
@@ -80,7 +80,7 @@ class BaseNode(ABC):
                 )
                 await asyncio.sleep(REGISTER_RETRY_DELAY)
 
-    #Webhook dispatch 
+    # Webhook dispatch
 
     async def handle_webhook(self, event: WebhookEvent) -> None:
         sid = event.session_id
@@ -93,12 +93,13 @@ class BaseNode(ABC):
         self._sessions[sid]["last_event"] = event.event
 
         handler = {
-            "session_open":       self.on_session_open,
-            "receiver_joined":    self.on_receiver_joined,
-            "measurements_ready": self.on_measurements_ready,
-            "sift_ready":         self.on_sift_ready,
-            "key_available":      self.on_key_available,
-            "session_aborted":    self.on_session_aborted,
+            "session_open":          self.on_session_open,
+            "receiver_joined":       self.on_receiver_joined,
+            "measurements_ready":    self.on_measurements_ready,
+            "transmission_complete": self.on_transmission_complete,  # Alice chord callback
+            "sift_ready":            self.on_sift_ready,
+            "key_available":         self.on_key_available,
+            "session_aborted":       self.on_session_aborted,
         }.get(event.event)
 
         if handler:
@@ -106,7 +107,7 @@ class BaseNode(ABC):
         else:
             logger.warning(f"[{self.label}] Unknown event: {event.event}")
 
-    #Default handlers (override in subclasses) 
+    # Default handlers (override in subclasses)
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
         if self.role == NodeRole.RECEIVER:
@@ -116,6 +117,10 @@ class BaseNode(ABC):
         pass
 
     async def on_measurements_ready(self, session_id: str, payload: dict) -> None:
+        pass
+
+    async def on_transmission_complete(self, session_id: str, payload: dict) -> None:
+        """Fired by the Celery chord callback when all qubit batches are done."""
         pass
 
     async def on_sift_ready(self, session_id: str, payload: dict) -> None:
@@ -134,14 +139,9 @@ class BaseNode(ABC):
         )
         self._sessions.pop(session_id, None)
 
-    #KME helpers 
+    # KME helpers
 
     async def join_session(self, session_id: str) -> dict:
-        """
-        Join a session and return the full response dict.
-        The dict now includes qkdl_url so the caller can use it
-        for quantum channel operations without relying on env vars.
-        """
         resp = await self._client.post(
             f"{KME_URL}/sessions/{session_id}/join",
             json={"node_id": self.node_id, "session_id": session_id},
@@ -153,7 +153,7 @@ class BaseNode(ABC):
             f"[{self.label}] Joined session={session_id[:8]} "
             f"qkdl={data.get('qkdl_url', 'unknown')}"
         )
-        return data   # ← callers use data["qkdl_url"]
+        return data
 
     async def get_session(self, session_id: str) -> dict:
         resp = await self._client.get(f"{KME_URL}/sessions/{session_id}")
@@ -170,7 +170,7 @@ class BaseNode(ABC):
         resp.raise_for_status()
         return resp.json()
 
-    #Agent loop 
+    # Agent loop
 
     async def _agent_loop(self) -> None:
         while self._running:
@@ -183,7 +183,7 @@ class BaseNode(ABC):
     async def _poll_tick(self) -> None:
         pass
 
-    #FastAPI app factory 
+    # FastAPI app factory
 
     def build_app(self, title: str, port: int) -> FastAPI:
         node = self
@@ -194,7 +194,7 @@ class BaseNode(ABC):
             yield
             await node.stop()
 
-        app = FastAPI(title=title, version="0.8.0", lifespan=lifespan)
+        app = FastAPI(title=title, version="0.9.0", lifespan=lifespan)
 
         @app.post("/webhook")
         async def webhook(request: Request):

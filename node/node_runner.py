@@ -49,11 +49,14 @@ def _qkdl_port(node_cfg: dict, global_cfg: dict) -> int:
 
 def compute_qkdl_urls(nodes: list[dict], global_cfg: dict) -> str:
     """
-    Collect every unique QKDL URL referenced by nodes (preserving order)
-    and return as comma-separated string for QKDL_URLS env var.
+    Collect every unique QKDL URL referenced by sender/receiver nodes
+    (preserving order) and return as comma-separated string for QKDL_URLS.
+    Monitor nodes (Eve) do not own a QKDL, so they are skipped here.
     """
     seen: dict[str, bool] = {}
     for n in nodes:
+        if n.get("role") in ("monitor",):
+            continue
         seen[_qkdl_url(n, global_cfg)] = True
     return ",".join(seen.keys())
 
@@ -96,22 +99,34 @@ def start_node(node_cfg: dict, global_cfg: dict) -> tuple[subprocess.Popen, Path
     env = {**os.environ}
     env.update(node_cfg.get("env", {}))
     env.setdefault("KME_URL",  global_cfg["kme"]["url"])
-    env.setdefault("QKDL_URL", global_cfg["qkdl"]["url"])
+    #Monitor nodes (Eve) have no QKDL; skip the default
+    if node_cfg.get("role") != "monitor":
+        env.setdefault("QKDL_URL", global_cfg["qkdl"]["url"])
     proc = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", f"{node_cfg['module']}:app",
-         "--host", "0.0.0.0", "--port", str(node_cfg["port"]), "--log-level", "info"],
+         "--host", "0.0.0.0", "--port", str(node_cfg["port"]),
+         "--log-level", "info"],
         env=env, cwd=str(ROOT),
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
     )
     threading.Thread(target=_stream_output, args=(proc, label, log_path),
                      daemon=True, name=f"log-{label}").start()
-    print(f"Launching {label} from {node_cfg['module']}")
     print(f"  Started {label:<20} (port {node_cfg['port']}) pid={proc.pid}")
     return proc, log_path
 
 
+def _celery_launch_hint(qkdl_urls: str) -> None:
+    print("\n[runner] Start Celery workers in separate terminals:")
+    print("  #Qubit sender pool (scale --concurrency for more throughput):")
+    print("  celery -A workers.celery_config worker \\")
+    print("         --queues=qubit_send --concurrency=4 --loglevel=info -n qubit@%h")
+    print("  #Sifting chord callback (1 worker is sufficient):")
+    print("  celery -A workers.celery_config worker \\")
+    print("         --queues=sifting --concurrency=1 --loglevel=info -n sifting@%h\n")
+
+
 def main():
-    parser = argparse.ArgumentParser(description="QKD Node Runner v0.8.1")
+    parser = argparse.ArgumentParser(description="QKD Node Runner v0.9.0")
     parser.add_argument("--node",     help="Start only this node label")
     parser.add_argument("--list",     action="store_true")
     parser.add_argument("--no-qkdl",  action="store_true",
@@ -126,10 +141,14 @@ def main():
     if args.list:
         print("\nConfigured nodes:")
         for n in nodes:
-            print(f"  {n['label']:<15} role={n['role']:<10} "
-                  f"port={n['port']}  qkdl={_qkdl_url(n, cfg)}")
+            role = n["role"]
+            qkdl = (f"  qkdl={_qkdl_url(n, cfg)}"
+                    if role != "monitor" else "  (no QKDL)")
+            print(f"  {n['label']:<15} role={role:<10} port={n['port']}{qkdl}")
+        qkdl_urls = compute_qkdl_urls(nodes, cfg)
         print(f"\nKME launch command:")
-        print(f"  QKDL_URLS={compute_qkdl_urls(nodes, cfg)} python kme/main.py")
+        print(f"  QKDL_URLS={qkdl_urls} uvicorn kme.main:app --port 8000")
+        _celery_launch_hint(qkdl_urls)
         return
 
     if args.node:
@@ -138,7 +157,11 @@ def main():
             print(f"Node '{args.node}' not found in network.yaml")
             sys.exit(1)
 
-    qkdl_urls = compute_qkdl_urls(nodes, cfg)
+    #Separate sender/receiver nodes (need QKDLs) from monitor nodes (don't)
+    qkdl_nodes   = [n for n in nodes if n.get("role") != "monitor"]
+    monitor_nodes = [n for n in nodes if n.get("role") == "monitor"]
+    qkdl_urls    = compute_qkdl_urls(nodes, cfg)
+
     print(f"\n[runner] QKDL pool: {qkdl_urls}")
 
     procs:  list[subprocess.Popen] = []
@@ -155,17 +178,18 @@ def main():
     signal.signal(signal.SIGINT,  shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    #QKDLs 
+    #QKDLs (one per unique port referenced by sender/receiver nodes)
     if not args.no_qkdl:
-        ports = sorted({_qkdl_port(n, cfg) for n in nodes})
-        print(f"\nStarting {len(ports)} QKDL instance(s)...\n")
-        for port in ports:
-            proc, log = start_qkdl(port)
-            procs.append(proc); labels.append(f"qkdl-{port}"); logs.append(log)
-        print(f"\n  Waiting 3s for QKDLs to bind...\n")
-        time.sleep(3.0)
+        ports = sorted({_qkdl_port(n, cfg) for n in qkdl_nodes})
+        if ports:
+            print(f"\nStarting {len(ports)} QKDL instance(s)...\n")
+            for port in ports:
+                proc, log = start_qkdl(port)
+                procs.append(proc); labels.append(f"qkdl-{port}"); logs.append(log)
+            print(f"\n  Waiting 3s for QKDLs to bind...\n")
+            time.sleep(3.0)
 
-    #KME (optional) 
+    #KME (optional)
     if args.with_kme:
         print(f"\nStarting KME...\n")
         proc, log = start_kme(qkdl_urls, cfg)
@@ -174,11 +198,15 @@ def main():
         time.sleep(2.0)
     else:
         print(f"[runner] Start KME separately with:")
-        print(f"         QKDL_URLS={qkdl_urls} python kme/main.py\n")
+        print(f"         QKDL_URLS={qkdl_urls} uvicorn kme.main:app --port 8000\n")
 
-    #Nodes 
-    print(f"Starting {len(nodes)} node(s)...\n")
-    for node_cfg in nodes:
+    #Celery reminder (runner does not launch workers — they need their own pool)
+    _celery_launch_hint(qkdl_urls)
+
+    #All nodes (sender, receiver, monitor)
+    all_nodes = qkdl_nodes + monitor_nodes
+    print(f"Starting {len(all_nodes)} node(s)...\n")
+    for node_cfg in all_nodes:
         proc, log = start_node(node_cfg, cfg)
         procs.append(proc); labels.append(node_cfg["label"]); logs.append(log)
         time.sleep(0.5)

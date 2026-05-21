@@ -42,12 +42,14 @@ class NodeInfo(BaseModel):
 
 
 class SessionCreateReq(BaseModel):
-    sender_node_id: str
-    receiver_label: str
-    n_qubits:       int   = Field(default=200, ge=0, le=5000)
-    batch_size:     int   = Field(default=10,  gt=0, le=100)
-    loss_rate:      float = Field(default=0.0, ge=0.0, le=1.0)
-    retry_enabled:  bool  = False
+    sender_node_id:    str
+    receiver_label:    str
+    n_qubits:          int   = Field(default=200, ge=0, le=5000)
+    batch_size:        int   = Field(default=10,  gt=0, le=100)
+    loss_rate:         float = Field(default=0.0, ge=0.0, le=1.0)
+    retry_enabled:     bool  = False
+    #Eve support: if set, QKDL will route qubits through this node (MITM)
+    interceptor_label: Optional[str] = None
 
 
 class SessionJoinReq(BaseModel):
@@ -61,10 +63,7 @@ class SessionJoinResp(BaseModel):
     sender_node_id:  str
     n_qubits:        int
     status:          str
-    #NEW: QKDL URL assigned to this session by KME 
-    #Nodes must use this URL for all quantum channel operations
-    #(POST /batch/send, GET /qubit/receive) so they always hit the
-    #same QKDL instance that the KME initialized the session on.
+    #QKDL URL assigned to this session by KME
     qkdl_url:        str = ""
 
 
@@ -163,22 +162,37 @@ class NetworkStopReq(BaseModel):
     session_id: str
 
 
+#Eve intercept registration  sent by EveNode to QKDL
+class InterceptRegisterReq(BaseModel):
+    session_id: str
+    eve_node_id: str
+    eve_label:   str = ""
+
+
+class InterceptRegisterResp(BaseModel):
+    session_id: str
+    registered: bool
+    message:    str = ""
+
+
 class SessionStatusResponse(BaseModel):
-    session_id:     str
-    status:         str
-    n_qubits:       int   = 0
-    n_delivered:    int   = 0
-    n_sifted:       int   = 0
-    qber:           float = 0.0
-    key_final:      str   = ""
-    key_status:     KeyStatus = KeyStatus.NONE
-    key_expires_at: Optional[float] = None
-    error_message:  str   = ""
-    elapsed_s:      float = 0.0
-    progress_pct:   float = 0.0
-    phase_label:    str   = ""
-    #NEW 
-    qkdl_url:       str   = ""
+    session_id:          str
+    status:              str
+    n_qubits:            int   = 0
+    n_delivered:         int   = 0
+    n_sifted:            int   = 0
+    qber:                float = 0.0
+    key_final:           str   = ""
+    key_status:          KeyStatus = KeyStatus.NONE
+    key_expires_at:      Optional[float] = None
+    error_message:       str   = ""
+    elapsed_s:           float = 0.0
+    progress_pct:        float = 0.0
+    phase_label:         str   = ""
+    qkdl_url:            str   = ""
+    #Eve metadata  present when session was intercepted
+    interceptor_label:   Optional[str]  = None
+    intercepted:         bool           = False
 
     @property
     def key_ID(self)   -> str: return self.session_id

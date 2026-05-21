@@ -10,12 +10,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+
 from node.base_node import BaseNode
 from models import (
     NodeRole, SessionCreateReq, QubitRecord, QubitBatch,
-    SiftUpload, KeyUpload, Basis,
+    SiftUpload, KeyUpload, Basis, WebhookEvent,
 )
 from bb84_logic import compute_qber, QBER_THRESHOLD
+from celery import chord as celery_chord
+from workers.qubit_tasks import send_batch_task
+from workers.sifting_tasks import batch_complete_task
 import httpx
 
 logger     = logging.getLogger("alice")
@@ -42,45 +46,47 @@ class AliceNode(BaseNode):
             if not s.get("done")
         ]
 
+
+    #Session creation
     async def start_bb84_session(
         self,
-        receiver_label: str,
-        n_qubits:       int   = 200,
-        batch_size:     int   = BATCH_SIZE,
-        loss_rate:      float = 0.0,
-        retry_enabled:  bool  = False,
+        receiver_label:    str,
+        n_qubits:          int   = 200,
+        batch_size:        int   = BATCH_SIZE,
+        loss_rate:         float = 0.0,
+        retry_enabled:     bool  = False,
+        interceptor_label: str   = None,
     ) -> dict:
-        """
-        Returns dict with session_id and qkdl_url on success.
-        Raises httpx.HTTPStatusError if KME rejects (e.g. 409 pool full).
-        """
-        resp = await self._client.post(
-            f"{KME_URL}/sessions",
-            json=SessionCreateReq(
-                sender_node_id=self.node_id,
-                receiver_label=receiver_label,
-                n_qubits=n_qubits,
-                batch_size=batch_size,
-                loss_rate=loss_rate,
-                retry_enabled=retry_enabled,
-            ).model_dump(),
-        )
-        resp.raise_for_status()   #propagates HTTPStatusError on 4xx/5xx
+        payload = SessionCreateReq(
+            sender_node_id=self.node_id,
+            receiver_label=receiver_label,
+            n_qubits=n_qubits,
+            batch_size=batch_size,
+            loss_rate=loss_rate,
+            retry_enabled=retry_enabled,
+            interceptor_label=interceptor_label or None,
+        ).model_dump()
+
+        resp = await self._client.post(f"{KME_URL}/sessions", json=payload)
+        resp.raise_for_status()
         body       = resp.json()
         session_id = body["session_id"]
-        qkdl_url   = body.get("qkdl_url", os.getenv("QKDL_URL", "http://localhost:8003"))
+        qkdl_url   = body.get("qkdl_url",
+                               os.getenv("QKDL_URL", "http://localhost:8003"))
 
         bits  = [random.randint(0, 1)       for _ in range(n_qubits)]
         bases = [random.choice(list(Basis)) for _ in range(n_qubits)]
 
         self._alice_state[session_id] = {
-            "bits":              bits,
-            "bases":             bases,
-            "n_qubits":          n_qubits,
-            "batch_size":        batch_size,
-            "qkdl_url":          qkdl_url,
-            "sifting_triggered": False,
-            "done":              False,
+            "bits":                bits,
+            "bases":               bases,
+            "n_qubits":            n_qubits,
+            "batch_size":          batch_size,
+            "qkdl_url":            qkdl_url,
+            "transmission_done":   False,   #set when chord callback fires
+            "measurements_ready":  False,   #set when Bob uploads
+            "sifting_triggered":   False,
+            "done":                False,
         }
         logger.info(
             f"[Alice] Session {session_id[:8]} created "
@@ -88,30 +94,83 @@ class AliceNode(BaseNode):
         )
         return body
 
-    #Webhook handlers 
 
+    #Webhook handlers
     async def on_receiver_joined(self, session_id: str, payload: dict) -> None:
-        logger.info(f"[Alice] Receiver joined {session_id[:8]} — starting qubit send")
-        asyncio.create_task(self._send_qubits(session_id))
+        logger.info(
+            f"[Alice] Receiver joined {session_id[:8]}  dispatching qubit chord"
+        )
+        asyncio.create_task(self._dispatch_qubit_chord(session_id))
 
     async def on_measurements_ready(self, session_id: str, payload: dict) -> None:
+        """KME fires this when Bob uploads measurements."""
         state = self._alice_state.get(session_id)
-        if not state or state.get("sifting_triggered") or state.get("done"):
+        if not state or state.get("done"):
             return
-        state["sifting_triggered"] = True
+        state["measurements_ready"] = True
         logger.info(
-            f"[Alice] measurements_ready → sifting {session_id[:8]} "
+            f"[Alice] measurements_ready session={session_id[:8]} "
             f"n={payload.get('n_measurements', '?')}"
         )
-        asyncio.create_task(self._run_sifting_and_key(session_id))
+        self._try_start_sifting(session_id)
+
+    async def on_transmission_complete(self, session_id: str, payload: dict) -> None:
+        #Chord callback fires this after all batch tasks complete
+        state = self._alice_state.get(session_id)
+        if not state or state.get("done"):
+            return
+        state["transmission_done"] = True
+        n_del = payload.get("n_delivered", "?")
+        n_q   = payload.get("n_qubits",    "?")
+        logger.info(
+            f"[Alice] transmission_complete session={session_id[:8]} "
+            f"delivered={n_del}/{n_q}"
+        )
+        self._try_start_sifting(session_id)
 
     async def on_session_aborted(self, session_id: str, payload: dict) -> None:
         self._cleanup(session_id)
-        logger.info(f"[Alice] Session {session_id[:8]} aborted — cleaned up")
+        logger.info(f"[Alice] Session {session_id[:8]} aborted  cleaned up")
 
-    #Qubit transmission 
+    #Webhook dispatch override  add transmission_complete handler
 
-    async def _send_qubits(self, session_id: str) -> None:
+    async def handle_webhook(self, event: WebhookEvent) -> None:
+        sid = event.session_id
+        if sid not in self._sessions:
+            self._sessions[sid] = {"session_id": sid}
+        self._sessions[sid]["last_event"] = event.event
+
+        handler = {
+            "session_open":          self.on_session_open,
+            "receiver_joined":       self.on_receiver_joined,
+            "measurements_ready":    self.on_measurements_ready,
+            "transmission_complete": self.on_transmission_complete,   #← new
+            "sift_ready":            self.on_sift_ready,
+            "key_available":         self.on_key_available,
+            "session_aborted":       self.on_session_aborted,
+        }.get(event.event)
+
+        if handler:
+            asyncio.create_task(handler(sid, event.payload))
+        else:
+            logger.warning(f"[Alice] Unknown event: {event.event}")
+
+
+    #Qubit transmission w/ Celery chord
+    async def _dispatch_qubit_chord(self, session_id: str) -> None:
+        """
+        Build and dispatch a Celery chord:
+          chord(send_batch_task x N_batches)(batch_complete_task)
+
+        Each send_batch_task receives:
+          - session_id
+          - serialised QubitBatch dict
+          - qkdl_url (explicit  no env var lookup in workers)
+
+        The chord header tasks are independent and execute in parallel
+        across the qubit_send worker pool.  The callback fires once all
+        N tasks have returned results (success or failure).
+        """
         state = self._alice_state.get(session_id)
         if not state:
             return
@@ -122,52 +181,80 @@ class AliceNode(BaseNode):
         n_batches     = (n + batch_size - 1) // batch_size
 
         logger.info(
-            f"[Alice] Transmission start session={session_id[:8]} "
+            f"[Alice] Dispatching chord session={session_id[:8]} "
             f"total={n} batches={n_batches} qkdl={qkdl_url}"
         )
 
-        n_delivered = 0
+        #Build batch task signatures (one per batch slice)
+        batch_tasks = []
         for batch_id, start in enumerate(range(0, n, batch_size)):
             end    = min(start + batch_size, n)
             qubits = [
                 {"qubit_id": i, "bit": bits[i], "basis": bases[i].value}
                 for i in range(start, end)
             ]
-            try:
-                resp = await self._client.post(
-                    f"{qkdl_url}/batch/send",
-                    json={
-                        "session_id": session_id,
-                        "batch": {
-                            "session_id": session_id,
-                            "batch_id":   batch_id,
-                            "qubits":     qubits,
-                        },
-                    },
-                    timeout=120.0,
-                )
-                resp.raise_for_status()
-                results      = resp.json().get("results", [])
-                batch_deliv  = sum(1 for r in results if r.get("delivered"))
-                n_delivered += batch_deliv
-                logger.info(
-                    f"[Alice] Batch {batch_id}/{n_batches-1} "
-                    f"session={session_id[:8]} delivered={batch_deliv}"
-                )
-            except Exception as e:
-                logger.warning(
-                    f"[Alice] Batch {batch_id} FAILED "
-                    f"session={session_id[:8]} qkdl={qkdl_url}: {e}"
-                )
-            await asyncio.sleep(0.002)
+            batch_payload = {
+                "session_id": session_id,
+                "batch_id":   batch_id,
+                "qubits":     qubits,
+            }
+            batch_tasks.append(
+                send_batch_task.s(session_id, batch_payload, qkdl_url)
+            )
 
+        #Chord callback receives all batch results + immutable session_meta
+        session_meta = {
+            "session_id":        session_id,
+            "alice_callback_url": f"{MY_URL}/webhook",
+            "n_qubits":          n,
+        }
+        callback = batch_complete_task.s(session_meta)
+
+        #Dispatch  non-blocking from Alice's async perspective
+        #The chord runs in the Celery worker pool; Alice's event loop is free.
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: celery_chord(batch_tasks)(callback),
+        )
         logger.info(
-            f"[Alice] All batches sent session={session_id[:8]} "
-            f"total_delivered={n_delivered}/{n}"
+            f"[Alice] Chord dispatched session={session_id[:8]} "
+            f"({n_batches} tasks)"
         )
 
-    #Sifting + key derivation 
+    #Sifting gate  wait for BOTH signals before starting
+    def _try_start_sifting(self, session_id: str) -> None:
+        """
+        Start sifting only when BOTH conditions are true:
+          1. transmission_done   chord says all qubits were sent
+          2. measurements_ready  Bob has uploaded his measurements to KME
 
+        This gate ensures Alice doesn't fetch an empty measurement set.
+        Either signal can arrive first; whichever arrives second triggers
+        the actual sifting work.
+        """
+        state = self._alice_state.get(session_id)
+        if not state:
+            return
+        if state.get("sifting_triggered") or state.get("done"):
+            return
+        if not (state.get("transmission_done") and state.get("measurements_ready")):
+            logger.debug(
+                f"[Alice] Waiting for both signals session={session_id[:8]} "
+                f"tx={state.get('transmission_done')} "
+                f"meas={state.get('measurements_ready')}"
+            )
+            return
+
+        state["sifting_triggered"] = True
+        logger.info(
+            f"[Alice] Both signals received  starting sifting "
+            f"session={session_id[:8]}"
+        )
+        asyncio.create_task(self._run_sifting_and_key(session_id))
+
+
+    #Sifting + key derivation (same as V7)
     async def _run_sifting_and_key(self, session_id: str) -> None:
         state = self._alice_state.get(session_id)
         if not state:
@@ -181,18 +268,19 @@ class AliceNode(BaseNode):
             resp.raise_for_status()
             raw_meas = resp.json().get("measurements", [])
         except Exception as e:
-            logger.error(f"[Alice] Fetch measurements failed {session_id[:8]}: {e}")
+            logger.error(
+                f"[Alice] Fetch measurements failed {session_id[:8]}: {e}"
+            )
             await self._post_key(session_id, "aborted", error="FETCH_FAILED")
             self._cleanup(session_id)
             return
 
-        logger.info(
-            f"[Alice] Sifting session={session_id[:8]} raw_meas={len(raw_meas)}"
-        )
-
         if not raw_meas:
-            logger.warning(f"[Alice] No measurements yet {session_id[:8]} — retry via poll")
+            logger.warning(
+                f"[Alice] No measurements yet {session_id[:8]}  retry via poll"
+            )
             state["sifting_triggered"] = False
+            state["measurements_ready"] = False
             return
 
         alice_bits  = state["bits"]
@@ -231,7 +319,9 @@ class AliceNode(BaseNode):
                 timeout=10.0,
             )
         except Exception as e:
-            logger.warning(f"[Alice] Post sift failed {session_id[:8]}: {e}")
+            logger.warning(
+                f"[Alice] Post sift failed {session_id[:8]}: {e}"
+            )
 
         if n_sifted < 10:
             await self._post_key(session_id, "aborted",
@@ -249,7 +339,8 @@ class AliceNode(BaseNode):
 
         if qber > QBER_THRESHOLD:
             await self._post_key(session_id, "aborted",
-                                 error="QBER_TOO_HIGH", n_sifted=n_sifted, qber=qber)
+                                 error="QBER_TOO_HIGH", n_sifted=n_sifted,
+                                 qber=qber)
             self._cleanup(session_id)
             return
 
@@ -271,15 +362,21 @@ class AliceNode(BaseNode):
             await self._client.post(
                 f"{KME_URL}/sessions/{session_id}/key",
                 json=KeyUpload(
-                    session_id=session_id, node_id=self.node_id,
-                    key_final=key_final, key_hash=key_hash,
-                    qber=qber, n_sifted=n_sifted,
-                    status=status, error_message=error,
+                    session_id=session_id,
+                    node_id=self.node_id,
+                    key_final=key_final,
+                    key_hash=key_hash,
+                    qber=qber,
+                    n_sifted=n_sifted,
+                    status=status,
+                    error_message=error,
                 ).model_dump(),
                 timeout=10.0,
             )
         except Exception as e:
-            logger.error(f"[Alice] Post key failed {session_id[:8]}: {e}")
+            logger.error(
+                f"[Alice] Post key failed {session_id[:8]}: {e}"
+            )
 
     def _cleanup(self, session_id: str) -> None:
         state = self._alice_state.get(session_id)
@@ -287,13 +384,15 @@ class AliceNode(BaseNode):
             state["done"] = True
         self._alice_state.pop(session_id, None)
 
+
+    #Poll tick  defensive fallback (same as V7)
     async def _poll_tick(self) -> None:
         for sid in list(self._alice_state.keys()):
             state = self._alice_state.get(sid)
             if not state or state.get("done") or state.get("sifting_triggered"):
                 continue
             try:
-                data = await self.kme_get(f"/sessions/{sid}")
+                data       = await self.kme_get(f"/sessions/{sid}")
                 kme_status = data.get("status", "")
                 if kme_status in ("aborted", "done"):
                     self._cleanup(sid)
@@ -302,38 +401,34 @@ class AliceNode(BaseNode):
                     meas = (await self.kme_get(
                         f"/sessions/{sid}/measurements"
                     )).get("measurements", [])
-                    if meas and not state.get("sifting_triggered"):
-                        logger.info(
-                            f"[Alice] Poll fallback: sifting {sid[:8]} "
-                            f"n_meas={len(meas)}"
-                        )
-                        state["sifting_triggered"] = True
-                        asyncio.create_task(self._run_sifting_and_key(sid))
+                    if meas:
+                        state["measurements_ready"] = True
+                        self._try_start_sifting(sid)
             except Exception:
                 pass
 
 
-#FastAPI app 
 
+#FastAPI app
 alice = AliceNode()
-app   = alice.build_app(title="SAE-A — Alice (Sender)", port=8001)
+app   = alice.build_app(title="SAE-A  Alice (Sender)", port=8001)
 
 
 @app.post("/start")
 async def start_session(
-    receiver_label: str   = "bob-1",
-    n_qubits:       int   = 200,
-    batch_size:     int   = BATCH_SIZE,
-    loss_rate:      float = 0.0,
-    retry_enabled:  bool  = False,
+    receiver_label:    str   = "bob-1",
+    n_qubits:          int   = 200,
+    batch_size:        int   = BATCH_SIZE,
+    loss_rate:         float = 0.0,
+    retry_enabled:     bool  = False,
+    interceptor_label: str   = None,
 ):
     if not alice.node_id:
         return JSONResponse(
             status_code=503,
-            content={"error": "Not registered yet — retry in 1s"},
+            content={"error": "Not registered yet  retry in 1s"},
         )
 
-    #Guard: one active session per alice instance
     active = alice._active_sessions()
     if active:
         return JSONResponse(
@@ -352,9 +447,9 @@ async def start_session(
             batch_size=batch_size,
             loss_rate=loss_rate,
             retry_enabled=retry_enabled,
+            interceptor_label=interceptor_label,
         )
     except httpx.HTTPStatusError as e:
-        #KME returned 4xx (e.g. 409 pool full, 404 bob not found)
         try:
             detail = e.response.json()
         except Exception:
@@ -365,18 +460,16 @@ async def start_session(
         )
     except Exception as e:
         logger.error(f"[Alice] /start unexpected error: {e}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": str(e)},
-        )
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
     session_id = body["session_id"]
     return {
-        "session_id":  session_id,
-        "status":      "created",
-        "qkdl_url":    body.get("qkdl_url"),
-        "poll_url":    f"{KME_URL}/sessions/{session_id}",
-        "consume_url": f"{KME_URL}/sessions/{session_id}/consume-key",
+        "session_id":    session_id,
+        "status":        "created",
+        "qkdl_url":      body.get("qkdl_url"),
+        "intercepted":   body.get("intercepted", False),
+        "poll_url":      f"{KME_URL}/sessions/{session_id}",
+        "consume_url":   f"{KME_URL}/sessions/{session_id}/consume-key",
     }
 
 

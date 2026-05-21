@@ -1,21 +1,29 @@
-# Each alice/bob pair declares its own QKDL_URL so that:
-
-# node_runner reads the unique QKDL ports and auto-launches one
-# qunetsim_service process per port before starting the nodes.
+# Launch order:
+#   1. Redis          (already running)
+#   2. node_runner    (launches QKDLs, KME, nodes below)
+#   3. Celery workers (separate terminal  see commands below)
 #
-# KME must know the full pool => pass QKDL_URLS when starting it:
-#   QKDL_URLS=http://localhost:8003,http://localhost:8013 python kme/main.py
+# Celery worker commands (run from project root):
+#   # qubit_send pool  handles batch transmission (scale up for throughput)
+#   celery -A workers.celery_config worker --queues=qubit_send --concurrency=4 --loglevel=info -n qubit@%h
+#
+#   # sifting pool  chord callbacks (1 worker is enough)
+#   celery -A workers.celery_config worker --queues=sifting --concurrency=1 --loglevel=info -n sifting@%h
+#
+# KME: node_runner --with-kme injects QKDL_URLS automatically.
+# Alternatively start manually:
+#   QKDL_URLS=http://localhost:8003,http://localhost:8013,http://localhost:8023 uvicorn kme.main:app --port 8000
 
 kme:
   url: "http://localhost:8000"
   key_ttl_seconds: 300
 
 qkdl:
-  url: "http://localhost:8003"   # default fallback for single-pair setups to be verif
+  url: "http://localhost:8003"   # default fallback for single-pair setups
 
 nodes:
 
-  # Pair 1: alice-1 <-> bob-1 
+  # Pair 1: alice-1 <-> bob-1  QKDL :8003
   - label:   alice-1
     role:    sender
     module:  nodes.alice.main
@@ -35,7 +43,7 @@ nodes:
       BOB_URL:   "http://localhost:8002"
       QKDL_URL:  "http://localhost:8003"
 
-  #Pair 2: alice-2 <-> bob-2  
+  # Pair 2: alice-2 <-> bob-2  QKDL :8013
   - label:   alice-2
     role:    sender
     module:  nodes.alice.main
@@ -55,11 +63,7 @@ nodes:
       BOB_URL:   "http://localhost:8202"
       QKDL_URL:  "http://localhost:8013"
 
-  #Each new pair needs:
-  #1. A new QKDL port (8023, 8033, ...)
-  #2. Unique alice/bob ports (8103/8203, 8104/8204, ...)
-  #3. Add the new port to QKDL_URLS when starting KME
-  #
+  # Pair 3: alice-3 <-> bob-3  QKDL :8023
   - label:   alice-3
     role:    sender
     module:  nodes.alice.main
@@ -68,7 +72,7 @@ nodes:
       ALICE_LABEL: alice-3
       ALICE_URL:   "http://localhost:8103"
       QKDL_URL:    "http://localhost:8023"
-  
+
   - label:   bob-3
     role:    receiver
     module:  nodes.bob.main
@@ -77,3 +81,19 @@ nodes:
       BOB_LABEL: bob-3
       BOB_URL:   "http://localhost:8203"
       QKDL_URL:  "http://localhost:8023"
+
+  # Eve  one instance serves all pairs (role=monitor)
+  # Start an intercepted session from alice-1:
+  #   POST http://localhost:8001/start?receiver_label=bob-1&interceptor_label=eve-1
+  - label:   eve-1
+    role:    monitor
+    module:  nodes.eve.main
+    port:    8010
+    env:
+      EVE_LABEL: eve-1
+      EVE_URL:   "http://localhost:8010"
+
+  # Adding a new pair:
+  #   1. New QKDL port   (8033, 8043, ...)
+  #   2. Unique alice/bob ports
+  #   3. node_runner picks up the new QKDL_URL automatically
