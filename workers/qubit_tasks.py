@@ -1,10 +1,3 @@
-"""
-QTT — Quantum Transmission Task
-
-Sends one qubit batch to the QKDL via POST /batch/send.
-Called N times in parallel as the chord header.
-Returns a delivery summary consumed by ST (assemble_and_sift_task).
-"""
 import logging
 import httpx
 
@@ -27,15 +20,7 @@ def send_batch_task(
     batch_payload: dict,
     qkdl_url:      str,
 ) -> dict:
-    """
-    POST one qubit batch to the assigned QKDL instance.
-
-    qkdl_url is passed explicitly so concurrent sessions on different
-    QKDL instances never cross-wire — each chord carries its own URL.
-
-    Returns:
-        {session_id, batch_id, delivered: [qid, ...], failed: [qid, ...]}
-    """
+   
     qkdl_url = qkdl_url.rstrip("/")
 
     try:

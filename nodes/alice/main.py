@@ -1,23 +1,3 @@
-"""
-Alice node — BB84 sender.
-
-Responsibilities in the hybrid architecture:
-  1. Register with KME and accept webhooks.
-  2. On session creation: generate bits+bases, save them to Redis
-     (so ST worker can read them without calling back to Alice).
-  3. On receiver_joined: dispatch the full Celery pipeline:
-
-         chord(QTT x N_batches)
-             | assemble_and_sift_task   (ST)
-             | qber_key_task            (QKT)
-             | notify_kme_task          (NT)
-
-  4. Track session state for the /start guard (one active session per node).
-  5. Poll KME as a fallback to detect aborted sessions.
-
-Alice does NOT run sifting, QBER, or key derivation — those are fully
-delegated to the Celery worker pipeline (ST -> QKT -> NT).
-"""
 import asyncio
 import logging
 import os
@@ -58,8 +38,8 @@ class AliceNode(BaseNode):
             label=os.getenv("ALICE_LABEL", "alice-1"),
             callback_url=f"{MY_URL}/webhook",
         )
-        # Lightweight session tracking — only for concurrency guard + cleanup.
-        # Bits/bases live in Redis (written at session start, deleted by QKT).
+        #Lightweight session tracking  only for concurrency guard + cleanup.
+        #Bits/bases live in Redis (written at session start, deleted by QKT).
         self._alice_state: dict[str, dict] = {}
 
     def _active_sessions(self) -> list[str]:
@@ -68,10 +48,8 @@ class AliceNode(BaseNode):
             if not s.get("done")
         ]
 
-    # ──────────────────────────────────────────────────────────────────────
-    # Session creation
-    # ──────────────────────────────────────────────────────────────────────
 
+    #Session creation
     async def start_bb84_session(
         self,
         receiver_label:    str,
@@ -99,23 +77,23 @@ class AliceNode(BaseNode):
             "qkdl_url", os.getenv("QKDL_URL", "http://localhost:8003")
         )
 
-        # Generate bits and bases
+        #Generate bits and bases
         bits  = [random.randint(0, 1)       for _ in range(n_qubits)]
         bases = [random.choice(list(Basis)) for _ in range(n_qubits)]
 
-        # Persist to Redis so ST worker can read them without calling Alice
+        #Persist to Redis so ST worker can read them without calling Alice
         save_alice_state(
             session_id,
             bits=bits,
-            bases=[b.value for b in bases],  # store as "Z"/"X" strings
+            bases=[b.value for b in bases],  #store as "Z"/"X" strings
         )
 
-        # Lightweight in-process record — no bits/bases here
+        #Lightweight in-process record  no bits/bases here
         self._alice_state[session_id] = {
             "n_qubits":   n_qubits,
             "batch_size": batch_size,
             "qkdl_url":   qkdl_url,
-            "bits":       bits,    # kept for qubit batch building only
+            "bits":       bits,    #kept for qubit batch building only
             "bases":      bases,
             "done":       False,
         }
@@ -127,13 +105,10 @@ class AliceNode(BaseNode):
         )
         return body
 
-    # ──────────────────────────────────────────────────────────────────────
-    # Webhook handlers
-    # ──────────────────────────────────────────────────────────────────────
-
+    #Webhook handlers
     async def on_receiver_joined(self, session_id: str, payload: dict) -> None:
         logger.info(
-            f"[Alice] Receiver joined {session_id[:8]} — dispatching pipeline"
+            f"[Alice] Receiver joined {session_id[:8]}  dispatching pipeline"
         )
         asyncio.create_task(self._dispatch_pipeline(session_id))
 
@@ -151,26 +126,9 @@ class AliceNode(BaseNode):
         )
         self._cleanup(session_id)
 
-    # ──────────────────────────────────────────────────────────────────────
-    # Pipeline dispatch  —  chord(QTT x N) | ST | QKT | NT
-    # ──────────────────────────────────────────────────────────────────────
-
+    
+    #Pipeline dispatch:  chord(QTT x N) | ST | QKT | NT
     async def _dispatch_pipeline(self, session_id: str) -> None:
-        """
-        Builds and fires the full Celery pipeline for one session:
-
-            chord( send_batch_task x N )
-                | assemble_and_sift_task   (ST)
-                | qber_key_task            (QKT)
-                | notify_kme_task          (NT)
-
-        The chord runs all N QTT tasks in parallel.  When every QTT task has
-        returned, Celery automatically calls ST with the list of all results
-        as its first argument, then chains QKT and NT sequentially.
-
-        Alice's event loop is not blocked — the chord is dispatched to Redis
-        and execution happens entirely in the worker pool.
-        """
         state = self._alice_state.get(session_id)
         if not state:
             return
@@ -185,7 +143,7 @@ class AliceNode(BaseNode):
             f"batches={n_batches} qkdl={qkdl_url}"
         )
 
-        # ── QTT signatures (one per batch) ──────────────────────────────
+        #QTT signatures (one per batch) 
         qtt_tasks = []
         for batch_id, start in enumerate(range(0, n, batch_size)):
             end    = min(start + batch_size, n)
@@ -202,8 +160,8 @@ class AliceNode(BaseNode):
                 send_batch_task.s(session_id, batch_payload, qkdl_url)
             )
 
-        # ── session_meta passed immutably through the pipeline ───────────
-        # node_id is passed so NT can sign the key upload to KME
+        #session_meta passed immutably through the pipeline 
+        #node_id is passed so NT can sign the key upload to KME
         session_meta = {
             "session_id": session_id,
             "n_qubits":   n,
@@ -211,18 +169,18 @@ class AliceNode(BaseNode):
             "node_id":    self.node_id,
         }
 
-        # ── ST → QKT → NT chain (callback for the chord) ────────────────
-        # assemble_and_sift_task.s(session_meta):
-        #   Celery prepends the chord results list as the first arg → correct.
-        # qber_key_task.s() + notify_kme_task.s():
-        #   Each receives the previous task's return value as first arg.
+        #ST -> QKT -> NT chain (callback for the chord) 
+        #assemble_and_sift_task.s(session_meta):
+        #Celery prepends the chord results list as the first arg -> correct.
+        #qber_key_task.s() + notify_kme_task.s():
+        #Each receives the previous task's return value as first arg.
         pipeline_callback = (
             assemble_and_sift_task.s(session_meta)
             | qber_key_task.s()
             | notify_kme_task.s()
         )
 
-        # ── Dispatch (non-blocking) ──────────────────────────────────────
+        #Dispatch (non-blocking) 
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             None,
@@ -231,13 +189,10 @@ class AliceNode(BaseNode):
 
         logger.info(
             f"[Alice] Pipeline dispatched session={session_id[:8]} "
-            f"({n_batches} QTT tasks → ST → QKT → NT)"
+            f"({n_batches} QTT tasks -> ST -> QKT -> NT)"
         )
 
-    # ──────────────────────────────────────────────────────────────────────
-    # Cleanup + poll fallback
-    # ──────────────────────────────────────────────────────────────────────
-
+    #Cleanup + poll fallback
     def _cleanup(self, session_id: str) -> None:
         state = self._alice_state.get(session_id)
         if state:
@@ -245,7 +200,6 @@ class AliceNode(BaseNode):
         self._alice_state.pop(session_id, None)
 
     async def _poll_tick(self) -> None:
-        """Defensive fallback: detect sessions that ended without a webhook."""
         for sid in list(self._alice_state.keys()):
             state = self._alice_state.get(sid)
             if not state or state.get("done"):
@@ -262,12 +216,9 @@ class AliceNode(BaseNode):
                 pass
 
 
-# ──────────────────────────────────────────────────────────────────────────
-# FastAPI app
-# ──────────────────────────────────────────────────────────────────────────
 
 alice = AliceNode()
-app   = alice.build_app(title="SAE-A — Alice (Sender)", port=8001)
+app   = alice.build_app(title="SAE-A  Alice (Sender)", port=8001)
 
 
 @app.post("/start")
@@ -282,7 +233,7 @@ async def start_session(
     if not alice.node_id:
         return JSONResponse(
             status_code=503,
-            content={"error": "Not registered yet — retry in 1s"},
+            content={"error": "Not registered yet  retry in 1s"},
         )
 
     active = alice._active_sessions()
