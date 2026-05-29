@@ -129,10 +129,10 @@ class BobNode(BaseNode):
                 if data.get("queue_empty"):
                     if measurements and (time.time() - last_received_at) > IDLE_EXIT_AFTER:
                         logger.info(
-                            f"[Bob] Queue empty mid-session={session_id[:8]} "
-                            f"got={len(measurements)} "
-                            f"remaining={n_qubits - len(measurements)}"
+                            f"[Bob] Queue stable-empty session={session_id[:8]} "
+                            f"got={len(measurements)} expected={n_qubits} => exiting early (loss)"
                         )
+                        break   
                     await asyncio.sleep(0.05)
                     continue
 

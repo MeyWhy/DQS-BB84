@@ -76,10 +76,8 @@ class EveNode(BaseNode):
         #session_id → {qkdl_url, registered, meas_log, done}
         self._eve_state: dict[str, dict] = {}
 
-    #
+    
     #Webhook handlers
-    #
-
     async def on_session_open(self, session_id: str, payload: dict) -> None:
         role = payload.get("role", "")
         if role != "monitor":
@@ -126,17 +124,9 @@ class EveNode(BaseNode):
         asyncio.create_task(self._collect_measurements(session_id))
         self._finish(session_id)
 
-    #
     #QKDL intercept registration
-    #
-
     async def _register_as_interceptor(self, session_id: str) -> None:
-        """
-        Call POST /intercept/{session_id} on the QKDL.
-
-        The QKDL session might not be ready yet (it's started in a background
-        task by KME), so we retry up to EVE_REGISTER_RETRIES times.
-        """
+    
         state = self._eve_state.get(session_id)
         if not state:
             return
@@ -185,15 +175,10 @@ class EveNode(BaseNode):
             f"{EVE_REGISTER_RETRIES} attempts session={session_id[:8]}"
         )
 
-    #
-    #Measurement collection
-    #
-
+    
+    #Measurement collectio
     async def _collect_measurements(self, session_id: str) -> None:
-        """
-        Drain Eve's measurement log from the QKDL.
-        Stores them in _eve_state for later retrieval via /session/{id}/stats.
-        """
+      
         state = self._eve_state.get(session_id)
         if not state:
             return
@@ -226,10 +211,8 @@ class EveNode(BaseNode):
         if state:
             state["done"] = True
 
-    #
+    
     #Stats helper
-    #
-
     def session_stats(self, session_id: str) -> dict:
         state = self._eve_state.get(session_id)
         if not state:
@@ -261,9 +244,6 @@ class EveNode(BaseNode):
         }
 
 
-#
-#FastAPI app
-#
 
 eve = EveNode()
 app = eve.build_app(title="SAE-E — Eve (Monitor / Interceptor)", port=8010)
@@ -271,10 +251,7 @@ app = eve.build_app(title="SAE-E — Eve (Monitor / Interceptor)", port=8010)
 
 @app.get("/session/{session_id}/stats")
 async def get_eve_stats(session_id: str):
-    """
-    Thesis endpoint: Eve's measurement log for a completed session.
-    Returns basis-match rate and per-qubit interception records.
-    """
+  
     return eve.session_stats(session_id)
 
 

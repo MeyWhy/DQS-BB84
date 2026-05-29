@@ -62,3 +62,6 @@ ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003)
 2026-05-25 23:23:21,687: [QKDL] *** Eve registered as interceptor session=66388de9 label=eve-1 ***
 2026-05-25 23:23:31,882: [QKDL] *** Eve registered as interceptor session=16c78894 label=eve-1 ***
 ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use

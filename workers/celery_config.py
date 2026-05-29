@@ -18,15 +18,16 @@ celery_app.conf.update(
         "retry_policy": {"timeout": 5.0}
     },
     task_routes={
-        "workers.qubit_tasks.send_batch_task":        {"queue": "qubit_send"},
+        #send_batch_task has NO static route  queue is set dynamically
+        #by Alice at dispatch time via .set(queue=q_name).
         "workers.sifting_tasks.assemble_and_sift_task": {"queue": "sifting"},
         "workers.sifting_tasks.qber_key_task":          {"queue": "sifting"},
         "workers.sifting_tasks.notify_kme_task":        {"queue": "sifting"},
     },
-    # Each worker pulls one task at a time  prevents a single worker
-    # monopolising all qubit batches while others sit idle.
+    #Each worker pulls one task at a time  prevents a single worker
+    #monopolising all qubit batches while others sit idle.
     worker_prefetch_multiplier=1,
-    task_acks_late=True,   # ack after execution, not on receipt
+    task_acks_late=True,
     result_chord_join_timeout=300,
 )
 

@@ -1,0 +1,54 @@
+INFO:     Started server process [1647]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[bob-24] Registered → node_id=3eec0734
+INFO:node.base:[bob-24] Started  node_id=3eec0734 role=receiver
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8224 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[bob-24] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1647]
+INFO:     Started server process [1302]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[bob-24] Registered → node_id=c9e0049a
+INFO:node.base:[bob-24] Started  node_id=c9e0049a role=receiver
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8224 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[bob-24] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1302]
+INFO:     Started server process [1315]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[bob-24] Registered → node_id=b272d016
+INFO:node.base:[bob-24] Started  node_id=b272d016 role=receiver
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8224 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Started server process [1310]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[bob-24] Registered → node_id=eaea7829
+INFO:node.base:[bob-24] Started  node_id=eaea7829 role=receiver
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8224 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Started server process [1311]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[bob-24] Registered → node_id=66d383d0
+INFO:node.base:[bob-24] Started  node_id=66d383d0 role=receiver
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8224 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[bob-24] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1311]

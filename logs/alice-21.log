@@ -1,0 +1,84 @@
+INFO:     Started server process [1584]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-21] Registered → node_id=f9d4511e
+INFO:node.base:[alice-21] Started  node_id=f9d4511e role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8121 (Press CTRL+C to quit)
+INFO:     127.0.0.1:54266 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=9e08cb2d queue=qubit_send_9e08cb2d pid=1921
+INFO:alice:[Alice] Session 9e08cb2d created n_qubits=1024 qkdl=http://localhost:9123 queue=qubit_send_9e08cb2d
+INFO:     127.0.0.1:54276 - "POST /start?receiver_label=bob-21&n_qubits=1024&batch_size=10 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9e08cb2d-2641-410f-aa45-6b399b417122 "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-21] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1584]
+INFO:     Started server process [1257]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-21] Registered → node_id=97842548
+INFO:node.base:[alice-21] Started  node_id=97842548 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8121 (Press CTRL+C to quit)
+INFO:     127.0.0.1:35662 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=084a2083 queue=qubit_send_084a2083 pid=1599
+INFO:alice:[Alice] Session 084a2083 created n_qubits=1024 qkdl=http://localhost:9153 queue=qubit_send_084a2083
+INFO:     127.0.0.1:35676 - "POST /start?receiver_label=bob-21&n_qubits=1024&batch_size=10 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/084a2083-1b5e-4f15-8e92-1a7ff8a3c41d "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-21] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1257]
+INFO:     Started server process [1270]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-21] Registered → node_id=b88b64c0
+INFO:node.base:[alice-21] Started  node_id=b88b64c0 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8121 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-21] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1270]
+INFO:     Started server process [1265]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-21] Registered → node_id=e06cc1b3
+INFO:node.base:[alice-21] Started  node_id=e06cc1b3 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8121 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-21] Stopped
+INFO:     Started server process [1266]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-21] Registered → node_id=74ee2a51
+INFO:node.base:[alice-21] Started  node_id=74ee2a51 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8121 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-21] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1266]

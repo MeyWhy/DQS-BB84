@@ -104,7 +104,7 @@ class NodeSubscriber:
                 r      = redis.from_url(REDIS_URL, decode_responses=True)
                 pubsub = r.pubsub(ignore_subscribe_messages=True)
 
-                # Subscribe to node-specific, broadcast, and session channels
+                #Subscribe to node-specific, broadcast, and session channels
                 pubsub.subscribe(
                     f"kme:events:{self.node_id}",
                     "kme:events:broadcast",
@@ -138,6 +138,6 @@ class NodeSubscriber:
         Note: requires a new pubsub connection or psubscribe.
         Simple implementation: just re-listen (restart thread).
         """
-        # In a full implementation, use psubscribe("kme:session:*")
-        # For now, the node-specific channel carries all session events.
+        #In a full implementation, use psubscribe("kme:session:*")
+        #For now, the node-specific channel carries all session events.
         pass

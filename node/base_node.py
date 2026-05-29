@@ -39,7 +39,7 @@ class BaseNode(ABC):
         self._client  = httpx.AsyncClient(timeout=30.0)
         self._running = False
 
-    # Lifecycle
+    #Lifecycle
 
     async def start(self) -> None:
         self.node_id = await self._register()
@@ -80,7 +80,7 @@ class BaseNode(ABC):
                 )
                 await asyncio.sleep(REGISTER_RETRY_DELAY)
 
-    # Webhook dispatch
+    #Webhook dispatch
 
     async def handle_webhook(self, event: WebhookEvent) -> None:
         sid = event.session_id
@@ -96,7 +96,7 @@ class BaseNode(ABC):
             "session_open":          self.on_session_open,
             "receiver_joined":       self.on_receiver_joined,
             "measurements_ready":    self.on_measurements_ready,
-            "transmission_complete": self.on_transmission_complete,  # Alice chord callback
+            "transmission_complete": self.on_transmission_complete,  #Alice chord callback
             "sift_ready":            self.on_sift_ready,
             "key_available":         self.on_key_available,
             "session_aborted":       self.on_session_aborted,
@@ -107,7 +107,7 @@ class BaseNode(ABC):
         else:
             logger.warning(f"[{self.label}] Unknown event: {event.event}")
 
-    # Default handlers (override in subclasses)
+    #Default handlers (override in subclasses)
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
         if self.role == NodeRole.RECEIVER:
@@ -139,7 +139,7 @@ class BaseNode(ABC):
         )
         self._sessions.pop(session_id, None)
 
-    # KME helpers
+    #KME helpers
 
     async def join_session(self, session_id: str) -> dict:
         resp = await self._client.post(
@@ -170,7 +170,7 @@ class BaseNode(ABC):
         resp.raise_for_status()
         return resp.json()
 
-    # Agent loop
+    #Agent loop
 
     async def _agent_loop(self) -> None:
         while self._running:
@@ -183,7 +183,7 @@ class BaseNode(ABC):
     async def _poll_tick(self) -> None:
         pass
 
-    # FastAPI app factory
+    #FastAPI app factory
 
     def build_app(self, title: str, port: int) -> FastAPI:
         node = self

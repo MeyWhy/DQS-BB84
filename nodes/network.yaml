@@ -1,29 +1,23 @@
-# Launch order:
-#   1. Redis          (already running)
-#   2. node_runner    (launches QKDLs, KME, nodes below)
-#   3. Celery workers (separate terminal  see commands below)
+#Launch order:
+#1. Redis           (already running)
+#2. node_runner     (launches QKDLs, KME, nodes)
+#3. Sifting worker  (start once, shared):
 #
-# Celery worker commands (run from project root):
-#   # qubit_send pool  handles batch transmission (scale up for throughput)
-#   celery -A workers.celery_config worker --queues=qubit_send --concurrency=4 --loglevel=info -n qubit@%h
+#celery -A workers.celery_config worker \
+#--queues=sifting --concurrency=1 --loglevel=info -n sifting@%h
 #
-#   # sifting pool  chord callbacks (1 worker is enough)
-#   celery -A workers.celery_config worker --queues=sifting --concurrency=1 --loglevel=info -n sifting@%h
-#
-# KME: node_runner --with-kme injects QKDL_URLS automatically.
-# Alternatively start manually:
-#   QKDL_URLS=http://localhost:8003,http://localhost:8013,http://localhost:8023 uvicorn kme.main:app --port 8000
+#Per-session qubit workers are managed AUTOMATICALLY by Alice nodes.
 
 kme:
   url: "http://localhost:8000"
-  key_ttl_seconds: 300
+  key_ttl_seconds: 600
 
 qkdl:
-  url: "http://localhost:8003"   # default fallback for single-pair setups
+  url: "http://localhost:8003"
 
 nodes:
 
-  # Pair 1: alice-1 <-> bob-1  QKDL :8003
+  #Pair 1: alice-1 <-> bob-1  QKDL :8003
   - label:   alice-1
     role:    sender
     module:  nodes.alice.main
@@ -43,7 +37,7 @@ nodes:
       BOB_URL:   "http://localhost:8002"
       QKDL_URL:  "http://localhost:8003"
 
-  # Pair 2: alice-2 <-> bob-2  QKDL :8013
+  #Pair 2: alice-2 <-> bob-2  QKDL :8013
   - label:   alice-2
     role:    sender
     module:  nodes.alice.main
@@ -63,7 +57,7 @@ nodes:
       BOB_URL:   "http://localhost:8202"
       QKDL_URL:  "http://localhost:8013"
 
-  # Pair 3: alice-3 <-> bob-3  QKDL :8023
+  #Pair 3: alice-3 <-> bob-3  QKDL :8023
   - label:   alice-3
     role:    sender
     module:  nodes.alice.main
@@ -71,6 +65,7 @@ nodes:
     env:
       ALICE_LABEL: alice-3
       ALICE_URL:   "http://localhost:8103"
+      BATCH_SIZE:  "10"
       QKDL_URL:    "http://localhost:8023"
 
   - label:   bob-3
@@ -82,6 +77,7 @@ nodes:
       BOB_URL:   "http://localhost:8203"
       QKDL_URL:  "http://localhost:8023"
 
+  #Pair 4: alice-4 <-> bob-4  QKDL :8033
   - label:   alice-4
     role:    sender
     module:  nodes.alice.main
@@ -101,7 +97,7 @@ nodes:
       BOB_URL:   "http://localhost:8204"
       QKDL_URL:  "http://localhost:8033"
 
-
+  #Pair 5: alice-5 <-> bob-5  QKDL :8043
   - label:   alice-5
     role:    sender
     module:  nodes.alice.main
@@ -121,7 +117,7 @@ nodes:
       BOB_URL:   "http://localhost:8205"
       QKDL_URL:  "http://localhost:8043"
 
-
+  #Pair 6: alice-6 <-> bob-6  QKDL :8053
   - label:   alice-6
     role:    sender
     module:  nodes.alice.main
@@ -141,6 +137,7 @@ nodes:
       BOB_URL:   "http://localhost:8206"
       QKDL_URL:  "http://localhost:8053"
 
+  #Pair 7: alice-7 <-> bob-7  QKDL :8063
   - label:   alice-7
     role:    sender
     module:  nodes.alice.main
@@ -160,7 +157,7 @@ nodes:
       BOB_URL:   "http://localhost:8207"
       QKDL_URL:  "http://localhost:8063"
 
-
+  #Pair 8: alice-8 <-> bob-8  QKDL :8073
   - label:   alice-8
     role:    sender
     module:  nodes.alice.main
@@ -179,10 +176,229 @@ nodes:
       BOB_LABEL: bob-8
       BOB_URL:   "http://localhost:8208"
       QKDL_URL:  "http://localhost:8073"
-      
-  # Eve  one instance serves all pairs (role=monitor)
-  # Start an intercepted session from alice-1:
-  #   POST http://localhost:8001/start?receiver_label=bob-1&interceptor_label=eve-1
+
+  #Pair 9: alice-9 <-> bob-9  QKDL :9003
+  - label:   alice-9
+    role:    sender
+    module:  nodes.alice.main
+    port:    8109
+    env:
+      ALICE_LABEL: alice-9
+      ALICE_URL:   "http://localhost:8109"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9003"
+
+  - label:   bob-9
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8209
+    env:
+      BOB_LABEL: bob-9
+      BOB_URL:   "http://localhost:8209"
+      QKDL_URL:  "http://localhost:9003"
+
+  #Pair 10: alice-10 <-> bob-10  QKDL :9013
+  - label:   alice-10
+    role:    sender
+    module:  nodes.alice.main
+    port:    8110
+    env:
+      ALICE_LABEL: alice-10
+      ALICE_URL:   "http://localhost:8110"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9013"
+
+  - label:   bob-10
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8210
+    env:
+      BOB_LABEL: bob-10
+      BOB_URL:   "http://localhost:8210"
+      QKDL_URL:  "http://localhost:9013"
+
+  #Pair 11: alice-11 <-> bob-11  QKDL :9023
+  - label:   alice-11
+    role:    sender
+    module:  nodes.alice.main
+    port:    8111
+    env:
+      ALICE_LABEL: alice-11
+      ALICE_URL:   "http://localhost:8111"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9023"
+
+  - label:   bob-11
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8211
+    env:
+      BOB_LABEL: bob-11
+      BOB_URL:   "http://localhost:8211"
+      QKDL_URL:  "http://localhost:9023"
+
+  #Pair 12: alice-12 <-> bob-12  QKDL :9033
+  - label:   alice-12
+    role:    sender
+    module:  nodes.alice.main
+    port:    8112
+    env:
+      ALICE_LABEL: alice-12
+      ALICE_URL:   "http://localhost:8112"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9033"
+
+  - label:   bob-12
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8212
+    env:
+      BOB_LABEL: bob-12
+      BOB_URL:   "http://localhost:8212"
+      QKDL_URL:  "http://localhost:9033"
+
+  #Pair 13: alice-13 <-> bob-13  QKDL :9043
+  - label:   alice-13
+    role:    sender
+    module:  nodes.alice.main
+    port:    8113
+    env:
+      ALICE_LABEL: alice-13
+      ALICE_URL:   "http://localhost:8113"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9043"
+
+  - label:   bob-13
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8213
+    env:
+      BOB_LABEL: bob-13
+      BOB_URL:   "http://localhost:8213"
+      QKDL_URL:  "http://localhost:9043"
+
+  #Pair 14: alice-14 <-> bob-14  QKDL :9053
+  - label:   alice-14
+    role:    sender
+    module:  nodes.alice.main
+    port:    8114
+    env:
+      ALICE_LABEL: alice-14
+      ALICE_URL:   "http://localhost:8114"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9053"
+
+  - label:   bob-14
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8214
+    env:
+      BOB_LABEL: bob-14
+      BOB_URL:   "http://localhost:8214"
+      QKDL_URL:  "http://localhost:9053"
+
+  #Pair 15: alice-15 <-> bob-15  QKDL :9063
+  - label:   alice-15
+    role:    sender
+    module:  nodes.alice.main
+    port:    8115
+    env:
+      ALICE_LABEL: alice-15
+      ALICE_URL:   "http://localhost:8115"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9063"
+
+  - label:   bob-15
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8215
+    env:
+      BOB_LABEL: bob-15
+      BOB_URL:   "http://localhost:8215"
+      QKDL_URL:  "http://localhost:9063"
+
+  #Pair 16: alice-16 <-> bob-16  QKDL :9073
+  - label:   alice-16
+    role:    sender
+    module:  nodes.alice.main
+    port:    8116
+    env:
+      ALICE_LABEL: alice-16
+      ALICE_URL:   "http://localhost:8116"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9073"
+
+  - label:   bob-16
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8216
+    env:
+      BOB_LABEL: bob-16
+      BOB_URL:   "http://localhost:8216"
+      QKDL_URL:  "http://localhost:9073"
+
+  #Pair 17: alice-17 <-> bob-17  QKDL :9083
+  - label:   alice-17
+    role:    sender
+    module:  nodes.alice.main
+    port:    8117
+    env:
+      ALICE_LABEL: alice-17
+      ALICE_URL:   "http://localhost:8117"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9083"
+
+  - label:   bob-17
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8217
+    env:
+      BOB_LABEL: bob-17
+      BOB_URL:   "http://localhost:8217"
+      QKDL_URL:  "http://localhost:9083"
+
+  #Pair 18: alice-18 <-> bob-18  QKDL :9093
+  - label:   alice-18
+    role:    sender
+    module:  nodes.alice.main
+    port:    8118
+    env:
+      ALICE_LABEL: alice-18
+      ALICE_URL:   "http://localhost:8118"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9093"
+
+  - label:   bob-18
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8218
+    env:
+      BOB_LABEL: bob-18
+      BOB_URL:   "http://localhost:8218"
+      QKDL_URL:  "http://localhost:9093"
+
+
+  #Pair 19: alice-19 <-> bob-19  QKDL :9103
+  - label:   alice-19
+    role:    sender
+    module:  nodes.alice.main
+    port:    8119
+    env:
+      ALICE_LABEL: alice-19
+      ALICE_URL:   "http://localhost:8119"
+      BATCH_SIZE:  "10"
+      QKDL_URL:    "http://localhost:9103"
+
+  - label:   bob-19
+    role:    receiver
+    module:  nodes.bob.main
+    port:    8219
+    env:
+      BOB_LABEL: bob-19
+      BOB_URL:   "http://localhost:8219"
+      QKDL_URL:  "http://localhost:9103"
+
+  #Eve - one instance, role=monitor
   - label:   eve-1
     role:    monitor
     module:  nodes.eve.main
@@ -190,8 +406,3 @@ nodes:
     env:
       EVE_LABEL: eve-1
       EVE_URL:   "http://localhost:8010"
-
-  # Adding a new pair:
-  #   1. New QKDL port   (8033, 8043, ...)
-  #   2. Unique alice/bob ports
-  #   3. node_runner picks up the new QKDL_URL automatically

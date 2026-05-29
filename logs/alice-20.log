@@ -1,0 +1,235 @@
+INFO:     Started server process [1564]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=9d799eea
+INFO:node.base:[alice-20] Started  node_id=9d799eea role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     127.0.0.1:57870 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=9ad4cc8f queue=qubit_send_9ad4cc8f pid=1959
+INFO:alice:[Alice] Session 9ad4cc8f created n_qubits=1024 qkdl=http://localhost:9173 queue=qubit_send_9ad4cc8f
+INFO:     127.0.0.1:57872 - "POST /start?receiver_label=bob-20&n_qubits=1024&batch_size=10 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/9ad4cc8f-a0c6-4f2f-8f86-e85ae1f9fd3e "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1564]
+INFO:     Started server process [1243]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=592dff75
+INFO:node.base:[alice-20] Started  node_id=592dff75 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     127.0.0.1:37960 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=c15d8ccd queue=qubit_send_c15d8ccd pid=1677
+INFO:alice:[Alice] Session c15d8ccd created n_qubits=1024 qkdl=http://localhost:9223 queue=qubit_send_c15d8ccd
+INFO:     127.0.0.1:37976 - "POST /start?receiver_label=bob-20&n_qubits=1024&batch_size=10 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/c15d8ccd-0a36-49e6-8a2a-f56eafe1af91 "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1243]
+INFO:     Started server process [1256]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=ab6ab7d7
+INFO:node.base:[alice-20] Started  node_id=ab6ab7d7 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1256]
+INFO:     Started server process [1251]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=816b0057
+INFO:node.base:[alice-20] Started  node_id=816b0057 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Started server process [1252]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=7864c04a
+INFO:node.base:[alice-20] Started  node_id=7864c04a role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1252]
+INFO:     Started server process [1298]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=56c33d47
+INFO:node.base:[alice-20] Started  node_id=56c33d47 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50724 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 409 Conflict"
+INFO:     127.0.0.1:50734 - "POST /start?receiver_label=bob-20&n_qubits=1024&batch_size=10 HTTP/1.1" 409 Conflict
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1298]
+INFO:     Started server process [1153]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=eb064e35
+INFO:node.base:[alice-20] Started  node_id=eb064e35 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     127.0.0.1:46524 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 409 Conflict"
+INFO:     127.0.0.1:46530 - "POST /start?receiver_label=bob-20&n_qubits=1024&batch_size=10 HTTP/1.1" 409 Conflict
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1153]
+INFO:     Started server process [1155]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-20] Registered → node_id=1e4f451c
+INFO:node.base:[alice-20] Started  node_id=1e4f451c role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8120 (Press CTRL+C to quit)
+INFO:     127.0.0.1:59436 - "GET /health HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=4acdf361 queue=qubit_send_4acdf361 pid=1273
+INFO:alice:[Alice] Session 4acdf361 created n_qubits=1024 qkdl=http://localhost:9093 queue=qubit_send_4acdf361
+INFO:     127.0.0.1:59446 - "POST /start?receiver_label=bob-20&n_qubits=1024&batch_size=10 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:45488 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 4acdf361 — dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=4acdf361 batches=103 qkdl=http://localhost:9093 queue=qubit_send_4acdf361
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Pipeline dispatched session=4acdf361 (103 QTT → ST → QKT → NT) queue=qubit_send_4acdf361
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/4acdf361-fbb9-4561-b819-e255124e255d "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-20] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1155]
