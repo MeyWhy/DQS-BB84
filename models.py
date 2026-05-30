@@ -47,6 +47,7 @@ class SessionCreateReq(BaseModel):
     n_qubits:          int   = Field(default=200, ge=0, le=5000)
     batch_size:        int   = Field(default=10,  gt=0, le=100)
     loss_rate:         float = Field(default=0.0, ge=0.0, le=1.0)
+    distance_km:       float = 0.0
     retry_enabled:     bool  = False
     #Eve support: if set, QKDL will route qubits through this node (MITM)
     interceptor_label: Optional[str] = None
@@ -132,7 +133,7 @@ class NetworkInitReq(BaseModel):
     session_id: str
     n_qubits:   int   = Field(gt=0, le=10000)
     loss_rate:  float = Field(default=0.0, ge=0.0, le=1.0)
-
+    distance_km: float = 0.0
 
 class NetworkInitResp(BaseModel):
     session_id: str
@@ -190,6 +191,7 @@ class SessionStatusResponse(BaseModel):
     progress_pct:        float = 0.0
     phase_label:         str   = ""
     qkdl_url:            str   = ""
+    distance_km:         float          = 0.0  
     #Eve metadata  present when session was intercepted
     interceptor_label:   Optional[str]  = None
     intercepted:         bool           = False

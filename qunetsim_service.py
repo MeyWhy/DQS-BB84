@@ -6,6 +6,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from typing import Optional
+from optical.channel import StatisticalChannel, FiberChannel
 
 import asyncio
 from fastapi import FastAPI, HTTPException
@@ -83,9 +84,14 @@ BOB_READY_DELAY = 0.015   #15 ms : empirically sufficient for EQSN
 
 
 class NetworkSession:
-    def __init__(self, session_id: str, loss_rate: float = 0.0):
+    def __init__(self, session_id: str, loss_rate: float = 0.0, distance_km: float=0.0):
         self.session_id  = session_id
         self.loss_rate   = loss_rate
+
+        if distance_km > 0.0:
+            self.channel = FiberChannel(distance_km)
+        else:
+            self.channel = StatisticalChannel(loss_rate)
 
         self.backend     = None
         self.network     = None
@@ -128,7 +134,8 @@ class NetworkSession:
         self.bob_host.start()
         self.network.add_host(self.alice_host)
         self.network.add_host(self.bob_host)
-
+        
+        self.channel.reset_session() 
         self._active = True
         logger.info(f"[QKDL] Session {self.session_id[:8]} started")
 
@@ -289,13 +296,24 @@ def _process_batch_sync(
 ) -> list[dict]:
     results = []
 
+
+    # Step 3: simulate time advancing per qubit.
+    # At 1 MHz clock, each qubit slot = 1000 ns.
+    # We use qubit_id as the time index so dead time is correctly
+    # enforced across the batch even if qubit_ids are non-contiguous.
+    PULSE_PERIOD_NS = 1000.0   # 1 MHz clock → 1000 ns per slot
+
     for qrec in batch.qubits:
         qid   = qrec.qubit_id
         bit   = qrec.bit
         basis = qrec.basis
+        t_ns  = qid * PULSE_PERIOD_NS 
 
         #Loss model
-        if session.loss_rate > 0 and random.random() < session.loss_rate:
+        photon_in   = {"qubit_id": qid, "bit": bit, "basis": basis.value}
+        transmitted = session.channel.transmit(photon_in, t_ns=t_ns)
+
+        if transmitted is None:
             results.append({
                 "qubit_id": qid, "delivered": False,
                 "bob_basis": None, "bob_bit": None,
@@ -322,12 +340,26 @@ def _process_batch_sync(
             })
             continue
 
-        #Normal path — pure Python BB84 (no QuNetSim noise)
-        bob_basis = random.choice(list(Basis))
-        if bob_basis == basis:
-            bob_bit = bit          #bases match → perfect transmission
+        #Normal path - pure Python BB84 (no QuNetSim noise)
+        is_dark = transmitted.get("dark_count", False)
+
+        if is_dark:
+            # Dark count: Bob records a random basis and random bit.
+            # This photon was never sent by Alice — it will survive sifting
+            # with 50% probability (random basis match) and be wrong 50%
+            # of the time → contributes ~0.5 × p_dark to QBER.
+            bob_basis = random.choice(list(Basis))
+            bob_bit   = random.randint(0, 1)
         else:
-            bob_bit = random.randint(0, 1)   #bases mismatch → random bit (discarded in sifting anyway)
+            # Real detection: apply drift-aware bit assignment
+            received_basis_str = transmitted["basis"]
+            bob_basis          = random.choice(list(Basis))
+
+            if bob_basis.value == basis.value:
+                # Bob chose Alice's original basis
+                bob_bit = bit if received_basis_str == basis.value else 1 - bit
+            else:
+                bob_bit = random.randint(0, 1)   # discarded in sifting
 
         results.append({
             "qubit_id":  qid,
@@ -336,10 +368,10 @@ def _process_batch_sync(
             "bob_bit":   bob_bit,
         })
         session.push_measurement({
-            "qubit_id":   qid,
-            "basis":      bob_basis.value,
-            "bit_result": bob_bit,
-            "delivered":  True,
+            "qubit_id":    qid,
+            "basis":       bob_basis.value,
+            "bit_result":  bob_bit,
+            "delivered":   True,
             "intercepted": False,
         })
 
@@ -388,7 +420,7 @@ async def init_network(req: NetworkInitReq):
                 detail=f"Session already active: {active[0][:8]}. Stop it first.",
             )
 
-    session = NetworkSession(req.session_id, loss_rate=req.loss_rate)
+    session = NetworkSession(req.session_id, loss_rate=req.loss_rate, distance_km=req.distance_km,)
     loop    = asyncio.get_event_loop()
     try:
         await loop.run_in_executor(None, session.start)
@@ -553,7 +585,6 @@ async def recv_classical(session_id: str):
             return ClassicalRecvResp(session_id=session_id, payload_hex=inbox.pop(0), available=True)
     return ClassicalRecvResp(session_id=session_id, payload_hex="", available=False)
 
-
 @app.get("/health")
 async def health():
     remaining = _cooldown_remaining()
@@ -561,11 +592,24 @@ async def health():
         active = list(_sessions.keys())
         counts = {sid: _sessions[sid].measurement_count() for sid in active}
         eve_on = {sid: _sessions[sid]._eve_registered for sid in active}
+        # Step 3: add detector stats per session
+        detector_stats = {}
+        for sid in active:
+            ch = _sessions[sid].channel
+            entry = {}
+            if hasattr(ch, "detector") and ch.detector:
+                entry["detector"] = ch.detector.counters()
+            if hasattr(ch, "drift") and ch.drift and hasattr(ch.drift, "describe"):
+                entry["drift"] = ch.drift.describe()
+            detector_stats[sid] = entry
     return {
-        "statut": "ok", "active_sessions": active,
-        "measurement_queues": counts, "eve_active": eve_on,
-        "cooldown_remaining": round(remaining, 2),
-        "ready": remaining == 0 and not active,
+        "statut":              "ok",
+        "active_sessions":     active,
+        "measurement_queues":  counts,
+        "eve_active":          eve_on,
+        "detector_stats":      detector_stats,   # ← ADD
+        "cooldown_remaining":  round(remaining, 2),
+        "ready":               remaining == 0 and not active,
     }
 
 

@@ -215,6 +215,7 @@ async def create_session(
         "n_qubits":            req.n_qubits,
         "batch_size":          req.batch_size,
         "loss_rate":           req.loss_rate,
+        "distance_km":  req.distance_km, 
         "retry_enabled":       req.retry_enabled,
         "qkdl_url":            qkdl_url,
         "created_at":          time.time(),
@@ -233,7 +234,7 @@ async def create_session(
 
     #Background tasks — QKDL init
     background_tasks.add_task(
-        _init_qkdl, session_id, req.n_qubits, req.loss_rate, qkdl_url
+        _init_qkdl, session_id, req.n_qubits, req.loss_rate, req.distance_km, qkdl_url
     )
 
     #Notify Bob
@@ -531,6 +532,7 @@ async def get_session(session_id: str):
         "progress_pct":      progress.get(session["status"], 0),
         "phase_label":       labels.get(session["status"], ""),
         "qkdl_url":          session.get("qkdl_url", ""),
+        "distance_km":       session.get("distance_km", 0.0),
         "intercepted":       session.get("intercepted", False),
         "interceptor_label": session.get("interceptor_label"),
     })
@@ -565,6 +567,7 @@ async def _init_qkdl(
     session_id: str,
     n_qubits:   int,
     loss_rate:  float,
+    distance_km: float,
     qkdl_url:   str,
 ) -> None:
     r = get_redis()
@@ -579,6 +582,7 @@ async def _init_qkdl(
                         session_id=session_id,
                         n_qubits=n_qubits,
                         loss_rate=loss_rate,
+                        distance_km=distance_km,
                     ).model_dump(),
                 )
 

@@ -31,6 +31,7 @@ logging.basicConfig(level=logging.INFO)
 KME_URL    = os.getenv("KME_URL",   "http://localhost:8000")
 MY_URL     = os.getenv("ALICE_URL", "http://localhost:8001")
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "10"))
+DISTANCE_KM = float(os.getenv("DISTANCE_KM", "0.0"))
 
 #How long to wait for the per-session worker to connect to Redis
 #before dispatching the chord.  2.5s is conservative; 1.5s usually works.
@@ -133,6 +134,7 @@ class AliceNode(BaseNode):
         n_qubits:          int   = 200,
         batch_size:        int   = BATCH_SIZE,
         loss_rate:         float = 0.0,
+        distance_km:       float = 0.0, 
         retry_enabled:     bool  = False,
         interceptor_label: str   = None,
     ) -> dict:
@@ -142,6 +144,7 @@ class AliceNode(BaseNode):
             n_qubits=n_qubits,
             batch_size=batch_size,
             loss_rate=loss_rate,
+            distance_km=distance_km, 
             retry_enabled=retry_enabled,
             interceptor_label=interceptor_label or None,
         ).model_dump()
@@ -321,6 +324,7 @@ async def start_session(
     n_qubits:          int   = 200,
     batch_size:        int   = BATCH_SIZE,
     loss_rate:         float = 0.0,
+    distance_km:       float = DISTANCE_KM, 
     retry_enabled:     bool  = False,
     interceptor_label: str   = None,
 ):
@@ -347,6 +351,7 @@ async def start_session(
             n_qubits=n_qubits,
             batch_size=batch_size,
             loss_rate=loss_rate,
+            distance_km=distance_km, 
             retry_enabled=retry_enabled,
             interceptor_label=interceptor_label,
         )
