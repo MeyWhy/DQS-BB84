@@ -283,6 +283,7 @@ def _send_one_qubit(
         "bob_bit":   bob_result.get("bit"),
     }
 
+
 def _process_batch_sync(
     session: NetworkSession,
     batch:   QubitBatch,
@@ -294,7 +295,7 @@ def _process_batch_sync(
         bit   = qrec.bit
         basis = qrec.basis
 
-        #Loss model
+        #Loss model (before Eve  a lost qubit is never intercepted)
         if session.loss_rate > 0 and random.random() < session.loss_rate:
             results.append({
                 "qubit_id": qid, "delivered": False,
@@ -302,7 +303,7 @@ def _process_batch_sync(
             })
             continue
 
-        #Eve intercept-resend
+        #Eve intercept-resend (pure Python, no QuNetSim)
         if session._eve_registered:
             eve_bit, eve_basis_val = _eve_intercept_qubit(bit, basis, session, qid)
             bob_basis = random.choice(list(Basis))
@@ -322,28 +323,21 @@ def _process_batch_sync(
             })
             continue
 
-        #Normal path — pure Python BB84 (no QuNetSim noise)
-        bob_basis = random.choice(list(Basis))
-        if bob_basis == basis:
-            bob_bit = bit          #bases match → perfect transmission
-        else:
-            bob_bit = random.randint(0, 1)   #bases mismatch → random bit (discarded in sifting anyway)
+        #Normal QuNetSim path
+        res = _send_one_qubit(session, qid, bit, basis)
+        results.append(res)
 
-        results.append({
-            "qubit_id":  qid,
-            "delivered": True,
-            "bob_basis": bob_basis.value,
-            "bob_bit":   bob_bit,
-        })
-        session.push_measurement({
-            "qubit_id":   qid,
-            "basis":      bob_basis.value,
-            "bit_result": bob_bit,
-            "delivered":  True,
-            "intercepted": False,
-        })
+        if res["delivered"]:
+            session.push_measurement({
+                "qubit_id":    qid,
+                "basis":       res["bob_basis"],
+                "bit_result":  res["bob_bit"],
+                "delivered":   True,
+                "intercepted": False,
+            })
 
     return results
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

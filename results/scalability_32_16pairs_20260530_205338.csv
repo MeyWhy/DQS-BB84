@@ -1,0 +1,17 @@
+pair,alice_label,bob_label,qkdl_url,session_id,start_error,status,n_qubits,n_delivered,n_sifted,qber,key_len,elapsed_s,error_message,intercepted
+8,alice-8,bob-8,http://localhost:8073,b4d5bd40-c729-4031-bb99-fd15109925b4,,done,1024,1024,524,0.0,420,212.316,,False
+1,alice-1,bob-1,http://localhost:8003,513bc102-97d3-4c5d-acf4-ebd915553eff,,done,1024,1024,509,0.0,408,214.779,,False
+2,alice-2,bob-2,http://localhost:8013,ee61ebd8-8ef1-4553-b224-006b51089049,,done,1024,1024,521,0.0,417,214.874,,False
+3,alice-3,bob-3,http://localhost:8023,a18583bd-04d1-42cb-a1d5-c20919cdfa31,,done,1024,1024,516,0.0,413,214.606,,False
+4,alice-4,bob-4,http://localhost:8033,ba644615-990e-4272-9cba-c2f410fba591,,done,1024,1024,548,0.0,439,213.842,,False
+5,alice-5,bob-5,http://localhost:8043,458feec7-c372-4a06-94e1-9c004fe59d60,,done,1024,1024,485,0.0,388,214.507,,False
+6,alice-6,bob-6,http://localhost:8053,e64f526f-afc2-422d-9599-391a09d51556,,done,1024,1024,502,0.0,402,213.132,,False
+7,alice-7,bob-7,http://localhost:8063,32886a97-30eb-48b8-be9f-12cc4f463830,,done,1024,1024,502,0.0,402,214.512,,False
+9,alice-9,bob-9,http://localhost:9003,0e626471-1799-4cae-896e-58a3df28cf38,,done,1024,1024,491,0.0,393,213.082,,False
+10,alice-10,bob-10,http://localhost:9013,b8fba03a-9dd7-4660-8758-4e124b0fbbfb,,done,1024,1024,485,0.0,388,213.873,,False
+11,alice-11,bob-11,http://localhost:9023,e3c4d8df-35c4-4e5b-ab33-3a290deb4723,,done,1024,1024,506,0.0,405,212.752,,False
+12,alice-12,bob-12,http://localhost:9033,f155528d-9148-4b94-ad8d-abc58a9043e9,,done,1024,1024,523,0.0,419,214.468,,False
+13,alice-13,bob-13,http://localhost:9043,f9313ec3-68e4-4ded-9b04-a10934806de4,,done,1024,1024,512,0.0,410,213.547,,False
+14,alice-14,bob-14,http://localhost:9053,e91a8722-f662-4fa6-badb-b0ed250c605d,,done,1024,1024,520,0.0,416,214.292,,False
+15,alice-15,bob-15,http://localhost:9063,80b2efcb-c60f-4d58-b262-70c349229142,,done,1024,1024,546,0.0,437,212.588,,False
+16,alice-16,bob-16,http://localhost:9073,7572306e-1bd9-4b0b-bb4a-7949e081c7f6,,done,1024,1024,491,0.0,393,212.663,,False

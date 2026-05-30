@@ -11,21 +11,17 @@ import httpx
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 ALICE_URLS = {
-    "alice-1": os.getenv("ALICE_1_URL", "http://localhost:8001"),
-    "alice-2": os.getenv("ALICE_2_URL", "http://localhost:8102"),
-    "alice-3": os.getenv("ALICE_3_URL", "http://localhost:8103"),
+    "alice-1": os.getenv("ALICE_1_URL", "http://localhost:8001")
 }
 QKDL_URLS = [
-    os.getenv("QKDL_1_URL", "http://localhost:8003"),
-    os.getenv("QKDL_2_URL", "http://localhost:8013"),
-    os.getenv("QKDL_3_URL", "http://localhost:8023"),
+    os.getenv("QKDL_1_URL", "http://localhost:8003")
 ]
 KME_URL = os.getenv("KME_URL", "http://localhost:8000")
 
-N_QUBITS_LIST = [16, 32, 64, 128, 200, 1024, 2048]
+N_QUBITS_LIST = [32, 64, 128, 200, 1024, 2048]
 BATCH_SIZES   = [10, 20]
-ALICE_NODES   = ["alice-1", "alice-2", "alice-3"]
-BOB_NODES     = ["bob-1",   "bob-2",   "bob-3"  ]
+ALICE_NODES   = ["alice-1"]
+BOB_NODES     = ["bob-1"]
 
 POLL_INTERVAL        = 2.0     # seconds between KME status polls
 INTER_SESSION_DELAY  = 4.0     # seconds between sessions (> QKDL cooldown 2.5s)
