@@ -1,9 +1,0 @@
-pair,alice_label,bob_label,qkdl_url,session_id,start_error,status,n_qubits,n_delivered,n_sifted,qber,key_len,elapsed_s,error_message,intercepted
-1,alice-1,bob-1,http://localhost:8003,b116362e-1237-4a26-a977-084453cb0920,,done,1024,1024,489,0.0,392,212.788,,False
-2,alice-2,bob-2,http://localhost:8013,31e420b0-ec3d-4048-9bca-9201454456a5,,done,1024,1024,535,0.0,428,212.659,,False
-3,alice-3,bob-3,http://localhost:8023,f586c6a3-2180-4330-8368-d75babecbe2c,,done,1024,1024,512,0.0,410,212.58,,False
-4,alice-4,bob-4,http://localhost:8033,f36221c7-f40d-44d9-b848-37aa5df93d7b,,done,1024,1024,497,0.0,398,212.649,,False
-5,alice-5,bob-5,http://localhost:8043,4a2143f7-7ffc-4812-be56-f36aec2075f9,,done,1024,1024,510,0.0,408,212.728,,False
-6,alice-6,bob-6,http://localhost:8053,66844927-2309-467b-8661-6530997d1d43,,done,1024,1024,502,0.0,402,212.7,,False
-7,alice-7,bob-7,http://localhost:8063,07754896-cef5-4a99-aa2d-468ffcda5c44,,done,1024,1024,509,0.0,408,212.64,,False
-8,alice-8,bob-8,http://localhost:8073,35d8df26-25ac-43ca-b7c3-ab9ab99e8624,,done,1024,1024,498,0.0,399,212.714,,False
