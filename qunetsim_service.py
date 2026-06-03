@@ -1,3 +1,43 @@
+"""
+qunetsim_service.py — Merged: QuNetSim transport + Optical channel layers
+==========================================================================
+
+Architecture of the merge
+--------------------------
+Old version: QuNetSim handled everything. Loss was applied via
+  `network.packet_drop_rate`. No optical model.
+
+New version: Pure Python BB84, optical model, no QuNetSim transport.
+
+This merged version:
+  1. Optical channel runs FIRST (Ansys attenuation + OU drift + detector)
+     to decide if the photon survives and what state it arrives in.
+  2. If the photon survives, QuNetSim sends the (possibly drift-modified)
+     qubit from Alice to Bob using real Host.send_qubit / get_qubit.
+  3. If the photon is lost by the optical model, QuNetSim is skipped
+     entirely for that qubit — no wasted thread/socket overhead.
+  4. Eve intercept-resend runs after the optical model, before QuNetSim,
+     so Eve sees the same attenuated photon count as in the pure-Python path.
+
+Key design decision: QuNetSim does NOT apply its own loss
+  (network.packet_drop_rate is left at 0). All loss is owned by the
+  optical model. This keeps a single source of truth for photon loss
+  and makes the optical calibration from Ansys the authoritative model.
+
+The dark-count path is handled outside QuNetSim:
+  A dark count is a spontaneous detector click with no real photon.
+  QuNetSim cannot model this (it requires a real qubit object), so dark
+  counts are injected as synthetic measurement records directly, exactly
+  as in the pure-Python version.
+
+Polarization drift and QuNetSim coexistence:
+  The OU drift model rotates the photon's polarization state before it
+  enters QuNetSim. The drift output is decoded back to (basis, bit) using
+  the _ENCODE/_DECODE table. Alice then prepares the QuNetSim qubit in
+  the drift-modified state. Bob measures in a random basis. The result is
+  the same as the pure-Python path but with real QuNetSim qubit objects.
+"""
+
 from __future__ import annotations
 import logging
 import os
@@ -6,11 +46,12 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from typing import Optional
-from optical.channel import StatisticalChannel, FiberChannel
 
 import asyncio
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
+from optical.channel import StatisticalChannel, FiberChannel
 
 try:
     from models import (
@@ -30,20 +71,31 @@ except ModuleNotFoundError:
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("qkdl")
 
+# ---------------------------------------------------------------------------
+# Polarization encoding table (mirrors optical/channel.py)
+# (basis_value, bit) → physical polarization state
+# ---------------------------------------------------------------------------
+_ENCODE: dict[tuple[str, int], str] = {
+    ("Z", 0): "H",
+    ("Z", 1): "V",
+    ("X", 0): "D",
+    ("X", 1): "A",
+}
+_DECODE: dict[str, tuple[str, int]] = {v: k for k, v in _ENCODE.items()}
 
 
-#Classical channel models
+# ---------------------------------------------------------------------------
+# Classical channel models (unchanged)
+# ---------------------------------------------------------------------------
 class ClassicalSendReq(BaseModel):
     session_id:  str
     payload_hex: str
     mode:        str = "direct"
 
-
 class ClassicalSendResp(BaseModel):
     session_id: str
     delivered:  bool
     mode:       str
-
 
 class ClassicalRecvResp(BaseModel):
     session_id:  str
@@ -51,23 +103,21 @@ class ClassicalRecvResp(BaseModel):
     available:   bool
 
 
-
-#Post-stop cooldown
-COOLDOWN_S       = 2.5
-_cooldown_until  = 0.0
-_cooldown_lock   = threading.Lock()
-
+# ---------------------------------------------------------------------------
+# Post-stop cooldown (unchanged)
+# ---------------------------------------------------------------------------
+COOLDOWN_S      = 2.5
+_cooldown_until = 0.0
+_cooldown_lock  = threading.Lock()
 
 def _set_cooldown() -> None:
     with _cooldown_lock:
         global _cooldown_until
         _cooldown_until = time.time() + COOLDOWN_S
 
-
 def _cooldown_remaining() -> float:
     with _cooldown_lock:
         return max(0.0, _cooldown_until - time.time())
-
 
 def _clear_cooldown() -> None:
     with _cooldown_lock:
@@ -75,47 +125,61 @@ def _clear_cooldown() -> None:
         _cooldown_until = 0.0
 
 
-
-#NetworkSession
-#How long to wait after starting Bob's thread before Alice sends.
-#EQSN has no "ready" callback; this small delay ensures get_qubit()
-#is blocking before the qubit arrives.
-BOB_READY_DELAY = 0.015   #15 ms : empirically sufficient for EQSN
+# ---------------------------------------------------------------------------
+# BOB_READY_DELAY — same as old version
+# ---------------------------------------------------------------------------
+BOB_READY_DELAY = 0.015   # 15 ms: enough for EQSN get_qubit() to block first
 
 
+# ---------------------------------------------------------------------------
+# NetworkSession
+# ---------------------------------------------------------------------------
 class NetworkSession:
-    def __init__(self, session_id: str, loss_rate: float = 0.0, distance_km: float=0.0):
+    def __init__(
+        self,
+        session_id:  str,
+        loss_rate:   float = 0.0,
+        distance_km: float = 0.0,
+    ):
         self.session_id  = session_id
         self.loss_rate   = loss_rate
+        self.distance_km = distance_km
 
+        # --- Optical channel selection ---
+        # distance_km > 0  → FiberChannel (Ansys CSV + OU drift + detector)
+        # distance_km == 0 → StatisticalChannel (Step 0 baseline)
         if distance_km > 0.0:
             self.channel = FiberChannel(
                 distance_km=distance_km,
-                csv_path="optical/data/attenuation_table.csv",  
-            )  
+                csv_path="optical/data/attenuation_table.csv",
+            )
         else:
             self.channel = StatisticalChannel(loss_rate)
 
-        self.backend     = None
-        self.network     = None
-        self.alice_host  = None
-        self.bob_host    = None
-        self._active     = False
+        # QuNetSim objects (initialised in start())
+        self.backend    = None
+        self.network    = None
+        self.alice_host = None
+        self.bob_host   = None
+        self._active    = False
 
-        sid6             = session_id.replace("-", "")[:6]
-        self._alice_name = f"Alice-{sid6}"
-        self._bob_name   = f"Bob-{sid6}"
+        sid6              = session_id.replace("-", "")[:6]
+        self._alice_name  = f"Alice-{sid6}"
+        self._bob_name    = f"Bob-{sid6}"
 
-        #Measurement results
+        # Measurement results
         self._meas_queue: list[dict] = []
-        self._meas_lock   = threading.Lock()
+        self._meas_lock  = threading.Lock()
 
-        #Eve intercept state
-        self._eve_registered  = False
-        self._eve_label       = ""
+        # Eve intercept state
+        self._eve_registered = False
+        self._eve_label      = ""
         self._eve_meas_queue: list[dict] = []
-        self._eve_meas_lock   = threading.Lock()
+        self._eve_meas_lock  = threading.Lock()
 
+    # ------------------------------------------------------------------
+    # Lifecycle
+    # ------------------------------------------------------------------
     def start(self) -> None:
         from qunetsim.components import Host, Network
         from qunetsim.backends import EQSNBackend
@@ -130,22 +194,28 @@ class NetworkSession:
         self.alice_host.add_connection(self._bob_name)
         self.bob_host.add_connection(self._alice_name)
 
-        if self.loss_rate > 0:
-            self.network.packet_drop_rate = self.loss_rate
+        # IMPORTANT: do NOT set network.packet_drop_rate here.
+        # All loss is owned by the optical channel model, not QuNetSim.
+        # Setting packet_drop_rate would double-count photon loss.
 
         self.alice_host.start()
         self.bob_host.start()
         self.network.add_host(self.alice_host)
         self.network.add_host(self.bob_host)
-        
-        self.channel.reset_session() 
+
+        # Reset per-session state on the optical model
+        self.channel.reset_session()
+
         self._active = True
-        logger.info(f"[QKDL] Session {self.session_id[:8]} started")
+        logger.info(
+            f"[QKDL] Session {self.session_id[:8]} started "
+            f"channel={type(self.channel).__name__} "
+            f"distance={self.distance_km} km"
+        )
 
     def stop(self) -> None:
         if not self._active:
             return
-
         try:
             if self.alice_host:
                 try:
@@ -168,11 +238,17 @@ class NetworkSession:
             except Exception as e:
                 logger.debug(f"[QKDL] Singleton reset: {e}")
             _set_cooldown()
-            logger.info(f"[QKDL] Session {self.session_id[:8]} stopped (cooldown {COOLDOWN_S}s)")
+            logger.info(
+                f"[QKDL] Session {self.session_id[:8]} stopped "
+                f"(cooldown {COOLDOWN_S}s)"
+            )
 
     def is_active(self) -> bool:
         return self._active
 
+    # ------------------------------------------------------------------
+    # Measurement queues (unchanged)
+    # ------------------------------------------------------------------
     def push_measurement(self, result: dict) -> None:
         with self._meas_lock:
             self._meas_queue.append(result)
@@ -206,14 +282,9 @@ class NetworkSession:
         )
 
 
-#Session registry
-_sessions:      dict[str, NetworkSession] = {}
-_sessions_lock  = threading.Lock()
-_classical_inbox: dict[str, list[str]] = {}
-_classical_lock   = threading.Lock()
-
-
-#Eve intercept-resend
+# ---------------------------------------------------------------------------
+# Eve intercept-resend (unchanged from new version)
+# ---------------------------------------------------------------------------
 def _eve_intercept_qubit(
     alice_bit:   int,
     alice_basis: Basis,
@@ -222,7 +293,6 @@ def _eve_intercept_qubit(
 ) -> tuple[int, str]:
     eve_basis = random.choice(list(Basis))
     eve_bit   = alice_bit if eve_basis == alice_basis else random.randint(0, 1)
-
     session.push_eve_measurement({
         "qubit_id":    qubit_id,
         "alice_basis": alice_basis.value,
@@ -234,19 +304,37 @@ def _eve_intercept_qubit(
     return eve_bit, eve_basis.value
 
 
+# ---------------------------------------------------------------------------
+# Core: send one qubit through QuNetSim with optical pre-filtering
+#
+# This replaces the old _send_one_qubit + the new pure-Python path.
+#
+# Flow per qubit:
+#   1. Optical model: transmit(photon) → survived | None | dark_count
+#   2a. None        → record delivered=False, skip QuNetSim
+#   2b. dark_count  → inject synthetic measurement, skip QuNetSim
+#   2c. survived    → send through QuNetSim with drift-corrected state
+#   3. Eve path     → intercept-resend (after optical, before QuNetSim)
+# ---------------------------------------------------------------------------
 
-#Core: per-qubit Bob-first send
-def _send_one_qubit(
-    session:    NetworkSession,
-    qid:        int,
-    bit:        int,
-    basis:      Basis,
+PULSE_PERIOD_NS = 1000.0   # 1 MHz clock → 1000 ns per qubit slot
+
+
+def _send_one_qubit_qns(
+    session:       NetworkSession,
+    qid:           int,
+    effective_bit:  int,    # may differ from original if drift flipped the state
+    effective_basis: Basis, # may differ from original if drift flipped the state
 ) -> dict:
-    
+    """
+    Send a single qubit through QuNetSim and return Bob's measurement.
+    Uses the drift-corrected (effective) bit and basis so that polarization
+    rotation is faithfully represented in the quantum simulation.
+    """
     from qunetsim.objects import Qubit
 
     bob_result: dict = {}
-    bob_done    = threading.Event()
+    bob_done = threading.Event()
 
     def _bob_recv(
         res=bob_result, done=bob_done,
@@ -257,11 +345,11 @@ def _send_one_qubit(
             res["bit"]   = None
             res["basis"] = None
         else:
-            b = random.choice(list(Basis))
-            if b == Basis.DIAGONAL:
+            bob_b = random.choice(list(Basis))
+            if bob_b == Basis.DIAGONAL:
                 q.H()
             res["bit"]   = q.measure()
-            res["basis"] = b.value
+            res["basis"] = bob_b.value
         done.set()
 
     t = threading.Thread(
@@ -270,18 +358,17 @@ def _send_one_qubit(
     )
     t.start()
 
-    #Give Bob's thread time to enter get_qubit() before Alice sends
+    # Give Bob's thread time to enter get_qubit() before Alice sends
     time.sleep(BOB_READY_DELAY)
 
-    #Alice prepares and sends
+    # Alice prepares qubit in the drift-corrected state
     q = Qubit(session.alice_host)
-    if bit == 1:
+    if effective_bit == 1:
         q.X()
-    if basis == Basis.DIAGONAL:
+    if effective_basis == Basis.DIAGONAL:
         q.H()
     session.alice_host.send_qubit(session._bob_name, q, await_ack=False)
 
-    #Wait for Bob
     bob_done.wait(timeout=6.0)
     t.join(timeout=6.0)
 
@@ -293,41 +380,102 @@ def _send_one_qubit(
         "bob_bit":   bob_result.get("bit"),
     }
 
+
 def _process_batch_sync(
     session: NetworkSession,
     batch:   QubitBatch,
 ) -> list[dict]:
+    """
+    Process one batch of qubits.
+
+    For each qubit the pipeline is:
+
+      [Optical: attenuation + drift + detector]
+            ↓ photon lost?  → delivered=False, done
+            ↓ dark count?   → synthetic measurement, done
+            ↓ photon survived (possibly drift-modified state)
+      [Eve: intercept-resend]  ← only if _eve_registered
+            ↓
+      [QuNetSim: real qubit send/receive]
+    """
     results = []
-
-
-    # Step 3: simulate time advancing per qubit.
-    # At 1 MHz clock, each qubit slot = 1000 ns.
-    # We use qubit_id as the time index so dead time is correctly
-    # enforced across the batch even if qubit_ids are non-contiguous.
-    PULSE_PERIOD_NS = 1000.0   # 1 MHz clock → 1000 ns per slot
 
     for qrec in batch.qubits:
         qid   = qrec.qubit_id
         bit   = qrec.bit
         basis = qrec.basis
-        t_ns  = qid * PULSE_PERIOD_NS 
+        t_ns  = qid * PULSE_PERIOD_NS
 
-        #Loss model
-        photon_in   = {"qubit_id": qid, "bit": bit, "basis": basis.value}
+        # ----------------------------------------------------------------
+        # STEP 1 — Optical channel (Ansys attenuation + OU drift + detector)
+        # ----------------------------------------------------------------
+        photon_in  = {"qubit_id": qid, "bit": bit, "basis": basis.value}
         transmitted = session.channel.transmit(photon_in, t_ns=t_ns)
 
         if transmitted is None:
+            # Photon lost in fiber or missed by detector
             results.append({
-                "qubit_id": qid, "delivered": False,
-                "bob_basis": None, "bob_bit": None,
+                "qubit_id":  qid,
+                "delivered": False,
+                "bob_basis": None,
+                "bob_bit":   None,
             })
             continue
 
-        #Eve intercept-resend
-        if session._eve_registered:
-            eve_bit, eve_basis_val = _eve_intercept_qubit(bit, basis, session, qid)
+        # ----------------------------------------------------------------
+        # STEP 2 — Dark count: synthetic measurement, no QuNetSim needed
+        # A dark count is a spontaneous detector click — no real photon.
+        # QuNetSim cannot represent this, so we inject it directly.
+        # ----------------------------------------------------------------
+        if transmitted.get("dark_count", False):
             bob_basis = random.choice(list(Basis))
-            bob_bit   = eve_bit if bob_basis.value == eve_basis_val else random.randint(0, 1)
+            bob_bit   = random.randint(0, 1)
+            results.append({
+                "qubit_id":  qid,
+                "delivered": True,
+                "bob_basis": bob_basis.value,
+                "bob_bit":   bob_bit,
+            })
+            session.push_measurement({
+                "qubit_id":    qid,
+                "basis":       bob_basis.value,
+                "bit_result":  bob_bit,
+                "delivered":   True,
+                "intercepted": False,
+                "dark_count":  True,
+            })
+            continue
+
+        # ----------------------------------------------------------------
+        # STEP 3 — Extract drift-corrected state for QuNetSim preparation
+        # The optical model may have rotated the polarization (OU drift).
+        # We decode the survived photon back to (basis, bit) so Alice
+        # prepares the QuNetSim qubit in the correct drifted state.
+        # ----------------------------------------------------------------
+        effective_basis_str = transmitted.get("basis", basis.value)
+        effective_bit       = transmitted.get("bit",   bit)
+        try:
+            effective_basis = Basis(effective_basis_str)
+        except ValueError:
+            effective_basis = basis
+
+        # ----------------------------------------------------------------
+        # STEP 4 — Eve intercept-resend (after optical, before QuNetSim)
+        # Eve intercepts the photon that survived the fiber, not the
+        # original photon. She gets a slightly drift-modified state.
+        # ----------------------------------------------------------------
+        if session._eve_registered:
+            eve_bit, eve_basis_val = _eve_intercept_qubit(
+                effective_bit, effective_basis, session, qid
+            )
+            # Bob measures Eve's resent photon — pure Python, no QuNetSim.
+            # Eve's resent photon is a fresh coherent state; QuNetSim would
+            # just add overhead without changing the probability model.
+            bob_basis = random.choice(list(Basis))
+            bob_bit   = (
+                eve_bit if bob_basis.value == eve_basis_val
+                else random.randint(0, 1)
+            )
             results.append({
                 "qubit_id":  qid,
                 "delivered": True,
@@ -343,46 +491,40 @@ def _process_batch_sync(
             })
             continue
 
-        #Normal path - pure Python BB84 (no QuNetSim noise)
-        is_dark = transmitted.get("dark_count", False)
+        # ----------------------------------------------------------------
+        # STEP 5 — QuNetSim: real qubit send/receive
+        # Only photons that survived the optical model and were not
+        # intercepted by Eve reach this point.
+        # Alice prepares the qubit in the drift-corrected state.
+        # ----------------------------------------------------------------
+        res = _send_one_qubit_qns(
+            session,
+            qid,
+            effective_bit,
+            effective_basis,
+        )
+        results.append(res)
 
-        if is_dark:
-            # Dark count: Bob records a random basis and random bit.
-            # This photon was never sent by Alice — it will survive sifting
-            # with 50% probability (random basis match) and be wrong 50%
-            # of the time → contributes ~0.5 × p_dark to QBER.
-            bob_basis = random.choice(list(Basis))
-            bob_bit   = random.randint(0, 1)
-        else:
-            # Real detection: apply drift-aware bit assignment
-            received_basis_str = transmitted["basis"]
-            bob_basis          = random.choice(list(Basis))
-
-            if bob_basis.value == basis.value:
-                # Bob chose Alice's original basis
-                bob_bit = bit if received_basis_str == basis.value else 1 - bit
-            else:
-                bob_bit = random.randint(0, 1)   # discarded in sifting
-
-        results.append({
-            "qubit_id":  qid,
-            "delivered": True,
-            "bob_basis": bob_basis.value,
-            "bob_bit":   bob_bit,
-        })
-        session.push_measurement({
-            "qubit_id":    qid,
-            "basis":       bob_basis.value,
-            "bit_result":  bob_bit,
-            "delivered":   True,
-            "intercepted": False,
-        })
+        if res["delivered"]:
+            session.push_measurement({
+                "qubit_id":    qid,
+                "basis":       res["bob_basis"],
+                "bit_result":  res["bob_bit"],
+                "delivered":   True,
+                "intercepted": False,
+                "dark_count":  False,
+            })
 
     return results
 
+
+# ---------------------------------------------------------------------------
+# FastAPI app (routes unchanged from both versions)
+# ---------------------------------------------------------------------------
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("[QKDL] Service started")
+    logger.info("[QKDL] Service started (QuNetSim + Optical merged)")
     yield
     with _sessions_lock:
         sessions = list(_sessions.values())
@@ -392,11 +534,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="QKDL - QKD Link Layer (QuNetSim)",
-    description="Quantum transport layer for BB84",
-    version="1.1.0",
+    title="QKDL - QKD Link Layer (QuNetSim + Optical)",
+    description="Quantum transport via QuNetSim + Ansys optical channel",
+    version="2.0.0",
     lifespan=lifespan,
 )
+
+_sessions:        dict[str, NetworkSession] = {}
+_sessions_lock    = threading.Lock()
+_classical_inbox: dict[str, list[str]] = {}
+_classical_lock   = threading.Lock()
 
 
 @app.post("/network/init", response_model=NetworkInitResp)
@@ -414,7 +561,10 @@ async def init_network(req: NetworkInitReq):
             del _sessions[sid]
 
         if req.session_id in _sessions:
-            return NetworkInitResp(session_id=req.session_id, statut="ready", message="Already active")
+            return NetworkInitResp(
+                session_id=req.session_id, statut="ready",
+                message="Already active",
+            )
 
         if _sessions:
             active = list(_sessions.keys())
@@ -423,8 +573,12 @@ async def init_network(req: NetworkInitReq):
                 detail=f"Session already active: {active[0][:8]}. Stop it first.",
             )
 
-    session = NetworkSession(req.session_id, loss_rate=req.loss_rate, distance_km=req.distance_km,)
-    loop    = asyncio.get_event_loop()
+    session = NetworkSession(
+        req.session_id,
+        loss_rate=req.loss_rate,
+        distance_km=req.distance_km,
+    )
+    loop = asyncio.get_event_loop()
     try:
         await loop.run_in_executor(None, session.start)
     except Exception as e:
@@ -436,7 +590,7 @@ async def init_network(req: NetworkInitReq):
     return NetworkInitResp(
         session_id=req.session_id,
         statut="ready",
-        message=f"Network ready for {req.n_qubits} qubits",
+        message=f"Network ready — channel={type(session.channel).__name__} d={req.distance_km}km",
     )
 
 
@@ -476,7 +630,10 @@ async def register_interceptor(session_id: str, req: InterceptRegisterReq):
     with _sessions_lock:
         session = _sessions.get(session_id)
     if not session:
-        raise HTTPException(status_code=404, detail=f"Session {session_id[:8]} not yet active. Retry in 1s.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session {session_id[:8]} not yet active. Retry in 1s.",
+        )
     if not session.is_active():
         raise HTTPException(status_code=409, detail="Session is not active")
     session.register_interceptor(req.eve_node_id, req.eve_label)
@@ -498,8 +655,12 @@ async def eve_measurements(session_id: str):
         if m is None:
             break
         records.append(m)
-    return {"session_id": session_id, "intercepted_n": len(records),
-            "measurements": records, "eve_label": session._eve_label}
+    return {
+        "session_id":    session_id,
+        "intercepted_n": len(records),
+        "measurements":  records,
+        "eve_label":     session._eve_label,
+    }
 
 
 @app.post("/batch/send", response_model=SendBatchResp)
@@ -509,8 +670,14 @@ async def send_batch(req: SendBatchReq):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     loop    = asyncio.get_event_loop()
-    results = await loop.run_in_executor(None, _process_batch_sync, session, req.batch)
-    return SendBatchResp(session_id=req.session_id, batch_id=req.batch.batch_id, results=results)
+    results = await loop.run_in_executor(
+        None, _process_batch_sync, session, req.batch
+    )
+    return SendBatchResp(
+        session_id=req.session_id,
+        batch_id=req.batch.batch_id,
+        results=results,
+    )
 
 
 @app.get("/qubit/receive/{session_id}")
@@ -522,13 +689,21 @@ async def receive_qubit(session_id: str):
     meas = session.pop_measurement()
     if meas:
         return {
-            "session_id": session_id, "qubit_id": meas["qubit_id"],
-            "basis": meas["basis"], "bit_result": meas["bit_result"],
-            "delivered": meas["delivered"], "queue_empty": False,
-            "remaining": session.measurement_count(),
+            "session_id": session_id,
+            "qubit_id":   meas["qubit_id"],
+            "basis":      meas["basis"],
+            "bit_result": meas["bit_result"],
+            "delivered":  meas["delivered"],
+            "queue_empty": False,
+            "remaining":  session.measurement_count(),
         }
-    return {"session_id": session_id, "qubit_id": None, "bit_result": None,
-            "queue_empty": True, "remaining": 0}
+    return {
+        "session_id":  session_id,
+        "qubit_id":    None,
+        "bit_result":  None,
+        "queue_empty": True,
+        "remaining":   0,
+    }
 
 
 @app.get("/qubit/count/{session_id}")
@@ -545,7 +720,9 @@ async def send_classical(req: ClassicalSendReq):
     with _sessions_lock:
         session = _sessions.get(req.session_id)
     if not session or not session.is_active():
-        raise HTTPException(status_code=404, detail="Session not found or inactive")
+        raise HTTPException(
+            status_code=404, detail="Session not found or inactive"
+        )
 
     loop = asyncio.get_event_loop()
 
@@ -558,7 +735,9 @@ async def send_classical(req: ClassicalSendReq):
             if msgs:
                 m       = msgs[-1] if isinstance(msgs, list) else msgs
                 content = getattr(m, "content", m)
-                received["hex"] = content if isinstance(content, str) else content.hex()
+                received["hex"] = (
+                    content if isinstance(content, str) else content.hex()
+                )
             ready.set()
 
         threading.Thread(target=_bob_listen, daemon=True).start()
@@ -572,12 +751,16 @@ async def send_classical(req: ClassicalSendReq):
         ready.wait(timeout=10.0)
         if "hex" in received:
             with _classical_lock:
-                _classical_inbox.setdefault(req.session_id, []).append(received["hex"])
+                _classical_inbox.setdefault(
+                    req.session_id, []
+                ).append(received["hex"])
             return True
         return False
 
     delivered = await loop.run_in_executor(None, _do_send)
-    return ClassicalSendResp(session_id=req.session_id, delivered=delivered, mode=req.mode)
+    return ClassicalSendResp(
+        session_id=req.session_id, delivered=delivered, mode=req.mode
+    )
 
 
 @app.get("/classical/recv/{session_id}", response_model=ClassicalRecvResp)
@@ -585,15 +768,18 @@ async def recv_classical(session_id: str):
     with _classical_lock:
         inbox = _classical_inbox.get(session_id, [])
         if inbox:
-            return ClassicalRecvResp(session_id=session_id, payload_hex=inbox.pop(0), available=True)
-    return ClassicalRecvResp(session_id=session_id, payload_hex="", available=False)
+            return ClassicalRecvResp(
+                session_id=session_id,
+                payload_hex=inbox.pop(0),
+                available=True,
+            )
+    return ClassicalRecvResp(
+        session_id=session_id, payload_hex="", available=False
+    )
+
 
 @app.get("/channel/status/{session_id}")
 async def channel_status(session_id: str):
-    """
-    Return the current physical channel state for a session.
-    Callable mid-session by workers or monitoring tools.
-    """
     with _sessions_lock:
         session = _sessions.get(session_id)
     if not session:
@@ -606,28 +792,22 @@ async def channel_status(session_id: str):
         "channel":      ch.describe(),
     }
 
-    # Decompose QBER budget
     if hasattr(ch, "qber_floor"):
         physical_floor = ch.qber_floor()
         report["qber_budget"] = {
-            "physical_floor":    round(physical_floor, 8),
-            "eve_threshold":     round(max(0.0, 0.11 - physical_floor), 8),
-            # If measured QBER exceeds physical_floor by more than
-            # this margin, the excess is attributable to Eve.
-            "margin_note": (
-                "Eve detectable if measured_QBER > physical_floor + margin"
-            ),
+            "physical_floor": round(physical_floor, 8),
+            "eve_threshold":  round(max(0.0, 0.11 - physical_floor), 8),
+            "margin_note":    "Eve detectable if measured_QBER > physical_floor + margin",
         }
 
-    # Live detector counters
     if hasattr(ch, "detector") and ch.detector:
         report["detector_counters"] = ch.detector.counters()
 
-    # Live OU drift state
     if hasattr(ch, "drift") and ch.drift and hasattr(ch.drift, "describe"):
         report["drift_state"] = ch.drift.describe()
 
     return report
+
 
 @app.get("/health")
 async def health():
@@ -636,10 +816,9 @@ async def health():
         active = list(_sessions.keys())
         counts = {sid: _sessions[sid].measurement_count() for sid in active}
         eve_on = {sid: _sessions[sid]._eve_registered for sid in active}
-        # Step 3: add detector stats per session
         detector_stats = {}
         for sid in active:
-            ch = _sessions[sid].channel
+            ch    = _sessions[sid].channel
             entry = {}
             if hasattr(ch, "detector") and ch.detector:
                 entry["detector"] = ch.detector.counters()
@@ -647,13 +826,13 @@ async def health():
                 entry["drift"] = ch.drift.describe()
             detector_stats[sid] = entry
     return {
-        "statut":              "ok",
-        "active_sessions":     active,
-        "measurement_queues":  counts,
-        "eve_active":          eve_on,
-        "detector_stats":      detector_stats,   # ← ADD
-        "cooldown_remaining":  round(remaining, 2),
-        "ready":               remaining == 0 and not active,
+        "statut":             "ok",
+        "active_sessions":    active,
+        "measurement_queues": counts,
+        "eve_active":         eve_on,
+        "detector_stats":     detector_stats,
+        "cooldown_remaining": round(remaining, 2),
+        "ready":              remaining == 0 and not active,
     }
 
 
