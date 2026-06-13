@@ -28,6 +28,8 @@ import httpx
 logger     = logging.getLogger("alice")
 logging.basicConfig(level=logging.INFO)
 
+
+
 KME_URL    = os.getenv("KME_URL",   "http://localhost:8000")
 MY_URL     = os.getenv("ALICE_URL", "http://localhost:8001")
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "10"))
@@ -317,7 +319,15 @@ class AliceNode(BaseNode):
 alice = AliceNode()
 app   = alice.build_app(title="SAE-A  Alice (Sender)", port=8001)
 
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.post("/start")
 async def start_session(
     receiver_label:    str   = "bob-1",

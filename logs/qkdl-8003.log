@@ -1,3 +1,6 @@
 ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use
 WARNING:qkdl:[QKDL] *** Eve registered session=114c5383 label=eve-1 ***
 WARNING:qkdl:[QKDL] *** Eve registered session=ab247b89 label=eve-1 ***
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8003): address already in use
+WARNING:qkdl:[QKDL] *** Eve registered session=299ae3d5 label=eve-1 ***
+WARNING:qkdl:[QKDL] *** Eve registered session=be6ed81d label=eve-1 ***

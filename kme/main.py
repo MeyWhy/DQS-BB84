@@ -35,8 +35,10 @@ from kme.node_registry import (
     list_nodes, notify_node,
 )
 
+
 logger = logging.getLogger("kme")
 logging.basicConfig(level=logging.INFO)
+
 
 HTTP_TO = 30.0
 
@@ -106,7 +108,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 def _get_session_or_404(r, session_id: str) -> dict:
     session = load_session(r, session_id)
     if not session:
