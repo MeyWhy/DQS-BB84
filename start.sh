@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-#start.sh : lancer the full QKD stack
-
-#Usage:
-#./start.sh            #2 pairs (default)
-#./start.sh 1          #1 pair only (alice-1/bob-1 + qkdl:8003)
-#
-#Requires:
-#- redis-server on PATH
-#- Python env with all dependencies installed
-
 set -e
 PAIRS=${1:-2}
 

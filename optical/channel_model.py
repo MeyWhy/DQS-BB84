@@ -1,52 +1,3 @@
-"""
-optical/channel_model.py
-========================
-Step 1 — Ansys-derived channel model.
-
-ROLE IN THE ARCHITECTURE
--------------------------
-This module is the single bridge between Ansys and your BB84 simulator.
-
-    Ansys Lumerical
-        ↓  (exports)
-    optical/data/attenuation_table.csv
-        ↓  (loaded once at startup by)
-    ChannelModel
-        ↓  (queried per photon by)
-    FiberChannel.transmit()
-        ↓
-    BB84 pipeline (qunetsim_service.py)
-
-ChannelModel does exactly three things:
-  1. Load the CSV (once, at __init__)
-  2. Interpolate T(d) for any distance in [0, max_distance_km]
-  3. Expose transmission_prob(d) and qber_floor(d) — same interface
-     as StatisticalChannel so the rest of the code never changes
-
-WHY INTERPOLATION?
-------------------
-Ansys exports discrete points (e.g. every 10 km). Your simulator runs
-at arbitrary distances (e.g. 47.3 km). scipy.interpolate.interp1d fills
-the gaps using linear interpolation — accurate enough given the smooth
-exponential shape of fiber attenuation.
-
-If scipy is not available, a pure-Python fallback is used automatically.
-
-USAGE
------
-    from optical.channel_model import ChannelModel
-
-    # Load once at startup
-    model = ChannelModel("optical/data/attenuation_table.csv")
-
-    # Query per session
-    p = model.transmission_prob(50.0)   # → ~0.01 at 50 km
-    q = model.qber_floor(50.0)          # → 0.0 at Step 1 (no PMD yet)
-
-    # FiberChannel uses it internally — you never call it directly
-    # from qunetsim_service.py
-"""
-
 from __future__ import annotations
 
 import csv
@@ -55,7 +6,7 @@ import os
 from pathlib import Path
 from typing import Callable
 
-# scipy is optional — pure Python fallback is used if not installed
+#scipy is optional - pure Python fallback is used if not installed
 try:
     from scipy.interpolate import interp1d as _scipy_interp1d
     _SCIPY_AVAILABLE = True
@@ -67,11 +18,7 @@ _DEFAULT_CSV = _DATA_DIR / "attenuation_table.csv"
 
 
 def _linear_interp(xs: list[float], ys: list[float]) -> Callable[[float], float]:
-    """
-    Pure-Python piecewise linear interpolation.
-    Used when scipy is not installed.
-    Clamps to boundary values outside [xs[0], xs[-1]].
-    """
+ 
     def _interp(x: float) -> float:
         if x <= xs[0]:
             return ys[0]
@@ -91,32 +38,6 @@ def _linear_interp(xs: list[float], ys: list[float]) -> Callable[[float], float]
 
 
 class ChannelModel:
-    """
-    Ansys-derived optical fiber channel model.
-
-    Loads a CSV produced by Ansys (or generate_synthetic_csv()) and
-    provides a transmission_prob(distance_km) function via interpolation.
-
-    Parameters
-    ----------
-    csv_path : str | Path
-        Path to the attenuation CSV.
-        Default: optical/data/attenuation_table.csv
-    pmd_csv_path : str | Path | None
-        Optional path to a PMD table (Step 3).
-        If None, qber_floor() returns 0.0 at all distances.
-    alpha_fallback : float
-        If the CSV is missing or invalid, fall back to this attenuation
-        coefficient (dB/km) and compute T(d) analytically.
-        Default: 0.2 dB/km (SMF-28 at 1550 nm).
-
-    Attributes
-    ----------
-    max_distance_km : float
-        Maximum distance in the loaded table.
-    source : str
-        "csv" if loaded from file, "fallback" if formula was used.
-    """
 
     def __init__(
         self,
@@ -143,20 +64,16 @@ class ChannelModel:
             self.source          = "fallback"
             self._csv_path       = None
 
-        # --- Load PMD table (optional, Step 3) ---
+        # Load PMD table
         if pmd_csv_path is not None:
             pmd_path = Path(pmd_csv_path)
             pmd_d, pmd_phi = self._load_pmd_csv(pmd_path)
             if pmd_d:
                 phi_fn        = self._build_interp(pmd_d, pmd_phi)
-                # P(flip) = sin²(Δφ/2) — standard Malus-law QBER from phase shift
+                # P(flip) = sin²(Δφ/2) - standard Malus-law QBER from phase shift
                 self._pmd_fn  = lambda d: math.sin(phi_fn(d) / 2) ** 2
             else:
                 self._pmd_fn  = None
-
-    # ------------------------------------------------------------------
-    # Public interface (same as StatisticalChannel)
-    # ------------------------------------------------------------------
 
     def transmission_prob(self, distance_km: float) -> float:
         """
@@ -164,7 +81,7 @@ class ChannelModel:
 
         Clamps to [0, 1]. Returns 1.0 at distance=0.
         For distances beyond the CSV range, returns the last CSV value
-        (conservative — typically near 0 for long distances).
+        (conservative - typically near 0 for long distances).
         """
         if distance_km <= 0:
             return 1.0
@@ -182,7 +99,6 @@ class ChannelModel:
         return max(0.0, min(0.5, self._pmd_fn(distance_km)))
 
     def describe(self, distance_km: float = 0.0) -> dict:
-        """Structured summary for /health and logging."""
         return {
             "model":            "ansys_csv_channel",
             "source":           self.source,
@@ -197,14 +113,8 @@ class ChannelModel:
             "pmd_loaded":       self._pmd_fn is not None,
             "scipy_used":       _SCIPY_AVAILABLE,
         }
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _load_csv(path: Path) -> tuple[list[float], list[float]]:
-        """Load distance_km and transmission_prob columns from CSV."""
         if not path.exists():
             return [], []
         distances, transmissions = [], []
@@ -241,7 +151,7 @@ class ChannelModel:
 
     @staticmethod
     def _build_interp(xs: list[float], ys: list[float]) -> Callable[[float], float]:
-        """Build interpolation function — scipy if available, pure Python otherwise."""
+        """Build interpolation function - scipy if available, pure Python otherwise."""
         if _SCIPY_AVAILABLE:
             fn = _scipy_interp1d(
                 xs, ys,
@@ -251,3 +161,25 @@ class ChannelModel:
             )
             return lambda d: float(fn(d))
         return _linear_interp(xs, ys)
+    
+    """
+This module is the single bridge between Ansys and your BB84 simulator.
+
+    Ansys Lumerical
+        ↓  (exports)
+    optical/data/attenuation_table.csv
+        ↓  (loaded once at startup by)
+    ChannelModel
+        ↓  (queried per photon by)
+    FiberChannel.transmit()
+        ↓
+    BB84 pipeline (qunetsim_service.py)
+
+ChannelModel does exactly three things:
+  1. Load the CSV (once, at __init__)
+  2. Interpolate T(d) for any distance in [0, max_distance_km]
+  3. Expose transmission_prob(d) and qber_floor(d) - same interface
+     as StatisticalChannel so the rest of the code never changes
+
+
+"""

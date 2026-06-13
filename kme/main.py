@@ -97,7 +97,7 @@ def pick_free_qkdl(r) -> str | None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"[KME] Started — QKDL pool: {QKDL_POOL}")
+    logger.info(f"[KME] Started - QKDL pool: {QKDL_POOL}")
     yield
     logger.info("[KME] Stopped")
 
@@ -183,7 +183,7 @@ async def create_session(
 
     locked = _acquire_qkdl_lock(r, qkdl_url, session_id)
     if not locked:
-        #Lost atomic race — try once more
+        #Lost atomic race - try once more
         qkdl_url = pick_free_qkdl(r)
         if not qkdl_url:
             raise HTTPException(status_code=409,
@@ -202,7 +202,7 @@ async def create_session(
             detail=f"Receiver node '{req.receiver_label}' not registered",
         )
 
-    #Resolve Eve (optional) — fail fast if label given but not found
+    #Resolve Eve (optional) fail fast if label given but not found
     eve_node = None
     if req.interceptor_label:
         eve_node = find_node_by_label(r, req.interceptor_label)
@@ -242,7 +242,7 @@ async def create_session(
     }
     save_session(r, session)
 
-    #Background tasks — QKDL init
+    #Background tasks - QKDL init
     background_tasks.add_task(
         _init_qkdl, session_id, req.n_qubits, req.loss_rate, req.distance_km, qkdl_url
     )

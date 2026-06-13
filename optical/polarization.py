@@ -37,7 +37,7 @@ def _nearest_state(angle: float) -> str:
 
 class PolarizationDriftChannel:
     """
-    Step 2 — Static Gaussian polarization rotation noise.
+     Static Gaussian polarization rotation noise.
 
     Models birefringence in optical fiber as a single Gaussian rotation
     applied independently to each photon.  This is the simplest physically

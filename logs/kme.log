@@ -6332,3 +6332,901 @@ INFO:     127.0.0.1:47094 - "POST /sessions/69a4a965-c033-4493-b258-4aa2b661c0db
 WARNING:kme.registry:[Registry] Webhook failed → alice-4 (http://localhost:8104/webhook):
 INFO:kme:[KME] 671 measurements posted for session 3579bc32-e482-4ce8-8391-5bbcb29f4840
 INFO:     127.0.0.1:47092 - "POST /sessions/3579bc32-e482-4ce8-8391-5bbcb29f4840/measurements HTTP/1.1" 202 Accepted
+INFO:     Started server process [275095]
+INFO:     Waiting for application startup.
+INFO:kme:[KME] Started — QKDL pool: ['http://localhost:8003']
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:kme.registry:[Registry] Node registered: alice-1 (f1378b3d)
+INFO:     127.0.0.1:45592 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: bob-1 (f56fdc20)
+INFO:     127.0.0.1:42680 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: eve-1 (4ce064f9)
+INFO:     127.0.0.1:42688 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme:[KME] Session ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:46586 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:46600 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=ca87da6a url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session ca87da6a-e3d6-46a1-9191-0fd1728cf6d4
+INFO:     127.0.0.1:46616 - "POST /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:46600 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46600 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46600 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46600 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39358 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39358 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41362 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:kme:[KME] 1024 measurements posted for session ca87da6a-e3d6-46a1-9191-0fd1728cf6d4
+INFO:     127.0.0.1:60180 - "POST /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:60188 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "POST /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:60180 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 QBER=0.00%
+INFO:     127.0.0.1:60208 - "POST /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:46586 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48628 - "GET /sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 HTTP/1.1" 200 OK
+INFO:kme:[KME] Session 67e37cbb-95a1-4e62-95a0-ea170457218c created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:51276 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=67e37cbb url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session 67e37cbb-95a1-4e62-95a0-ea170457218c
+INFO:     127.0.0.1:51296 - "POST /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51290 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38494 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38494 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45942 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c%20 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45942 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45942 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45942 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49448 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52522 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52522 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52522 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33282 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33282 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33286 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/measurements HTTP/1.1" 200 OK
+INFO:kme:[KME] 1024 measurements posted for session 67e37cbb-95a1-4e62-95a0-ea170457218c
+INFO:     127.0.0.1:33294 - "POST /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:33298 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33308 - "POST /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:33294 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=67e37cbb-95a1-4e62-95a0-ea170457218c QBER=0.00%
+INFO:     127.0.0.1:33324 - "POST /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51276 - "GET /sessions/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38936 - "GET /keys/67e37cbb-95a1-4e62-95a0-ea170457218c HTTP/1.1" 200 OK
+INFO:kme:[KME] Session 232b5201-8c81-4992-bafa-34c4bd1613f8 created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:54920 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=232b5201 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session 232b5201-8c81-4992-bafa-34c4bd1613f8
+INFO:     127.0.0.1:54936 - "POST /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53122 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/measurements HTTP/1.1" 200 OK
+INFO:kme:[KME] 200 measurements posted for session 232b5201-8c81-4992-bafa-34c4bd1613f8
+INFO:     127.0.0.1:53126 - "POST /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53142 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53152 - "POST /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:53126 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=232b5201-8c81-4992-bafa-34c4bd1613f8 QBER=0.00%
+INFO:     127.0.0.1:53166 - "POST /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54924 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54920 - "GET /sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 HTTP/1.1" 200 OK
+INFO:kme:[KME] Session 61db4fb5-fdd1-498e-a16b-1268462d36d6 created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:51414 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=61db4fb5 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session 61db4fb5-fdd1-498e-a16b-1268462d36d6
+INFO:     127.0.0.1:51430 - "POST /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36830 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36844 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36854 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36864 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36878 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36886 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36902 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36906 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:kme:[KME] 22 measurements posted for session 61db4fb5-fdd1-498e-a16b-1268462d36d6
+INFO:     127.0.0.1:36916 - "POST /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:36922 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36936 - "POST /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:36916 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=61db4fb5-fdd1-498e-a16b-1268462d36d6 QBER=0.00%
+INFO:     127.0.0.1:36952 - "POST /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51420 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 HTTP/1.1" 200 OK
+INFO:kme:[KME] Session eba24224-d13f-4da9-a95b-8f1aa533cb6b created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:54266 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=eba24224 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session eba24224-d13f-4da9-a95b-8f1aa533cb6b
+INFO:     127.0.0.1:49318 - "POST /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49326 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49330 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49340 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49344 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36424 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36426 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36440 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36456 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:kme:[KME] 21 measurements posted for session eba24224-d13f-4da9-a95b-8f1aa533cb6b
+INFO:     127.0.0.1:36458 - "POST /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:36474 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36490 - "POST /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:36458 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=eba24224-d13f-4da9-a95b-8f1aa533cb6b QBER=0.00%
+INFO:     127.0.0.1:36500 - "POST /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54266 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54270 - "GET /sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b HTTP/1.1" 200 OK
+INFO:kme:[KME] Session 8c0846b2-3521-4597-b83d-f269d2093097 created sender=f1378b3d receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:54186 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=8c0846b2 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f56fdc20 joined session 8c0846b2-3521-4597-b83d-f269d2093097
+INFO:     127.0.0.1:54202 - "POST /sessions/8c0846b2-3521-4597-b83d-f269d2093097/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48498 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48502 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48516 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48518 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48522 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48536 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48552 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48558 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:kme:[KME] 12 measurements posted for session 8c0846b2-3521-4597-b83d-f269d2093097
+INFO:     127.0.0.1:48574 - "POST /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:48586 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48592 - "POST /sessions/8c0846b2-3521-4597-b83d-f269d2093097/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:48574 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097/sift HTTP/1.1" 200 OK
+WARNING:kme:[KME] Session 8c0846b2-3521-4597-b83d-f269d2093097 aborted: INSUFFICIENT_BITS QBER=100.00%
+INFO:     127.0.0.1:48604 - "POST /sessions/8c0846b2-3521-4597-b83d-f269d2093097/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:54186 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /sessions/8c0846b2-3521-4597-b83d-f269d2093097 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:kme:[KME] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [275095]
+INFO:     Started server process [307737]
+INFO:     Waiting for application startup.
+INFO:kme:[KME] Started — QKDL pool: ['http://localhost:8003']
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:kme.registry:[Registry] Node registered: alice-1 (1fffb74a)
+INFO:     127.0.0.1:54404 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: bob-1 (8ce3da30)
+INFO:     127.0.0.1:54408 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: eve-1 (6a7400b4)
+INFO:     127.0.0.1:54424 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme:[KME] Session f63bfdc6-4664-402e-899b-e87ce183244b created sender=1fffb74a receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:54404 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=f63bfdc6 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob 8ce3da30 joined session f63bfdc6-4664-402e-899b-e87ce183244b
+INFO:     127.0.0.1:54408 - "POST /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34148 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34152 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34164 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38164 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38178 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38180 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38192 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38204 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:kme:[KME] 16 measurements posted for session f63bfdc6-4664-402e-899b-e87ce183244b
+INFO:     127.0.0.1:38212 - "POST /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:38218 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38226 - "POST /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:38212 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b/sift HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54404 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34136 - "GET /sessions/f63bfdc6-4664-402e-899b-e87ce183244b HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:kme:[KME] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [307737]
+INFO:     Started server process [308077]
+INFO:     Waiting for application startup.
+INFO:kme:[KME] Started — QKDL pool: ['http://localhost:8003']
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:kme.registry:[Registry] Node registered: alice-1 (cc538075)
+INFO:     127.0.0.1:40710 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: bob-1 (f2357758)
+INFO:     127.0.0.1:40722 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: eve-1 (46ce666c)
+INFO:     127.0.0.1:40730 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40710 - "POST /sessions HTTP/1.1" 409 Conflict
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:kme:[KME] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [308077]
+INFO:     Started server process [308121]
+INFO:     Waiting for application startup.
+INFO:kme:[KME] Started — QKDL pool: ['http://localhost:8003']
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:kme.registry:[Registry] Node registered: alice-1 (b4fc11c0)
+INFO:     127.0.0.1:51796 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: bob-1 (f5ee8ccb)
+INFO:     127.0.0.1:51806 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme.registry:[Registry] Node registered: eve-1 (90464f67)
+INFO:     127.0.0.1:44020 - "POST /nodes/register HTTP/1.1" 200 OK
+INFO:kme:[KME] Session 98c0267a-db5b-4314-a833-5e3b91a2164d created sender=b4fc11c0 receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:51796 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=98c0267a url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f5ee8ccb joined session 98c0267a-db5b-4314-a833-5e3b91a2164d
+INFO:     127.0.0.1:51806 - "POST /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44042 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44056 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46322 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46326 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46336 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46338 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46340 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46344 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:kme:[KME] 15 measurements posted for session 98c0267a-db5b-4314-a833-5e3b91a2164d
+INFO:     127.0.0.1:46358 - "POST /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:46366 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46380 - "POST /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:46358 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=98c0267a-db5b-4314-a833-5e3b91a2164d QBER=0.00%
+INFO:     127.0.0.1:46390 - "POST /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51796 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44034 - "GET /sessions/98c0267a-db5b-4314-a833-5e3b91a2164d HTTP/1.1" 200 OK
+INFO:kme:[KME] Session b87ca36c-3997-40d7-b236-aa50e547d93f created sender=b4fc11c0 receiver=bob-1 qkdl=http://localhost:8003
+INFO:     127.0.0.1:57398 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=b87ca36c url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f5ee8ccb joined session b87ca36c-3997-40d7-b236-aa50e547d93f
+INFO:     127.0.0.1:57408 - "POST /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/join HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48126 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48132 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48138 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48140 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48156 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48162 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48174 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48184 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:kme:[KME] 8 measurements posted for session b87ca36c-3997-40d7-b236-aa50e547d93f
+INFO:     127.0.0.1:48194 - "POST /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:48196 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48206 - "POST /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:48194 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/sift HTTP/1.1" 200 OK
+WARNING:kme:[KME] Session b87ca36c-3997-40d7-b236-aa50e547d93f aborted: INSUFFICIENT_BITS
+INFO:     127.0.0.1:48208 - "POST /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:57400 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57398 - "GET /sessions/b87ca36c-3997-40d7-b236-aa50e547d93f HTTP/1.1" 200 OK
+INFO:kme:[KME] Session bd305c7e-caa3-4598-9013-f3bdfacc201e created sender=b4fc11c0 receiver=bob-1 qkdl=http://localhost:8003 interceptor=eve-1
+INFO:     127.0.0.1:41710 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=bd305c7e url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f5ee8ccb joined session bd305c7e-caa3-4598-9013-f3bdfacc201e
+INFO:     127.0.0.1:41732 - "POST /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8010/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41734 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41740 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56876 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56888 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56918 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56926 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:kme:[KME] 42 measurements posted for session bd305c7e-caa3-4598-9013-f3bdfacc201e
+INFO:     127.0.0.1:56936 - "POST /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:56948 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56958 - "POST /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:56936 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/sift HTTP/1.1" 200 OK
+INFO:kme:[KME] Key ACTIVE session=bd305c7e-caa3-4598-9013-f3bdfacc201e QBER=0.00%
+INFO:     127.0.0.1:56970 - "POST /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8010/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41710 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41724 - "GET /sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e HTTP/1.1" 200 OK
+INFO:kme:[KME] Session d6e42942-0761-4905-b000-ab893911cb04 created sender=b4fc11c0 receiver=bob-1 qkdl=http://localhost:8003 interceptor=eve-1
+INFO:     127.0.0.1:41412 - "POST /sessions HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:41418 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/init "HTTP/1.1 200 OK"
+INFO:kme:[KME] QKDL initialised session=d6e42942 url=http://localhost:8003 (attempt 1)
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:kme:[KME] Bob f5ee8ccb joined session d6e42942-0761-4905-b000-ab893911cb04
+INFO:     127.0.0.1:41424 - "POST /sessions/d6e42942-0761-4905-b000-ab893911cb04/join HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8010/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41412 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41418 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41432 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41412 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:kme:[KME] 200 measurements posted for session d6e42942-0761-4905-b000-ab893911cb04
+INFO:     127.0.0.1:41424 - "POST /sessions/d6e42942-0761-4905-b000-ab893911cb04/measurements HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8001/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41444 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04/measurements HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41446 - "POST /sessions/d6e42942-0761-4905-b000-ab893911cb04/sift HTTP/1.1" 202 Accepted
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41424 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04/sift HTTP/1.1" 200 OK
+WARNING:kme:[KME] Session d6e42942-0761-4905-b000-ab893911cb04 aborted: QBER_TOO_HIGH QBER=21.05%
+INFO:     127.0.0.1:41454 - "POST /sessions/d6e42942-0761-4905-b000-ab893911cb04/key HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST http://localhost:8002/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8010/webhook "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://localhost:8003/network/stop "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41418 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41412 - "GET /sessions/d6e42942-0761-4905-b000-ab893911cb04 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Finished server process [308121]

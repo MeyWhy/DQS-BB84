@@ -1,22 +1,3 @@
-"""
-optical/channel.py  — Step 1 update
-=====================================
-Changes from Step 0
---------------------
-  1. FiberChannel now accepts an optional ChannelModel.
-     When provided, transmission probability comes from the Ansys CSV
-     instead of the analytical formula. The formula is still the fallback.
-
-  2. FiberChannel.__init__ drift-assignment bug fixed:
-     Previously `self.drift` was assigned twice (PolarizationDriftChannel
-     then immediately overwritten). Now there is a single assignment.
-
-  3. StatisticalChannel is unchanged — still the Step 0 baseline.
-
-  4. ChannelModel import is lazy (inside FiberChannel.__init__) so that
-     StatisticalChannel can be imported in test environments that don't
-     have the data/ directory present.
-"""
 
 from __future__ import annotations
 import math
@@ -28,7 +9,7 @@ logger = logging.getLogger("optical.channel")
 from .polarization import PolarizationDriftChannel, OUDriftChannel
 from .detector import SinglePhotonDetector
 
-# Physical polarization encoding table — shared by both channel classes
+#Physical polarization encoding table - shared by both channel classes
 _ENCODE: dict[tuple[str, int], str] = {
     ("Z", 0): "H",
     ("Z", 1): "V",
@@ -39,17 +20,6 @@ _DECODE: dict[str, tuple[str, int]] = {v: k for k, v in _ENCODE.items()}
 
 
 class FiberChannel:
-    """
-    Step 1+ — Physical fiber channel.
-
-    Transmission probability source (in priority order):
-      1. ChannelModel (Ansys CSV) — if csv_path is given or channel_model
-         is passed directly
-      2. Analytical formula: T(d) = 10^(-α·d/10) — fallback / Step 1 default
-
-    All higher-step effects (polarization drift, detector) are
-    independently toggleable and default to ON.
-    """
 
     def __init__(
         self,
@@ -61,9 +31,9 @@ class FiberChannel:
         eta:             float = 0.85,
         dark_count_hz:   float = 100.0,
         dead_time_ns:    float = 50.0,
-        # Step 1: Ansys CSV source (either a path or a pre-built model)
+        #Ansys CSV source (either a path or a pre-built model)
         csv_path:        str | None = None,
-        channel_model=   None,   # ChannelModel instance or None
+        channel_model=   None,   #ChannelModel instance or None
     ):
         if distance_km < 0:
             raise ValueError(f"distance_km must be >= 0, got {distance_km}")
@@ -71,7 +41,7 @@ class FiberChannel:
         self.distance_km     = distance_km
         self.alpha_db_per_km = alpha_db_per_km
 
-        # --- Step 1: choose transmission source ---
+        #choose transmission source
         self._channel_model = None
         if channel_model is not None:
             self._channel_model = channel_model
@@ -81,10 +51,10 @@ class FiberChannel:
             self._channel_model = ChannelModel(csv_path)
             self._transmission  = self._channel_model.transmission_prob(distance_km)
         else:
-            # Analytical fallback (same formula as before Step 1)
+            #Analytical fallback (same formula as before)
             self._transmission = 10 ** (-(alpha_db_per_km * distance_km) / 10)
 
-        # --- Step 2/4: polarization drift (single assignment, bug fixed) ---
+        #polarization drift (single assignment)
         if enable_drift and distance_km > 0:
             if use_ou_drift:
                 self.drift = OUDriftChannel.from_distance(distance_km)
@@ -93,7 +63,7 @@ class FiberChannel:
         else:
             self.drift = None
 
-        # --- Step 3: single-photon detector ---
+        #single-photon detector
         self.detector = (
             SinglePhotonDetector(
                 eta=eta,
@@ -105,13 +75,13 @@ class FiberChannel:
         )
 
     def transmit(self, photon: dict | None, t_ns: float = 0.0) -> dict | None:
-        # Step 1 — attenuation (formula or Ansys CSV)
+        #attenuation (formula or Ansys CSV)
         survived = None
         if photon is not None:
             if random.random() <= self._transmission:
                 survived = photon
 
-        # Step 2 — polarization drift
+        #olarization drift
         if survived is not None and self.drift is not None:
             basis_val = survived.get("basis")
             bit       = survived.get("bit")
@@ -123,7 +93,7 @@ class FiberChannel:
                         new_basis, new_bit = _DECODE[drifted_state]
                         survived = {**survived, "basis": new_basis, "bit": new_bit}
 
-        # Step 3 — detector
+        #detector
         if self.detector is not None:
             clicked, reason = self.detector.detect(survived, t_ns)
             if not clicked:
@@ -145,7 +115,7 @@ class FiberChannel:
             self.detector.qber_contribution(self._transmission)
             if self.detector else 0.0
         )
-        # PMD floor from ChannelModel (Step 3 CSV — 0.0 until then)
+        #PMD floor from ChannelModel (CSV - 0.0 until then)
         pmd_floor = (
             self._channel_model.qber_floor(self.distance_km)
             if self._channel_model else 0.0
@@ -178,11 +148,7 @@ class FiberChannel:
 
 
 class StatisticalChannel:
-    """
-    Step 0 — probabilistic loss model (unchanged from Step 0).
-    Kept here so qunetsim_service.py import stays identical.
-    """
-
+    #probabilistic loss model
     def __init__(self, loss_rate: float = 0.0):
         if not 0.0 <= loss_rate <= 1.0:
             raise ValueError(f"loss_rate must be in [0, 1], got {loss_rate}")

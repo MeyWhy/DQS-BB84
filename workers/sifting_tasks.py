@@ -33,7 +33,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
     n_qubits   = session_meta.get("n_qubits", 0)
     kme_url    = session_meta.get("kme_url", KME_URL).rstrip("/")
 
-    #1. Aggregate delivered qubit IDs from QTT results 
+    #1\ Aggregate delivered qubit IDs from QTT results 
     delivered_ids: set[int] = set()
     for br in batch_results:
         if not br:
@@ -46,7 +46,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
         f"qtt_delivered={n_delivered}/{n_qubits}  waiting for Bob"
     )
 
-    #2. Wait for Bob to finish measuring and post to KME 
+    #2\ Wait for Bob to finish measuring and post to KME 
     #Deadline matches Bob's own poll deadline so we never give up before Bob.
     deadline = time.time() + QKDL_FIXED_OVERHEAD + n_qubits * QKDL_SECS_PER_QUBIT
     raw_meas = []
@@ -91,7 +91,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
         )
         return _abort(session_id, n_delivered, n_qubits, "BOB_TIMEOUT", kme_url)
 
-    #3. Load Alice's bits+bases from Redis 
+    #3\ Load Alice's bits+bases from Redis 
     alice_state = load_alice_state(session_id)
     if not alice_state:
         logger.error(
@@ -103,7 +103,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
     alice_bits  = alice_state["bits"]
     alice_bases = alice_state["bases"]   #list of "Z" / "X" strings
 
-    #4. Basis reconciliation by qubit_id 
+    #4\ Basis reconciliation by qubit_id 
     meas_by_id    = {m["qubit_id"]: m for m in raw_meas}
     alice_sifted: list[int] = []
     bob_sifted:   list[int] = []
@@ -123,7 +123,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
         f"[ST] session={session_id[:8]} n_sifted={n_sifted}/{n_qubits}"
     )
 
-    #5. Post Alice's bases to KME so Bob can do his local sift 
+    #5\ Post Alice's bases to KME so Bob can do his local sift 
     alice_bases_payload = [
         (qid, alice_bases[qid])
         for qid in sorted(meas_by_id.keys())
@@ -152,7 +152,7 @@ def assemble_and_sift_task(batch_results: list[dict], session_meta: dict) -> dic
         "n_qubits":     n_qubits,
         "sample_seed":  sample_seed,
         "kme_url":      kme_url,
-        "qkdl_url":     session_meta.get("qkdl_url", "http://localhost:8003"),  # ← ADD
+        "qkdl_url":     session_meta.get("qkdl_url", "http://localhost:8003"),  #← ADD
 
     }
 
@@ -171,21 +171,13 @@ def _abort(session_id, n_delivered, n_qubits, reason, kme_url=None) -> dict:
     }
 
 
-#
-#QKT  QBER & Key Derivation Task
-#
 
+#QKT:  QBER & Key Derivation Task
 @celery_app.task(
     name="workers.sifting_tasks.qber_key_task",
     queue="sifting",
 )
 def qber_key_task(sifting_result: dict) -> dict:
-    """
-    QKT: Receives ST output, computes QBER, derives final key if safe.
-
-    Uses the shared sample_seed so Alice and Bob compute QBER on the same
-    subset  essential for consistent eavesdropping detection.
-    """
     session_id = sifting_result["session_id"]
     kme_url    = sifting_result.get("kme_url", KME_URL).rstrip("/")
     qkdl_url   = sifting_result.get("qkdl_url", "http://localhost:8003") 
@@ -224,7 +216,7 @@ def qber_key_task(sifting_result: dict) -> dict:
             "session_id":    session_id,
             "status":        "aborted",
             "error_message": "INSUFFICIENT_BITS",
-            "qber":          1.0,
+            "qber":         0.0,
             "key_final":     "",
             "key_hash":      "",
             "n_sifted":      n_sifted,
@@ -259,9 +251,9 @@ def qber_key_task(sifting_result: dict) -> dict:
         f"[QKT] session={session_id[:8]} QBER={qber*100:.2f}% "
         f"threshold={QBER_THRESHOLD*100:.1f}%"
     )
-    # In qber_key_task, after computing qber:
+    #In qber_key_task, after computing qber:
 
-    # Fetch physical floor from QKDL channel status
+    #Fetch physical floor from QKDL channel status
     physical_floor = 0.0
 
     try:
@@ -273,7 +265,7 @@ def qber_key_task(sifting_result: dict) -> dict:
 
     qber_analysis = decompose_qber(qber, physical_floor)
 
-    # Log the decomposition
+    #Log the decomposition
     logger.info(
         f"[QKT] QBER analysis session={session_id[:8]}: "
         f"measured={qber_analysis['measured']*100:.3f}% "
@@ -282,8 +274,8 @@ def qber_key_task(sifting_result: dict) -> dict:
         f"confidence={qber_analysis['confidence']}"
     )
 
-    # Include in the key upload payload (extend your existing KeyUpload call)
-    # Add to the metadata / error_message field or extend the model if needed
+    #Include in the key upload payload (extend your existing KeyUpload call)
+    #Add to the metadata / error_message field or extend the model if needed
     if qber > QBER_THRESHOLD:
         logger.warning(
             f"[QKT] QBER_TOO_HIGH session={session_id[:8]} "
@@ -329,10 +321,8 @@ def qber_key_task(sifting_result: dict) -> dict:
     }
 
 
-#
-#NT  Notification Task
-#
 
+#NT  Notification Task
 @celery_app.task(
     bind=True,
     name="workers.sifting_tasks.notify_kme_task",

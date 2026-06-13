@@ -6,40 +6,6 @@ logger = logging.getLogger("optical.detector")
 
 
 class SinglePhotonDetector:
-    """
-    Step 3 — Single photon detector with realistic imperfections.
-
-    Three physically distinct noise sources, each independently modelled:
-
-    η (efficiency)
-        Even when a photon arrives, the detector misses it with probability
-        1 − η. For SNSPDs (superconducting nanowire): η ≈ 0.85–0.95.
-        For silicon APDs (cheaper, room-temp): η ≈ 0.50–0.70.
-
-    Dark counts
-        The detector fires spontaneously with no photon present.
-        Caused by thermal noise and quantum tunnelling. Specified as a
-        rate in Hz; converted to per-pulse probability using the system
-        clock rate. Commercial SNSPD: ~100 Hz. APD: ~1000–10000 Hz.
-
-    Dead time
-        After any click (real or dark), the detector is blind for
-        dead_time_ns nanoseconds. Limits maximum sustainable count rate.
-        SNSPD: ~50 ns. APD: ~10–50 μs (much longer).
-
-    Parameters
-    ----------
-    eta : float
-        Detection efficiency in [0, 1].
-    dark_count_hz : float
-        Dark count rate in Hz.
-    dead_time_ns : float
-        Recovery time after a detection in nanoseconds.
-    clock_rate_hz : float
-        System pulse rate in Hz. Used to convert dark_count_hz to a
-        per-pulse probability. Default 1 MHz matches typical QKD systems.
-    """
-
     def __init__(
         self,
         eta:           float = 0.85,
@@ -59,53 +25,33 @@ class SinglePhotonDetector:
         self.dead_time_ns  = dead_time_ns
         self.clock_rate_hz = clock_rate_hz
 
-        # Probability of a dark count per pulse window
+        #Probability of a dark count per pulse window
         self._dark_prob_per_pulse = dark_count_hz / clock_rate_hz
 
-        # Track last click time for dead time enforcement
+        #Track last click time for dead time enforcement
         self._last_click_ns: float = -dead_time_ns - 1.0
 
-        # Diagnostic counters (reset per session via reset_counters())
+        #Diagnostic counters (reset per session via reset_counters())
         self._n_photon_detections = 0
         self._n_dark_detections   = 0
         self._n_missed_photons    = 0
         self._n_dead_time_blocks  = 0
 
-    # ------------------------------------------------------------------
-    # Core detection logic
-    # ------------------------------------------------------------------
 
     def detect(self, photon: dict | None, t_ns: float) -> tuple[bool, str]:
-        """
-        Attempt to detect a photon (or generate a dark count) at time t_ns.
-
-        Parameters
-        ----------
-        photon : dict | None
-            Photon record from channel.transmit(), or None if photon was lost.
-        t_ns : float
-            Current simulation time in nanoseconds. Used for dead time.
-
-        Returns
-        -------
-        (clicked, reason) : tuple[bool, str]
-            clicked — True if the detector fired.
-            reason  — one of: "signal", "dark", "dead", "missed", "no_photon"
-                      Used for diagnostics; not needed by the caller in normal use.
-        """
-        # Dead time check — detector is blind regardless of photon or dark count
+        #Dead time check - detector is blind regardless of photon or dark count
         if (t_ns - self._last_click_ns) < self.dead_time_ns:
             self._n_dead_time_blocks += 1
             return False, "dead"
 
-        # Dark count fires independently of photon presence
+        #Dark count fires independently of photon presence
         if random.random() < self._dark_prob_per_pulse:
             self._last_click_ns = t_ns
             self._n_dark_detections += 1
             logger.debug("Dark count at t=%.1f ns", t_ns)
             return True, "dark"
 
-        # Real photon detection
+        #Real photon detection
         if photon is not None:
             if random.random() < self.eta:
                 self._last_click_ns = t_ns
@@ -116,10 +62,6 @@ class SinglePhotonDetector:
                 return False, "missed"
 
         return False, "no_photon"
-
-    # ------------------------------------------------------------------
-    # Derived metrics
-    # ------------------------------------------------------------------
 
     def qber_contribution(self, fiber_transmission: float) -> float:
         """
@@ -197,3 +139,37 @@ class SinglePhotonDetector:
             f"dark={self.dark_count_hz} Hz, "
             f"dead={self.dead_time_ns} ns)"
         )
+    
+     """
+    Single photon detector with realistic imperfections.
+
+    Three physically distinct noise sources, each independently modelled:
+
+    η (efficiency)
+        Even when a photon arrives, the detector misses it with probability
+        1 − η. For SNSPDs (superconducting nanowire): η ≈ 0.85–0.95.
+        For silicon APDs (cheaper, room-temp): η ≈ 0.50–0.70.
+
+    Dark counts
+        The detector fires spontaneously with no photon present.
+        Caused by thermal noise and quantum tunnelling. Specified as a
+        rate in Hz; converted to per-pulse probability using the system
+        clock rate. Commercial SNSPD: ~100 Hz. APD: ~1000–10000 Hz.
+
+    Dead time
+        After any click (real or dark), the detector is blind for
+        dead_time_ns nanoseconds. Limits maximum sustainable count rate.
+        SNSPD: ~50 ns. APD: ~10–50 μs (much longer).
+
+    Parameters
+    ----------
+    eta : float
+        Detection efficiency in [0, 1].
+    dark_count_hz : float
+        Dark count rate in Hz.
+    dead_time_ns : float
+        Recovery time after a detection in nanoseconds.
+    clock_rate_hz : float
+        System pulse rate in Hz. Used to convert dark_count_hz to a
+        per-pulse probability. Default 1 MHz matches typical QKD systems.
+    """

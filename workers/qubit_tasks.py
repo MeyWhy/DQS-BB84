@@ -6,7 +6,7 @@ from models import QubitBatch
 
 logger = logging.getLogger("worker.qubit")
 
-
+#QTT
 @celery_app.task(
     bind=True,
     name="workers.qubit_tasks.send_batch_task",

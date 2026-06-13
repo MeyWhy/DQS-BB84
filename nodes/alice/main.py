@@ -94,7 +94,7 @@ def _terminate_session_worker(proc: subprocess.Popen, session_id: str) -> None:
         return   #already dead
 
     try:
-        proc.terminate()   #SIGTERM → Celery warm shutdown
+        proc.terminate()   #SIGTERM -> Celery warm shutdown
         try:
             proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
@@ -118,7 +118,7 @@ class AliceNode(BaseNode):
             label=os.getenv("ALICE_LABEL", "alice-1"),
             callback_url=f"{MY_URL}/webhook",
         )
-        #session_id → {n_qubits, batch_size, qkdl_url, bits, bases,
+        #session_id -> {n_qubits, batch_size, qkdl_url, bits, bases,
         #queue_name, worker_proc, done}
         self._alice_state: dict[str, dict] = {}
 
@@ -229,10 +229,6 @@ class AliceNode(BaseNode):
         n_batches     = (n + batch_size - 1) // batch_size
 
         #Wait for the per-session worker to connect to Redis.
-        #The worker was spawned in start_bb84_session(); by the time
-        #receiver_joined fires (KME notifies Bob, Bob joins, KME notifies
-        #Alice) at least 12s have already elapsed.  The remaining sleep
-        #closes any gap on fast machines.
         await asyncio.sleep(WORKER_WARMUP_S)
 
         logger.info(
@@ -281,7 +277,7 @@ class AliceNode(BaseNode):
 
         logger.info(
             f"[Alice] Pipeline dispatched session={session_id[:8]} "
-            f"({n_batches} QTT → ST → QKT → NT) queue={q_name}"
+            f"({n_batches} QTT -> ST -> QKT -> NT) queue={q_name}"
         )
 
     def _cleanup(self, session_id: str) -> None:
@@ -289,7 +285,7 @@ class AliceNode(BaseNode):
         if state:
             state["done"] = True
             #Terminate the per-session worker in a background thread so
-            #we don't block Alice's async event loop during shutdown.
+            #we don't block Alice's async event loop during shutdown
             import threading
             threading.Thread(
                 target=_terminate_session_worker,
@@ -300,7 +296,6 @@ class AliceNode(BaseNode):
         self._alice_state.pop(session_id, None)   #idempotent
 
     async def _poll_tick(self) -> None:
-        """Defensive fallback: detect sessions that ended without a webhook."""
         for sid in list(self._alice_state.keys()):
             state = self._alice_state.get(sid)
             if not state or state.get("done"):

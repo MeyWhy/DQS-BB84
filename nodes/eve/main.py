@@ -24,19 +24,6 @@ with role="monitor" to Eve so it can perceive the content of the session
    measurement log (alice_basis, eve_basis, basis_match, bits).
    She persists these for the thesis QBER comparison.
 
-What Eve does NOT do
-
-- She never reads Alice's or Bob's key.
-- She does not participate in sifting or key derivation.
-- She does not relay classical messages.
-
-Usage
-
-Start Eve via network.yaml / node_runner, or manually:
-    EVE_LABEL=eve-1 EVE_URL=http://localhost:8010 uvicorn nodes.eve.main:app ...
-
-Then start an intercepted session from Alice:
-    POST http://localhost:8001/start?receiver_label=bob-1&interceptor_label=eve-1
 """
 import asyncio
 import logging
@@ -73,7 +60,7 @@ class EveNode(BaseNode):
             label=os.getenv("EVE_LABEL", "eve-1"),
             callback_url=f"{MY_URL}/webhook",
         )
-        #session_id → {qkdl_url, registered, meas_log, done}
+        #session_id -> {qkdl_url, registered, meas_log, done}
         self._eve_state: dict[str, dict] = {}
 
     

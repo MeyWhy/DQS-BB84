@@ -1,55 +1,3 @@
-"""
-optical/ansys_export.py
-=======================
-Step 1 — Ansys attenuation table generator / validator.
-
-ROLE IN THE ARCHITECTURE
--------------------------
-In a real workflow:
-  1. You open Ansys Lumerical MODE or FDTD
-  2. Define a silica SMF-28 fiber waveguide
-  3. Sweep length 0 → 120 km
-  4. Export transmission power ratio at each distance
-  5. Save as  optical/data/attenuation_table.csv
-
-This module does two things:
-
-  A) generate_synthetic_csv()
-       Produces the exact same CSV structure that Ansys would export,
-       using the standard attenuation formula:
-           T(d) = 10 ^ (- alpha_dB_per_km * d / 10)
-       with alpha = 0.2 dB/km (SMF-28 at 1550 nm, telecom standard).
-       Use this as a stand-in until you run the real Ansys simulation.
-       When you do run Ansys, just replace the CSV file — zero code changes.
-
-  B) validate_csv()
-       Checks that a CSV (synthetic or Ansys-exported) has the expected
-       columns, monotonically decreasing transmission, and no missing values.
-       Call this once at startup to catch bad exports early.
-
-CSV FORMAT (what Ansys should export / what this generates)
------------------------------------------------------------
-  distance_km, transmission_prob
-  0,           1.000000
-  10,          0.630957
-  20,          0.398107
-  ...
-  120,         0.000631
-
-REAL ANSYS WORKFLOW (for reference)
--------------------------------------
-  In Lumerical MODE:
-    1. File → New → Waveguide simulation
-    2. Material: SiO2 (silica), n = 1.4682 at 1550 nm
-    3. Geometry: length = variable, core diameter = 9 μm (SMF-28)
-    4. Source: fundamental HE11 mode at λ = 1550 nm
-    5. Monitor: transmission at fiber output
-    6. Parameter sweep: length from 0 to 120 km, step 10 km
-    7. Export: Results → Transmission → Export to CSV
-    8. Rename columns to: distance_km, transmission_prob
-    9. Place at: optical/data/attenuation_table.csv
-"""
-
 from __future__ import annotations
 
 import csv
@@ -85,25 +33,7 @@ def generate_synthetic_csv(
     distances_km: list[int] = None,
     overwrite: bool         = False,
 ) -> Path:
-    """
-    Generate a synthetic Ansys-format attenuation CSV.
-
-    Parameters
-    ----------
-    output_path : path-like
-        Where to write the CSV. Default: optical/data/attenuation_table.csv
-    alpha_db_per_km : float
-        Fiber attenuation coefficient. Default 0.2 dB/km (SMF-28 at 1550 nm).
-    distances_km : list[int] | None
-        Distance points to simulate. Default: 0, 10, 20, ..., 120 km.
-    overwrite : bool
-        If False (default), skip generation if file already exists.
-
-    Returns
-    -------
-    Path
-        Path to the written CSV file.
-    """
+  
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -123,25 +53,7 @@ def generate_synthetic_csv(
 
 
 def validate_csv(csv_path: str | Path) -> dict:
-    """
-    Validate an attenuation CSV (synthetic or Ansys-exported).
 
-    Checks:
-      - File exists
-      - Has columns: distance_km, transmission_prob
-      - All values are numeric
-      - Distances are non-negative and increasing
-      - Transmission values are in (0, 1]
-      - Transmission is monotonically non-increasing with distance
-
-    Returns
-    -------
-    dict with keys:
-        valid   : bool
-        rows    : int
-        issues  : list[str]  (empty if valid)
-        summary : dict       (min/max distance and transmission)
-    """
     csv_path = Path(csv_path)
     issues: list[str] = []
 
@@ -245,3 +157,53 @@ if __name__ == "__main__":
     path = generate_synthetic_csv(overwrite=True)
     print(f"Generated: {path}")
     print_table(path)
+
+    """
+ Ansys attenuation table generator / validator.
+
+This module does two things:
+
+  A) generate_synthetic_csv()
+       Produces the exact same CSV structure that Ansys would export,
+       using the standard attenuation formula:
+           T(d) = 10 ^ (- alpha_dB_per_km * d / 10)
+       with alpha = 0.2 dB/km (SMF-28 at 1550 nm, telecom standard).
+       Use this as a stand-in until you run the real Ansys simulation.
+       When you do run Ansys, just replace the CSV file — zero code changes.
+
+  B) validate_csv()
+       Checks that a CSV (synthetic or Ansys-exported) has the expected
+       columns, monotonically decreasing transmission, and no missing values.
+       Call this once at startup to catch bad exports early.
+
+ROLE IN THE ARCHITECTURE
+-------------------------
+In a real workflow:
+  1. You open Ansys Lumerical MODE or FDTD
+  2. Define a silica SMF-28 fiber waveguide
+  3. Sweep length 0 → 120 km
+  4. Export transmission power ratio at each distance
+  5. Save as  optical/data/attenuation_table.csv
+
+CSV FORMAT (what Ansys should export / what this generates)
+-----------------------------------------------------------
+  distance_km, transmission_prob
+  0,           1.000000
+  10,          0.630957
+  20,          0.398107
+  ...
+  120,         0.000631
+
+REAL ANSYS WORKFLOW (for reference)
+-------------------------------------
+  In Lumerical MODE:
+    1. File → New → Waveguide simulation
+    2. Material: SiO2 (silica), n = 1.4682 at 1550 nm
+    3. Geometry: length = variable, core diameter = 9 μm (SMF-28)
+    4. Source: fundamental HE11 mode at λ = 1550 nm
+    5. Monitor: transmission at fiber output
+    6. Parameter sweep: length from 0 to 120 km, step 10 km
+    7. Export: Results → Transmission → Export to CSV
+    8. Rename columns to: distance_km, transmission_prob
+    9. Place at: optical/data/attenuation_table.csv
+"""

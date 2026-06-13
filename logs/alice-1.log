@@ -931,3 +931,533 @@ INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/71cfd2f4-ebcf-40a1-b
 INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/71cfd2f4-ebcf-40a1-bf1e-eebdf60e1cf7 "HTTP/1.1 200 OK"
 INFO:     Shutting down
 INFO:     Finished server process [973]
+INFO:     Started server process [275102]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-1] Registered → node_id=f1378b3d
+INFO:node.base:[alice-1] Started  node_id=f1378b3d role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=ca87da6a queue=qubit_send_ca87da6a pid=275127
+INFO:alice:[Alice] Session ca87da6a created n_qubits=1024 qkdl=http://localhost:8003 queue=qubit_send_ca87da6a
+INFO:     127.0.0.1:34236 - "POST /start?receiver_label=bob-1&n_qubits=1024&batch_size=10&distance_km=0&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:34242 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined ca87da6a  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=ca87da6a batches=103 qkdl=http://localhost:8003 queue=qubit_send_ca87da6a
+INFO:alice:[Alice] Pipeline dispatched session=ca87da6a (103 QTT → ST → QKT → NT) queue=qubit_send_ca87da6a
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41274 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/ca87da6a-e3d6-46a1-9191-0fd1728cf6d4 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=ca87da6a status=done
+INFO:alice:[Alice] Worker terminated session=ca87da6a pid=275127
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=67e37cbb queue=qubit_send_67e37cbb pid=289567
+INFO:alice:[Alice] Session 67e37cbb created n_qubits=1024 qkdl=http://localhost:8003 queue=qubit_send_67e37cbb
+INFO:     127.0.0.1:49784 - "POST /start?receiver_label=bob-1&n_qubits=1024&batch_size=10&distance_km=0&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49794 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 67e37cbb  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=67e37cbb batches=103 qkdl=http://localhost:8003 queue=qubit_send_67e37cbb
+INFO:alice:[Alice] Pipeline dispatched session=67e37cbb (103 QTT → ST → QKT → NT) queue=qubit_send_67e37cbb
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:49598 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/67e37cbb-95a1-4e62-95a0-ea170457218c "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=67e37cbb status=done
+INFO:alice:[Alice] Worker terminated session=67e37cbb pid=289567
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=232b5201 queue=qubit_send_232b5201 pid=303979
+INFO:alice:[Alice] Session 232b5201 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_232b5201
+INFO:     127.0.0.1:38828 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=0&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38840 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 232b5201  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=232b5201 batches=20 qkdl=http://localhost:8003 queue=qubit_send_232b5201
+INFO:alice:[Alice] Pipeline dispatched session=232b5201 (20 QTT → ST → QKT → NT) queue=qubit_send_232b5201
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:36982 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/232b5201-8c81-4992-bafa-34c4bd1613f8 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=232b5201 status=done
+INFO:alice:[Alice] Worker terminated session=232b5201 pid=303979
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=61db4fb5 queue=qubit_send_61db4fb5 pid=306814
+INFO:alice:[Alice] Session 61db4fb5 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_61db4fb5
+INFO:     127.0.0.1:59404 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=20&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 61db4fb5  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=61db4fb5 batches=20 qkdl=http://localhost:8003 queue=qubit_send_61db4fb5
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Pipeline dispatched session=61db4fb5 (20 QTT → ST → QKT → NT) queue=qubit_send_61db4fb5
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:50998 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/61db4fb5-fdd1-498e-a16b-1268462d36d6 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=61db4fb5 status=done
+INFO:alice:[Alice] Worker terminated session=61db4fb5 pid=306814
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=eba24224 queue=qubit_send_eba24224 pid=307163
+INFO:alice:[Alice] Session eba24224 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_eba24224
+INFO:     127.0.0.1:43072 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=30&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58496 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined eba24224  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=eba24224 batches=20 qkdl=http://localhost:8003 queue=qubit_send_eba24224
+INFO:alice:[Alice] Pipeline dispatched session=eba24224 (20 QTT → ST → QKT → NT) queue=qubit_send_eba24224
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:41740 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/eba24224-d13f-4da9-a95b-8f1aa533cb6b "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=eba24224 status=done
+INFO:alice:[Alice] Worker terminated session=eba24224 pid=307163
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=8c0846b2 queue=qubit_send_8c0846b2 pid=307490
+INFO:alice:[Alice] Session 8c0846b2 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_8c0846b2
+INFO:     127.0.0.1:35090 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=50&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35106 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 8c0846b2  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=8c0846b2 batches=20 qkdl=http://localhost:8003 queue=qubit_send_8c0846b2
+INFO:alice:[Alice] Pipeline dispatched session=8c0846b2 (20 QTT → ST → QKT → NT) queue=qubit_send_8c0846b2
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:40100 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/8c0846b2-3521-4597-b83d-f269d2093097 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=8c0846b2 status=aborted
+INFO:alice:[Alice] Worker terminated session=8c0846b2 pid=307490
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [275102]
+INFO:     Started server process [307747]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-1] Registered → node_id=1fffb74a
+INFO:node.base:[alice-1] Started  node_id=1fffb74a role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=f63bfdc6 queue=qubit_send_f63bfdc6 pid=307769
+INFO:alice:[Alice] Session f63bfdc6 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_f63bfdc6
+INFO:     127.0.0.1:46234 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=50&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:46240 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined f63bfdc6  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=f63bfdc6 batches=20 qkdl=http://localhost:8003 queue=qubit_send_f63bfdc6
+INFO:alice:[Alice] Pipeline dispatched session=f63bfdc6 (20 QTT → ST → QKT → NT) queue=qubit_send_f63bfdc6
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:51354 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/f63bfdc6-4664-402e-899b-e87ce183244b "HTTP/1.1 200 OK"
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [307747]
+INFO:     Started server process [308084]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-1] Registered → node_id=cc538075
+INFO:node.base:[alice-1] Started  node_id=cc538075 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 409 Conflict"
+INFO:     127.0.0.1:34398 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=50&loss_rate=0&retry_enabled=false HTTP/1.1" 409 Conflict
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [308084]
+INFO:     Started server process [308128]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[alice-1] Registered → node_id=b4fc11c0
+INFO:node.base:[alice-1] Started  node_id=b4fc11c0 role=sender
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=98c0267a queue=qubit_send_98c0267a pid=308150
+INFO:alice:[Alice] Session 98c0267a created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_98c0267a
+INFO:     127.0.0.1:38520 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=50&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38536 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined 98c0267a  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=98c0267a batches=20 qkdl=http://localhost:8003 queue=qubit_send_98c0267a
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Pipeline dispatched session=98c0267a (20 QTT → ST → QKT → NT) queue=qubit_send_98c0267a
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:40488 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/98c0267a-db5b-4314-a833-5e3b91a2164d "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=98c0267a status=done
+INFO:alice:[Alice] Worker terminated session=98c0267a pid=308150
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=b87ca36c queue=qubit_send_b87ca36c pid=308413
+INFO:alice:[Alice] Session b87ca36c created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_b87ca36c
+INFO:     127.0.0.1:42946 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=60&loss_rate=0&retry_enabled=false HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:42960 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined b87ca36c  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=b87ca36c batches=20 qkdl=http://localhost:8003 queue=qubit_send_b87ca36c
+INFO:alice:[Alice] Pipeline dispatched session=b87ca36c (20 QTT → ST → QKT → NT) queue=qubit_send_b87ca36c
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:58488 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/b87ca36c-3997-40d7-b236-aa50e547d93f "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=b87ca36c status=aborted
+INFO:alice:[Alice] Worker terminated session=b87ca36c pid=308413
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=bd305c7e queue=qubit_send_bd305c7e pid=308577
+INFO:alice:[Alice] Session bd305c7e created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_bd305c7e interceptor=eve-1
+INFO:     127.0.0.1:50500 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=30&loss_rate=0&retry_enabled=false&interceptor_label=eve-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50506 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined bd305c7e  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=bd305c7e batches=20 qkdl=http://localhost:8003 queue=qubit_send_bd305c7e
+INFO:alice:[Alice] Pipeline dispatched session=bd305c7e (20 QTT → ST → QKT → NT) queue=qubit_send_bd305c7e
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:32886 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=bd305c7e status=done
+INFO:alice:[Alice] Worker terminated session=bd305c7e pid=308577
+INFO:httpx:HTTP Request: POST http://localhost:8000/sessions "HTTP/1.1 202 Accepted"
+INFO:alice:[Alice] Worker spawned session=d6e42942 queue=qubit_send_d6e42942 pid=308631
+INFO:alice:[Alice] Session d6e42942 created n_qubits=200 qkdl=http://localhost:8003 queue=qubit_send_d6e42942 interceptor=eve-1
+INFO:     127.0.0.1:44134 - "POST /start?receiver_label=bob-1&n_qubits=200&batch_size=10&distance_km=0&loss_rate=0&retry_enabled=false&interceptor_label=eve-1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "POST /webhook HTTP/1.1" 200 OK
+INFO:alice:[Alice] Receiver joined d6e42942  dispatching pipeline
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/d6e42942-0761-4905-b000-ab893911cb04 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Dispatching pipeline session=d6e42942 batches=20 qkdl=http://localhost:8003 queue=qubit_send_d6e42942
+INFO:alice:[Alice] Pipeline dispatched session=d6e42942 (20 QTT → ST → QKT → NT) queue=qubit_send_d6e42942
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/d6e42942-0761-4905-b000-ab893911cb04 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:44140 - "POST /webhook HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: GET http://localhost:8000/sessions/d6e42942-0761-4905-b000-ab893911cb04 "HTTP/1.1 200 OK"
+INFO:alice:[Alice] Poll detected terminal status session=d6e42942 status=aborted
+INFO:alice:[Alice] Worker terminated session=d6e42942 pid=308631
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[alice-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [308128]

@@ -151,3 +151,67 @@ INFO:node.base:[eve-1] Started  node_id=7ad55980 role=monitor
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
 INFO:     Shutting down
+INFO:     Started server process [275112]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[eve-1] Registered → node_id=4ce064f9
+INFO:node.base:[eve-1] Started  node_id=4ce064f9 role=monitor
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[eve-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [275112]
+INFO:     Started server process [307761]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[eve-1] Registered → node_id=6a7400b4
+INFO:node.base:[eve-1] Started  node_id=6a7400b4 role=monitor
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[eve-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [307761]
+INFO:     Started server process [308094]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[eve-1] Registered → node_id=46ce666c
+INFO:node.base:[eve-1] Started  node_id=46ce666c role=monitor
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[eve-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [308094]
+INFO:     Started server process [308138]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[eve-1] Registered → node_id=90464f67
+INFO:node.base:[eve-1] Started  node_id=90464f67 role=monitor
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:40712 - "POST /webhook HTTP/1.1" 200 OK
+INFO:eve:[Eve] Session open — session=bd305c7e n_qubits=200 qkdl=http://localhost:8003 — registering as interceptor
+INFO:httpx:HTTP Request: POST http://localhost:8003/intercept/bd305c7e-caa3-4598-9013-f3bdfacc201e "HTTP/1.1 200 OK"
+INFO:eve:[Eve] *** Registered as interceptor session=bd305c7e qkdl=http://localhost:8003 (attempt 1) ***
+INFO:     127.0.0.1:35972 - "POST /webhook HTTP/1.1" 200 OK
+WARNING:eve:[Eve] Session bd305c7e completed WITH a key — QBER=0.00%  (Eve's attack may have been too lucky — re-run)
+INFO:httpx:HTTP Request: GET http://localhost:8003/intercept/bd305c7e-caa3-4598-9013-f3bdfacc201e/measurements "HTTP/1.1 200 OK"
+INFO:eve:[Eve] Measurements collected session=bd305c7e n=42 basis_match=22 (52.4%)
+INFO:     127.0.0.1:57598 - "POST /webhook HTTP/1.1" 200 OK
+INFO:eve:[Eve] Session open — session=d6e42942 n_qubits=200 qkdl=http://localhost:8003 — registering as interceptor
+INFO:httpx:HTTP Request: POST http://localhost:8003/intercept/d6e42942-0761-4905-b000-ab893911cb04 "HTTP/1.1 200 OK"
+INFO:eve:[Eve] *** Registered as interceptor session=d6e42942 qkdl=http://localhost:8003 (attempt 1) ***
+INFO:     127.0.0.1:57608 - "POST /webhook HTTP/1.1" 200 OK
+INFO:eve:[Eve] Session d6e42942 aborted — reason=QBER_TOO_HIGH QBER=21.05%
+INFO:httpx:HTTP Request: GET http://localhost:8003/intercept/d6e42942-0761-4905-b000-ab893911cb04/measurements "HTTP/1.1 200 OK"
+INFO:eve:[Eve] Measurements collected session=d6e42942 n=200 basis_match=107 (53.5%)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[eve-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [308138]
