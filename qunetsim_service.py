@@ -1,43 +1,3 @@
-"""
-qunetsim_service.py — Merged: QuNetSim transport + Optical channel layers
-==========================================================================
-
-Architecture of the merge
---------------------------
-Old version: QuNetSim handled everything. Loss was applied via
-  `network.packet_drop_rate`. No optical model.
-
-New version: Pure Python BB84, optical model, no QuNetSim transport.
-
-This merged version:
-  1. Optical channel runs FIRST (Ansys attenuation + OU drift + detector)
-     to decide if the photon survives and what state it arrives in.
-  2. If the photon survives, QuNetSim sends the (possibly drift-modified)
-     qubit from Alice to Bob using real Host.send_qubit / get_qubit.
-  3. If the photon is lost by the optical model, QuNetSim is skipped
-     entirely for that qubit — no wasted thread/socket overhead.
-  4. Eve intercept-resend runs after the optical model, before QuNetSim,
-     so Eve sees the same attenuated photon count as in the pure-Python path.
-
-Key design decision: QuNetSim does NOT apply its own loss
-  (network.packet_drop_rate is left at 0). All loss is owned by the
-  optical model. This keeps a single source of truth for photon loss
-  and makes the optical calibration from Ansys the authoritative model.
-
-The dark-count path is handled outside QuNetSim:
-  A dark count is a spontaneous detector click with no real photon.
-  QuNetSim cannot model this (it requires a real qubit object), so dark
-  counts are injected as synthetic measurement records directly, exactly
-  as in the pure-Python version.
-
-Polarization drift and QuNetSim coexistence:
-  The OU drift model rotates the photon's polarization state before it
-  enters QuNetSim. The drift output is decoded back to (basis, bit) using
-  the _ENCODE/_DECODE table. Alice then prepares the QuNetSim qubit in
-  the drift-modified state. Bob measures in a random basis. The result is
-  the same as the pure-Python path but with real QuNetSim qubit objects.
-"""
-
 from __future__ import annotations
 import logging
 import os
@@ -71,10 +31,6 @@ except ModuleNotFoundError:
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("qkdl")
 
-# ---------------------------------------------------------------------------
-# Polarization encoding table (mirrors optical/channel.py)
-# (basis_value, bit) → physical polarization state
-# ---------------------------------------------------------------------------
 _ENCODE: dict[tuple[str, int], str] = {
     ("Z", 0): "H",
     ("Z", 1): "V",
@@ -83,10 +39,6 @@ _ENCODE: dict[tuple[str, int], str] = {
 }
 _DECODE: dict[str, tuple[str, int]] = {v: k for k, v in _ENCODE.items()}
 
-
-# ---------------------------------------------------------------------------
-# Classical channel models (unchanged)
-# ---------------------------------------------------------------------------
 class ClassicalSendReq(BaseModel):
     session_id:  str
     payload_hex: str
@@ -103,9 +55,6 @@ class ClassicalRecvResp(BaseModel):
     available:   bool
 
 
-# ---------------------------------------------------------------------------
-# Post-stop cooldown (unchanged)
-# ---------------------------------------------------------------------------
 COOLDOWN_S      = 2.5
 _cooldown_until = 0.0
 _cooldown_lock  = threading.Lock()
@@ -125,15 +74,9 @@ def _clear_cooldown() -> None:
         _cooldown_until = 0.0
 
 
-# ---------------------------------------------------------------------------
-# BOB_READY_DELAY — same as old version
-# ---------------------------------------------------------------------------
-BOB_READY_DELAY = 0.015   # 15 ms: enough for EQSN get_qubit() to block first
+BOB_READY_DELAY = 0.015   #15 ms: enough for EQSN get_qubit() to block first
 
 
-# ---------------------------------------------------------------------------
-# NetworkSession
-# ---------------------------------------------------------------------------
 class NetworkSession:
     def __init__(
         self,
@@ -145,9 +88,7 @@ class NetworkSession:
         self.loss_rate   = loss_rate
         self.distance_km = distance_km
 
-        # --- Optical channel selection ---
-        # distance_km > 0  → FiberChannel (Ansys CSV + OU drift + detector)
-        # distance_km == 0 → StatisticalChannel (Step 0 baseline)
+       
         if distance_km > 0.0:
             self.channel = FiberChannel(
                 distance_km=distance_km,
@@ -156,7 +97,7 @@ class NetworkSession:
         else:
             self.channel = StatisticalChannel(loss_rate)
 
-        # QuNetSim objects (initialised in start())
+        #QuNetSim objects (initialised in start())
         self.backend    = None
         self.network    = None
         self.alice_host = None
@@ -167,19 +108,17 @@ class NetworkSession:
         self._alice_name  = f"Alice-{sid6}"
         self._bob_name    = f"Bob-{sid6}"
 
-        # Measurement results
+        #Measurement results
         self._meas_queue: list[dict] = []
         self._meas_lock  = threading.Lock()
 
-        # Eve intercept state
+        #Eve intercept state
         self._eve_registered = False
         self._eve_label      = ""
         self._eve_meas_queue: list[dict] = []
         self._eve_meas_lock  = threading.Lock()
 
-    # ------------------------------------------------------------------
-    # Lifecycle
-    # ------------------------------------------------------------------
+    
     def start(self) -> None:
         from qunetsim.components import Host, Network
         from qunetsim.backends import EQSNBackend
@@ -194,16 +133,16 @@ class NetworkSession:
         self.alice_host.add_connection(self._bob_name)
         self.bob_host.add_connection(self._alice_name)
 
-        # IMPORTANT: do NOT set network.packet_drop_rate here.
-        # All loss is owned by the optical channel model, not QuNetSim.
-        # Setting packet_drop_rate would double-count photon loss.
+        #IMPORTANT: do NOT set network.packet_drop_rate here.
+        #All loss is owned by the optical channel model, not QuNetSim.
+        #Setting packet_drop_rate would double-count photon loss.
 
         self.alice_host.start()
         self.bob_host.start()
         self.network.add_host(self.alice_host)
         self.network.add_host(self.bob_host)
 
-        # Reset per-session state on the optical model
+        #Reset per-session state on the optical model
         self.channel.reset_session()
 
         self._active = True
@@ -246,9 +185,6 @@ class NetworkSession:
     def is_active(self) -> bool:
         return self._active
 
-    # ------------------------------------------------------------------
-    # Measurement queues (unchanged)
-    # ------------------------------------------------------------------
     def push_measurement(self, result: dict) -> None:
         with self._meas_lock:
             self._meas_queue.append(result)
@@ -281,10 +217,6 @@ class NetworkSession:
             f"label={eve_label} ***"
         )
 
-
-# ---------------------------------------------------------------------------
-# Eve intercept-resend (unchanged from new version)
-# ---------------------------------------------------------------------------
 def _eve_intercept_qubit(
     alice_bit:   int,
     alice_basis: Basis,
@@ -304,27 +236,15 @@ def _eve_intercept_qubit(
     return eve_bit, eve_basis.value
 
 
-# ---------------------------------------------------------------------------
-# Core: send one qubit through QuNetSim with optical pre-filtering
-#
-# This replaces the old _send_one_qubit + the new pure-Python path.
-#
-# Flow per qubit:
-#   1. Optical model: transmit(photon) → survived | None | dark_count
-#   2a. None        → record delivered=False, skip QuNetSim
-#   2b. dark_count  → inject synthetic measurement, skip QuNetSim
-#   2c. survived    → send through QuNetSim with drift-corrected state
-#   3. Eve path     → intercept-resend (after optical, before QuNetSim)
-# ---------------------------------------------------------------------------
 
-PULSE_PERIOD_NS = 1000.0   # 1 MHz clock → 1000 ns per qubit slot
+PULSE_PERIOD_NS = 1000.0   #1 MHz clock → 1000 ns per qubit slot
 
 
 def _send_one_qubit_qns(
     session:       NetworkSession,
     qid:           int,
-    effective_bit:  int,    # may differ from original if drift flipped the state
-    effective_basis: Basis, # may differ from original if drift flipped the state
+    effective_bit:  int,    #may differ from original if drift flipped the state
+    effective_basis: Basis, #may differ from original if drift flipped the state
 ) -> dict:
     """
     Send a single qubit through QuNetSim and return Bob's measurement.
@@ -358,10 +278,10 @@ def _send_one_qubit_qns(
     )
     t.start()
 
-    # Give Bob's thread time to enter get_qubit() before Alice sends
+    #Give Bob's thread time to enter get_qubit() before Alice sends
     time.sleep(BOB_READY_DELAY)
 
-    # Alice prepares qubit in the drift-corrected state
+    #Alice prepares qubit in the drift-corrected state
     q = Qubit(session.alice_host)
     if effective_bit == 1:
         q.X()
@@ -406,14 +326,13 @@ def _process_batch_sync(
         basis = qrec.basis
         t_ns  = qid * PULSE_PERIOD_NS
 
-        # ----------------------------------------------------------------
-        # STEP 1 — Optical channel (Ansys attenuation + OU drift + detector)
-        # ----------------------------------------------------------------
+        
+        #Ansys attenuation + OU drift + detector
         photon_in  = {"qubit_id": qid, "bit": bit, "basis": basis.value}
         transmitted = session.channel.transmit(photon_in, t_ns=t_ns)
 
         if transmitted is None:
-            # Photon lost in fiber or missed by detector
+            #Photon lost in fiber or missed by detector
             results.append({
                 "qubit_id":  qid,
                 "delivered": False,
@@ -422,11 +341,7 @@ def _process_batch_sync(
             })
             continue
 
-        # ----------------------------------------------------------------
-        # STEP 2 — Dark count: synthetic measurement, no QuNetSim needed
-        # A dark count is a spontaneous detector click — no real photon.
-        # QuNetSim cannot represent this, so we inject it directly.
-        # ----------------------------------------------------------------
+        #Dark count: synthetic measurement, no QuNetSim needed
         if transmitted.get("dark_count", False):
             bob_basis = random.choice(list(Basis))
             bob_bit   = random.randint(0, 1)
@@ -446,12 +361,8 @@ def _process_batch_sync(
             })
             continue
 
-        # ----------------------------------------------------------------
-        # STEP 3 — Extract drift-corrected state for QuNetSim preparation
-        # The optical model may have rotated the polarization (OU drift).
-        # We decode the survived photon back to (basis, bit) so Alice
-        # prepares the QuNetSim qubit in the correct drifted state.
-        # ----------------------------------------------------------------
+
+        #Extract drift-corrected state for QuNetSim preparation
         effective_basis_str = transmitted.get("basis", basis.value)
         effective_bit       = transmitted.get("bit",   bit)
         try:
@@ -459,18 +370,15 @@ def _process_batch_sync(
         except ValueError:
             effective_basis = basis
 
-        # ----------------------------------------------------------------
-        # STEP 4 — Eve intercept-resend (after optical, before QuNetSim)
-        # Eve intercepts the photon that survived the fiber, not the
-        # original photon. She gets a slightly drift-modified state.
-        # ----------------------------------------------------------------
+
+        #Eve intercept-resend (after optical, before QuNetSim)
         if session._eve_registered:
             eve_bit, eve_basis_val = _eve_intercept_qubit(
                 effective_bit, effective_basis, session, qid
             )
-            # Bob measures Eve's resent photon — pure Python, no QuNetSim.
-            # Eve's resent photon is a fresh coherent state; QuNetSim would
-            # just add overhead without changing the probability model.
+            #Bob measures Eve's resent photon - pure Python, no QuNetSim.
+            #Eve's resent photon is a fresh coherent state; QuNetSim would
+            #just add overhead without changing the probability model.
             bob_basis = random.choice(list(Basis))
             bob_bit   = (
                 eve_bit if bob_basis.value == eve_basis_val
@@ -491,12 +399,8 @@ def _process_batch_sync(
             })
             continue
 
-        # ----------------------------------------------------------------
-        # STEP 5 — QuNetSim: real qubit send/receive
-        # Only photons that survived the optical model and were not
-        # intercepted by Eve reach this point.
-        # Alice prepares the qubit in the drift-corrected state.
-        # ----------------------------------------------------------------
+        
+        #QuNetSim: real qubit send/receive
         res = _send_one_qubit_qns(
             session,
             qid,
@@ -517,10 +421,6 @@ def _process_batch_sync(
 
     return results
 
-
-# ---------------------------------------------------------------------------
-# FastAPI app (routes unchanged from both versions)
-# ---------------------------------------------------------------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -590,7 +490,7 @@ async def init_network(req: NetworkInitReq):
     return NetworkInitResp(
         session_id=req.session_id,
         statut="ready",
-        message=f"Network ready — channel={type(session.channel).__name__} d={req.distance_km}km",
+        message=f"Network ready - channel={type(session.channel).__name__} d={req.distance_km}km",
     )
 
 

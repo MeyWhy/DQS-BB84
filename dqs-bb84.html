@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BB84 Distributed Dashboard</title>
+<style>
+:root { --bg: #0b1220; --card: #121a2b; --card2: #1a2338; --accent: #3b82f6; --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --text: #f8fafc; --muted: #94a3b8; --border: #1e2d45; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 28px 32px;
+  min-height: 100vh;
+}
+
+.container { max-width: 1100px; margin: auto; }
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.logo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+header h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+.field input:focus { border-color: var(--accent); }
+.field input::placeholder { color: #4a6080; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+button:hover { opacity: 0.88; }
+button:active { transform: scale(0.98); }
+
+.btn-primary { background: var(--accent); color: white; }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.session-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.session-id-box {
+  flex: 1;
+  min-width: 240px;
+  padding: 9px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-id-box.active { color: #60a5fa; border-color: #1e40af; }
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--card2);
+  color: var(--muted);
+}
+
+.status-badge.running { background: #1c3a5e; color: #60a5fa; }
+.status-badge.done { background: #14532d; color: #4ade80; }
+.status-badge.aborted { background: #450a0a; color: #f87171; }
+.status-badge.open { background: #2d2a0a; color: #fbbf24; }
+.status-badge.initializing { background: #1c3a5e; color: #60a5fa; }
+.status-badge.sending { background: #1c3a5e; color: #93c5fd; }
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--card2);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 16px 0 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.progress-fill.done { background: var(--green); }
+.progress-fill.aborted { background: var(--red); }
+
+.progress-label {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.stat-value.danger { color: var(--red); }
+.stat-value.success { color: var(--green); }
+.stat-value.warn { color: var(--amber); }
+
+.timeline {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 18px; left: 18px; right: 18px;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.tl-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.tl-dot {
+  color: white;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--card2);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.tl-dot.active {
+  border-color: var(--accent);
+  background: #1d3461;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+}
+
+.tl-dot.done {
+  border-color: var(--green);
+  background: #14532d;
+}
+
+.tl-dot.aborted {
+  border-color: var(--red);
+  background: #450a0a;
+}
+
+.tl-label { font-size: 11px; color: var(--muted); text-align: center; }
+.tl-label.active { color: #60a5fa; font-weight: 600; }
+.tl-label.done { color: var(--green); }
+.tl-label.aborted { color: var(--red); }
+
+.key-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: break-all;
+  min-height: 80px;
+  color: var(--green);
+  transition: opacity 0.2s;
+}
+
+.key-box.empty { color: var(--muted); font-style: italic; }
+
+.raw-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow: auto;
+  max-height: 320px;
+  color: #ffffff;
+  white-space: pre;
+}
+
+.elapsed { font-size: 13px; color: var(--muted); margin-left: auto; }
+
+.auto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #60a5fa;
+  background: #1c3460;
+  border-radius: 6px;
+  padding: 3px 9px;
+}
+
+.pulse {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #60a5fa;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.intercepted-yes {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.intercepted-no { color: var(--green); }
+
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  .timeline::before { display: none; }
+  .timeline { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">⚛</div>
+    <div>
+      <h1>BB84 Distributed Dashboard</h1>
+      <p>DQS-BB84 · Alice → KME session monitor</p>
+    </div>
+  </header>
+
+  <!-- CONFIG -->
+  <div class="panel">
+    <div class="panel-title">Start Session</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Receiver label</label>
+        <input id="receiver" value="bob-1">
+      </div>
+      <div class="field">
+        <label>Qubits (n_qubits)</label>
+        <input id="qubits" type="number" value="200">
+      </div>
+      <div class="field">
+        <label>Batch size</label>
+        <input id="batch" type="number" value="10">
+      </div>
+      <div class="field">
+        <label>Distance km</label>
+        <input id="distance" type="number" value="0">
+      </div>
+      <div class="field">
+        <label>Interceptor label (optional)</label>
+        <input id="eve" placeholder="eve-1">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="startSession()">▶ Start BB84 Session</button>
+    </div>
+  </div>
+
+  <!-- SESSION CONTROL -->
+  <div class="panel">
+    <div class="panel-title">Session</div>
+    <div class="session-row">
+      <div class="session-id-box" id="sessionIdBox">No active session</div>
+      <span class="status-badge" id="statusBadge">—</span>
+      <span class="elapsed" id="elapsed"></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">—</div>
+    <br>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btnGet" onclick="manualPoll()" disabled>🔍 Get Session State</button>
+      <button class="btn-secondary" id="btnToggleAuto" onclick="toggleAuto()" disabled>⏸ Stop Auto-Poll</button>
+      <span id="autoBadge" style="display:none" class="auto-badge"><span class="pulse"></span> Polling every 2s</span>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="panel">
+    <div class="panel-title">Metrics</div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">Qubits</div>
+        <div class="stat-value" id="mQubits">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Delivered</div>
+        <div class="stat-value" id="mDelivered">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Sifted</div>
+        <div class="stat-value" id="mSifted">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">QBER</div>
+        <div class="stat-value" id="mQber">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Distance</div>
+        <div class="stat-value" id="mDistance">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Intercepted</div>
+        <div class="stat-value" id="mIntercepted">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="panel">
+    <div class="panel-title">BB84 Timeline</div>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-dot" id="dot-open">1</div>
+        <div class="tl-label" id="lbl-open">Waiting</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot" id="dot-init">2</div>
+        <div class="tl-label" id="lbl-init">Initializing</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot" id="dot-send">3</div>
+        <div class="tl-label" id="lbl-send">Transmitting</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot" id="dot-done">4</div>
+        <div class="tl-label" id="lbl-done">Key Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL KEY -->
+  <div class="panel">
+    <div class="panel-title">Final Key</div>
+    <div class="key-box empty" id="finalKey">Waiting for session to complete…</div>
+  </div>
+
+  <!-- RAW RESPONSE -->
+  <div class="panel">
+    <div class="panel-title">Raw KME Response</div>
+    <div class="raw-box" id="rawResponse">—</div>
+  </div>
+
+</div>
+
+<script>
+const ALICE_PORT = 8001;
+const KME_PORT   = 8000;
+
+let currentSession = null;
+let polling        = null;
+let autoPolling    = false;
+
+function resetUI() {
+  document.getElementById('sessionIdBox').textContent = 'No active session';
+  document.getElementById('sessionIdBox').classList.remove('active');
+  document.getElementById('statusBadge').textContent  = '—';
+  document.getElementById('statusBadge').className    = 'status-badge';
+  document.getElementById('elapsed').textContent      = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').className   = 'progress-fill';
+  document.getElementById('progressLabel').textContent = '—';
+
+  ['mQubits','mDelivered','mSifted','mQber','mDistance','mIntercepted'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '—';
+    el.className = 'stat-value';
+  });
+
+  // Clear final key on every new session start
+  const keyEl = document.getElementById('finalKey');
+  keyEl.textContent = 'Waiting for session to complete…';
+  keyEl.className = 'key-box empty';
+
+  document.getElementById('rawResponse').textContent = '—';
+
+  ['open','init','send','done'].forEach(s => {
+    document.getElementById('dot-' + s).className = 'tl-dot';
+    document.getElementById('lbl-' + s).className = 'tl-label';
+  });
+}
+
+function setControls(sessionActive) {
+  document.getElementById('btnGet').disabled       = !sessionActive;
+  document.getElementById('btnToggleAuto').disabled = !sessionActive;
+}
+
+async function startSession() {
+  const receiver = document.getElementById('receiver').value.trim();
+  const qubits   = document.getElementById('qubits').value;
+  const batch    = document.getElementById('batch').value;
+  const distance = document.getElementById('distance').value;
+  const eve      = document.getElementById('eve').value.trim();
+
+  // Stop any existing polling
+  if (polling) { clearInterval(polling); polling = null; }
+
+  // Clear UI before the new session
+  resetUI();
+
+  let url = `http://localhost:${ALICE_PORT}/start`
+    + `?receiver_label=${encodeURIComponent(receiver)}`
+    + `&n_qubits=${qubits}`
+    + `&batch_size=${batch}`
+    + `&distance_km=${distance}`
+    + `&loss_rate=0`
+    + `&retry_enabled=false`;
+
+  if (eve) url += `&interceptor_label=${encodeURIComponent(eve)}`;
+
+  try {
+    const res  = await fetch(url, { method: 'POST' });
+    const data = await res.json();
+
+    if (data.session_id) {
+      currentSession = data.session_id;
+      document.getElementById('sessionIdBox').textContent = currentSession;
+      document.getElementById('sessionIdBox').classList.add('active');
+      setControls(true);
+      startAutoPolling();
+    } else {
+      alert('Alice response:\n' + JSON.stringify(data, null, 2));
+    }
+  } catch (err) {
+    alert('Could not reach Alice at localhost:' + ALICE_PORT + '\n' + err);
+  }
+}
+
+function startAutoPolling() {
+  autoPolling = true;
+  document.getElementById('autoBadge').style.display = 'inline-flex';
+  document.getElementById('btnToggleAuto').textContent = '⏸ Stop Auto-Poll';
+  polling = setInterval(pollSession, 2000);
+  pollSession(); // immediate first fetch
+}
+
+function stopAutoPolling() {
+  autoPolling = false;
+  if (polling) { clearInterval(polling); polling = null; }
+  document.getElementById('autoBadge').style.display = 'none';
+  document.getElementById('btnToggleAuto').textContent = '▶ Start Auto-Poll';
+}
+
+function toggleAuto() {
+  if (autoPolling) stopAutoPolling();
+  else startAutoPolling();
+}
+
+async function manualPoll() {
+  await pollSession();
+}
+
+async function pollSession() {
+  if (!currentSession) return;
+
+  try {
+    // KME endpoint: GET /sessions/{session_id}  →  SessionStatusResponse
+    const res  = await fetch(`http://localhost:${KME_PORT}/sessions/${currentSession}`);
+    const data = await res.json();
+
+    document.getElementById('rawResponse').textContent = JSON.stringify(data, null, 2);
+
+    // Session ID box
+    document.getElementById('sessionIdBox').textContent = currentSession;
+
+    // Status badge
+    const status = data.status || '—';
+    const badge  = document.getElementById('statusBadge');
+    badge.textContent = status;
+    badge.className   = 'status-badge ' + (['done','aborted','open','initializing','sending'].includes(status) ? status : 'running');
+
+    // Elapsed
+    if (data.elapsed_s !== undefined) {
+      document.getElementById('elapsed').textContent = data.elapsed_s.toFixed(1) + ' s';
+    }
+
+    // Progress
+    const pct = data.progress_pct || 0;
+    const fill = document.getElementById('progressFill');
+    fill.style.width = pct + '%';
+    fill.className   = 'progress-fill' + (status === 'done' ? ' done' : status === 'aborted' ? ' aborted' : '');
+    document.getElementById('progressLabel').textContent = pct + '%';
+
+    // Metrics
+    document.getElementById('mQubits').textContent    = data.n_qubits    ?? '—';
+    document.getElementById('mDelivered').textContent = data.n_delivered  ?? '—';
+    document.getElementById('mSifted').textContent    = data.n_sifted     ?? '—';
+    document.getElementById('mDistance').textContent  = (data.distance_km ?? '—') + (data.distance_km !== undefined ? ' km' : '');
+
+    const qberEl = document.getElementById('mQber');
+    if (data.qber !== undefined) {
+      const q = (data.qber * 100).toFixed(2) + '%';
+      qberEl.textContent = q;
+      qberEl.className   = 'stat-value' + (data.qber > 0.11 ? ' danger' : data.qber > 0.05 ? ' warn' : ' success');
+    } else {
+      qberEl.textContent = '—';
+      qberEl.className   = 'stat-value';
+    }
+
+    const intEl = document.getElementById('mIntercepted');
+    if (data.intercepted !== undefined) {
+      intEl.textContent = data.intercepted ? 'YES' : 'NO';
+      intEl.className   = 'stat-value ' + (data.intercepted ? 'intercepted-yes danger' : 'intercepted-no success');
+    } else {
+      intEl.textContent = '—';
+      intEl.className   = 'stat-value';
+    }
+
+    // Timeline
+    updateTimeline(status);
+
+    // Final key — only set if present; don't carry over from previous session
+    const keyEl = document.getElementById('finalKey');
+    if (data.key_final) {
+      keyEl.textContent = data.key_final;
+      keyEl.className   = 'key-box';
+    }
+
+    // Stop polling on terminal state
+    if (status === 'done' || status === 'aborted') {
+      stopAutoPolling();
+    }
+
+  } catch (err) {
+    console.error('KME poll error:', err);
+    document.getElementById('rawResponse').textContent = 'Error reaching KME: ' + err.message;
+  }
+}
+
+const STEP_MAP = {
+  open:          { active: 'open' },
+  initializing:  { active: 'init', done: ['open'] },
+  sending:       { active: 'send', done: ['open', 'init'] },
+  done:          { active: 'done', done: ['open', 'init', 'send'] },
+  aborted:       { aborted: true,  done: [] },
+};
+
+function updateTimeline(status) {
+  const steps   = ['open', 'init', 'send', 'done'];
+  const mapping = STEP_MAP[status];
+  if (!mapping) return;
+
+  steps.forEach(s => {
+    document.getElementById('dot-' + s).className = 'tl-dot';
+    document.getElementById('lbl-' + s).className = 'tl-label';
+  });
+
+  if (mapping.aborted) {
+    // mark everything up to where we were as aborted
+    steps.forEach(s => {
+      document.getElementById('dot-' + s).classList.add('aborted');
+      document.getElementById('lbl-' + s).classList.add('aborted');
+    });
+    return;
+  }
+
+  (mapping.done || []).forEach(s => {
+    document.getElementById('dot-' + s).classList.add('done');
+    document.getElementById('lbl-' + s).classList.add('done');
+  });
+
+  if (mapping.active) {
+    document.getElementById('dot-' + mapping.active).classList.add('active');
+    document.getElementById('lbl-' + mapping.active).classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

@@ -140,7 +140,7 @@ class SinglePhotonDetector:
             f"dead={self.dead_time_ns} ns)"
         )
     
-     """
+    """
     Single photon detector with realistic imperfections.
 
     Three physically distinct noise sources, each independently modelled:

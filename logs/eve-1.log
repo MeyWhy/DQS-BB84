@@ -215,3 +215,15 @@ INFO:     Waiting for application shutdown.
 INFO:node.base:[eve-1] Stopped
 INFO:     Application shutdown complete.
 INFO:     Finished server process [308138]
+INFO:     Started server process [775]
+INFO:     Waiting for application startup.
+INFO:httpx:HTTP Request: POST http://localhost:8000/nodes/register "HTTP/1.1 200 OK"
+INFO:node.base:[eve-1] Registered → node_id=a8d567d5
+INFO:node.base:[eve-1] Started  node_id=a8d567d5 role=monitor
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:node.base:[eve-1] Stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [775]
