@@ -6,6 +6,9 @@ Distributed BB84 Quantum Key Distribution simulation based on a microservices ar
 
 DQS-BB84 is a scalable implementation of the BB84 Quantum Key Distribution protocol where protocol roles are decomposed into independent services. The system supports concurrent key-generation sessions, asynchronous task execution, and distributed simulation of quantum communication.
 
+<img width="960" height="438" alt="dqs_dashboard" src="https://github.com/user-attachments/assets/09232968-5c60-4da7-b1fa-f9c0eef0a912" />
+
+
 The project combines:
 
 * Microservices architecture
