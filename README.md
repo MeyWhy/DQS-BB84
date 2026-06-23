@@ -1,4 +1,4 @@
-# DQS-BB84
+# DQS-BB84: Scalable and Secure QKD: Designing a Microservices-Based Framework for the BB84 Protocol Validated through Optical Simulation
 
 Distributed BB84 Quantum Key Distribution simulation based on a microservices architecture.
 
