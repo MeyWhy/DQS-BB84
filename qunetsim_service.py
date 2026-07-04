@@ -112,7 +112,18 @@ class NetworkSession:
         self._meas_queue: list[dict] = []
         self._meas_lock  = threading.Lock()
 
-        #Eve intercept state
+        #QuNetSim serialization lock — CRITICAL.
+        #_send_one_qubit_qns spawns a bob_host.get_qubit() thread then calls
+        #alice_host.send_qubit(). QuNetSim's Host internals are NOT safe for
+        #concurrent callers on the same host instance: if multiple Celery
+        #qubit workers call /batch/send in parallel (concurrency > 1), their
+        #bob threads race on the same get_qubit() queue. Only one thread "wins"
+        #the qubit; the others time out after 6s returning bit=None (delivered=
+        #False). At concurrency=3 and 10km, this caused ~2/3 of qubits to be
+        #reported as undelivered even though FiberChannel had let them through.
+        #This lock serializes the QuNetSim path only — photons that are already
+        #dropped by attenuation/detector or handled by Eve don't need it.
+        self._qns_lock = threading.Lock()
         self._eve_registered = False
         self._eve_label      = ""
         self._eve_meas_queue: list[dict] = []
@@ -310,13 +321,37 @@ def _process_batch_sync(
 
     For each qubit the pipeline is:
 
-      [Optical: attenuation + drift + detector]
+      [Optical: attenuation + drift + detector]  ← NOT thread-safe
             ↓ photon lost?  → delivered=False, done
             ↓ dark count?   → synthetic measurement, done
             ↓ photon survived (possibly drift-modified state)
       [Eve: intercept-resend]  ← only if _eve_registered
             ↓
-      [QuNetSim: real qubit send/receive]
+      [QuNetSim: real qubit send/receive]  ← NOT thread-safe
+
+    THREAD SAFETY NOTE
+    -------------------
+    The entire per-qubit pipeline is serialized via session._qns_lock.
+    This is necessary because FiberChannel is NOT thread-safe:
+
+      - detector._last_click_ns is read-then-written without a lock.
+        With 3 concurrent Celery workers: Thread A clicks at t=5000,
+        sets _last_click_ns=5000. Thread B simultaneously reads
+        _last_click_ns=5000 with t_ns=5000 -> delta=0 < dead_time_ns=50
+        -> dead_time_block. This cascades: every subsequent qubit in the
+        session appears in dead time, blocking ~90% of photons.
+
+      - OUDriftChannel.theta is updated by step() without a lock.
+        Concurrent calls produce non-deterministic theta values and
+        incorrect n_steps counts.
+
+    Originally the lock only covered the QuNetSim call. Moving it to
+    wrap the entire qubit pipeline costs no additional throughput since
+    batches still run in parallel for their Celery overhead (task fetch,
+    result upload), and only serialize during the actual qubit processing.
+    The alternative — making FiberChannel thread-safe internally — would
+    require locks inside detector.py and polarization.py, adding complexity
+    to modules that were designed for single-threaded use.
     """
     results = []
 
@@ -326,98 +361,93 @@ def _process_batch_sync(
         basis = qrec.basis
         t_ns  = qid * PULSE_PERIOD_NS
 
-        
-        #Ansys attenuation + OU drift + detector
-        photon_in  = {"qubit_id": qid, "bit": bit, "basis": basis.value}
-        transmitted = session.channel.transmit(photon_in, t_ns=t_ns)
+        with session._qns_lock:
 
-        if transmitted is None:
-            #Photon lost in fiber or missed by detector
-            results.append({
-                "qubit_id":  qid,
-                "delivered": False,
-                "bob_basis": None,
-                "bob_bit":   None,
-            })
-            continue
+            #Ansys attenuation + OU drift + detector
+            photon_in  = {"qubit_id": qid, "bit": bit, "basis": basis.value}
+            transmitted = session.channel.transmit(photon_in, t_ns=t_ns)
 
-        #Dark count: synthetic measurement, no QuNetSim needed
-        if transmitted.get("dark_count", False):
-            bob_basis = random.choice(list(Basis))
-            bob_bit   = random.randint(0, 1)
-            results.append({
-                "qubit_id":  qid,
-                "delivered": True,
-                "bob_basis": bob_basis.value,
-                "bob_bit":   bob_bit,
-            })
-            session.push_measurement({
-                "qubit_id":    qid,
-                "basis":       bob_basis.value,
-                "bit_result":  bob_bit,
-                "delivered":   True,
-                "intercepted": False,
-                "dark_count":  True,
-            })
-            continue
+            if transmitted is None:
+                #Photon lost in fiber or missed by detector
+                results.append({
+                    "qubit_id":  qid,
+                    "delivered": False,
+                    "bob_basis": None,
+                    "bob_bit":   None,
+                })
+                continue
 
+            #Dark count: synthetic measurement, no QuNetSim needed
+            if transmitted.get("dark_count", False):
+                bob_basis = random.choice(list(Basis))
+                bob_bit   = random.randint(0, 1)
+                results.append({
+                    "qubit_id":  qid,
+                    "delivered": True,
+                    "bob_basis": bob_basis.value,
+                    "bob_bit":   bob_bit,
+                })
+                session.push_measurement({
+                    "qubit_id":    qid,
+                    "basis":       bob_basis.value,
+                    "bit_result":  bob_bit,
+                    "delivered":   True,
+                    "intercepted": False,
+                    "dark_count":  True,
+                })
+                continue
 
-        #Extract drift-corrected state for QuNetSim preparation
-        effective_basis_str = transmitted.get("basis", basis.value)
-        effective_bit       = transmitted.get("bit",   bit)
-        try:
-            effective_basis = Basis(effective_basis_str)
-        except ValueError:
-            effective_basis = basis
+            #Extract drift-corrected state for QuNetSim preparation
+            effective_basis_str = transmitted.get("basis", basis.value)
+            effective_bit       = transmitted.get("bit",   bit)
+            try:
+                effective_basis = Basis(effective_basis_str)
+            except ValueError:
+                effective_basis = basis
 
+            #Eve intercept-resend (after optical, before QuNetSim)
+            if session._eve_registered:
+                eve_bit, eve_basis_val = _eve_intercept_qubit(
+                    effective_bit, effective_basis, session, qid
+                )
+                bob_basis = random.choice(list(Basis))
+                bob_bit   = (
+                    eve_bit if bob_basis.value == eve_basis_val
+                    else random.randint(0, 1)
+                )
+                results.append({
+                    "qubit_id":  qid,
+                    "delivered": True,
+                    "bob_basis": bob_basis.value,
+                    "bob_bit":   bob_bit,
+                })
+                session.push_measurement({
+                    "qubit_id":    qid,
+                    "basis":       bob_basis.value,
+                    "bit_result":  bob_bit,
+                    "delivered":   True,
+                    "intercepted": True,
+                })
+                continue
 
-        #Eve intercept-resend (after optical, before QuNetSim)
-        if session._eve_registered:
-            eve_bit, eve_basis_val = _eve_intercept_qubit(
-                effective_bit, effective_basis, session, qid
+            #QuNetSim: real qubit send/receive
+            res = _send_one_qubit_qns(
+                session,
+                qid,
+                effective_bit,
+                effective_basis,
             )
-            #Bob measures Eve's resent photon - pure Python, no QuNetSim.
-            #Eve's resent photon is a fresh coherent state; QuNetSim would
-            #just add overhead without changing the probability model.
-            bob_basis = random.choice(list(Basis))
-            bob_bit   = (
-                eve_bit if bob_basis.value == eve_basis_val
-                else random.randint(0, 1)
-            )
-            results.append({
-                "qubit_id":  qid,
-                "delivered": True,
-                "bob_basis": bob_basis.value,
-                "bob_bit":   bob_bit,
-            })
-            session.push_measurement({
-                "qubit_id":    qid,
-                "basis":       bob_basis.value,
-                "bit_result":  bob_bit,
-                "delivered":   True,
-                "intercepted": True,
-            })
-            continue
+            results.append(res)
 
-        
-        #QuNetSim: real qubit send/receive
-        res = _send_one_qubit_qns(
-            session,
-            qid,
-            effective_bit,
-            effective_basis,
-        )
-        results.append(res)
-
-        if res["delivered"]:
-            session.push_measurement({
-                "qubit_id":    qid,
-                "basis":       res["bob_basis"],
-                "bit_result":  res["bob_bit"],
-                "delivered":   True,
-                "intercepted": False,
-                "dark_count":  False,
-            })
+            if res["delivered"]:
+                session.push_measurement({
+                    "qubit_id":    qid,
+                    "basis":       res["bob_basis"],
+                    "bit_result":  res["bob_bit"],
+                    "delivered":   True,
+                    "intercepted": False,
+                    "dark_count":  False,
+                })
 
     return results
 
