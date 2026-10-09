@@ -17,7 +17,7 @@ logger  = logging.getLogger("bob")
 logging.basicConfig(level=logging.INFO)
 
 KME_URL  = os.getenv("KME_URL",  "http://localhost:8000")
-MY_URL   = os.getenv("BOB_URL",  "http://localhost:8002")
+#MY_URL   = os.getenv("BOB_URL",  "http://localhost:8002")
 IDLE_EXIT_AFTER = 8.0  
 
 QKDL_SECS_PER_QUBIT = 8.0
@@ -33,14 +33,11 @@ class BobNode(BaseNode):
         )
         self._bob_state: dict[str, dict] = {}
 
-    #Stream event handlers
-    #(begin_listening for each new session_id is handled transparently by
-    #BaseNode._drain_pending_sessions, fed by the KME's pending-session
-    #registry + low-latency wake-up — Bob's own code is unchanged from the
-    #webhook-era version below; it only ever needed the session_id once
-    #session_open had already arrived, same as before.)
 
     async def on_session_open(self, session_id: str, payload: dict) -> None:
+        if session_id in self._bob_state:
+            return
+        
         #FIX: grab qkdl_url from payload early 
         #KME now includes it in the session_open webhook so Bob knows which
         #QKDL to poll before join_session even returns.
@@ -77,7 +74,6 @@ class BobNode(BaseNode):
             f"[Bob] Key available session={session_id[:8]} "
             f"QBER={payload.get('qber', 0.0)*100:.2f}%"
         )
-        self.stop_listening(session_id)
 
     async def on_session_aborted(self, session_id: str, payload: dict) -> None:
         logger.warning(
@@ -86,7 +82,6 @@ class BobNode(BaseNode):
         )
         self._bob_state.pop(session_id, None)
         self._sessions.pop(session_id, None)
-        self.stop_listening(session_id)
 
     #Qubit reception 
 
