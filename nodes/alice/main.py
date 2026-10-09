@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 KME_URL    = os.getenv("KME_URL",   "http://localhost:8000")
-MY_URL     = os.getenv("ALICE_URL", "http://localhost:8001")
+#MY_URL     = os.getenv("ALICE_URL", "http://localhost:8001")
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "10"))
 DISTANCE_KM = float(os.getenv("DISTANCE_KM", "0.0"))
 
@@ -158,17 +158,6 @@ class AliceNode(BaseNode):
             "qkdl_url", os.getenv("QKDL_URL", "http://localhost:8003")
         )
 
-        #Start listening on this session's event stream BEFORE doing
-        #anything else — the KME may publish events (e.g. nothing targets
-        #"sender" at creation time today, but receiver_joined will arrive
-        #the moment Bob joins, which can happen at any point after this
-        #call returns). Calling begin_listening() here, synchronously, with
-        #a session_id Alice already has in hand removes any discovery race
-        #for the sender side entirely — unlike Bob/Eve, Alice never needs
-        #the pending-session registry since she's the one who just created
-        #the session and knows its ID immediately.
-        self.begin_listening(session_id)
-
         bits  = [random.randint(0, 1)       for _ in range(n_qubits)]
         bases = [random.choice(list(Basis)) for _ in range(n_qubits)]
 
@@ -204,7 +193,7 @@ class AliceNode(BaseNode):
         return body
 
 
-    #Stream event handlers
+    #Webhook handlers
     async def on_receiver_joined(self, session_id: str, payload: dict) -> None:
         logger.info(
             f"[Alice] Receiver joined {session_id[:8]}  dispatching pipeline"
@@ -304,7 +293,6 @@ class AliceNode(BaseNode):
                 name=f"worker-cleanup-{session_id[:8]}",
             ).start()
         self._alice_state.pop(session_id, None)   #idempotent
-        self.stop_listening(session_id)
 
     async def _poll_tick(self) -> None:
         for sid in list(self._alice_state.keys()):
