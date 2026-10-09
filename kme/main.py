@@ -16,9 +16,13 @@ from models import (
     QubitUpload, MeasurementUpload,
     SiftUpload, KeyUpload,
     SessionStatusResponse, KeyStatus,
-    NetworkInitReq, NetworkStopReq,
+    NetworkInitReq, NetworkStopReq, BusEvent,
     new_session_id,
 )
+from message_bus import EventBus
+
+bus= EventBus()
+
 from kme.state_machine import SessionStatus
 from collections import defaultdict
 from kme.session_store import (
@@ -34,7 +38,6 @@ from kme.node_registry import (
     register_node, load_node, find_node_by_label,
     list_nodes,
 )
-from kme.event_bus import publish_event, publish_broadcast, register_pending_session
 
 
 logger = logging.getLogger("kme")
@@ -58,7 +61,7 @@ METRICS = {
     "total_qubits":            0,
     "total_batches":           0,
     "registry_hits":           0,
-    "stream_events":           0,
+    "bus_events":          0,
     "coordination_latency_ms": [],
     "session_latency_s":       [],
     "batch_latency_ms":        [],
@@ -105,7 +108,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="KME - Key Management Entity",
-    version="1.0.0",
+    version="0.9.0",
     lifespan=lifespan,
 )
 
@@ -124,26 +127,11 @@ def _get_session_or_404(r, session_id: str) -> dict:
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
-
-def _emit(session_id: str, event: str, target_role: str, payload: dict | None = None) -> None:
-    """
-    Publish a lifecycle event to the session's Redis Stream.
-
-    Replaces the old _notify(node_id, WebhookEvent) which did an HTTP POST
-    to a single node's /webhook callback. target_role replaces node_id as
-    the addressing mechanism: instead of "send to this specific node_id",
-    events say "send to whoever is playing this role in this session" -
-    which is what every call site actually meant (the node_id was always
-    just "the current sender" or "the current receiver" for the session).
-    Use target_role="broadcast" for events the old code fired at multiple
-    node_ids in a row (e.g. key_available going to both Bob and Eve).
-    """
-    publish_event(session_id, event, target_role=target_role, payload=payload or {})
-    METRICS["stream_events"] += 1
-
+def _publish(node_id: str, event: str, session_id: str, payload: dict | None = None) -> None:
+    bus.publish(node_id, BusEvent(event=event, session_id=session_id, payload=payload or {}))
+    METRICS["bus_events"] += 1
 
 #Node registry
-
 @app.post("/nodes/register", response_model=NodeInfo)
 async def register(reg: NodeRegistration):
     r    = get_redis()
@@ -252,57 +240,12 @@ async def create_session(
     }
     save_session(r, session)
 
-    #QKDL init - awaited synchronously, NOT a background_task.
-    #session_open must never be published before QKDL has confirmed the
-    #network is ready, or a fast-discovering Bob (Streams' wake-up delivers
-    #in single-digit milliseconds) can poll QKDL before /network/init has
-    #even been sent, get a 404, and give up without retrying. See
-    #_init_qkdl's docstring for the full race description.
-    qkdl_ready = await _init_qkdl(
-        session_id, req.n_qubits, req.loss_rate, req.distance_km, qkdl_url
+    #Background tasks - QKDL init
+    background_tasks.add_task(
+        _init_then_open, session_id, req,
+        bob_node.node_id, eve_node.node_id if eve_node else None, qkdl_url,
     )
-    if not qkdl_ready:
-        #_init_qkdl already marked the session ABORTED and released the
-        #QKDL lock on failure - surface this to Alice as a request failure
-        #rather than returning 202 for a session that can never proceed.
-        raise HTTPException(
-            status_code=503,
-            detail=f"QKDL failed to initialise network for session {session_id}",
-        )
-
-    #Register the session as pending pickup for Bob BEFORE publishing
-    #session_open - Bob's poll loop discovers it via the pending-session
-    #registry and calls begin_listening() to start its stream consumer.
-    #Order matters here: if we published the event first and registered
-    #pending second, Bob could in principle start listening (after some
-    #other discovery path) before this line ran and have nothing wrong
-    #happen - but registering first costs nothing and removes any doubt.
-    register_pending_session(bob_node.node_id, session_id, r=r)
-
-    #Notify Bob - published to the "receiver" role on this session's stream.
-    _emit(
-        session_id, "session_open", target_role="receiver",
-        payload={
-            "role":           "receiver",
-            "sender_node_id": req.sender_node_id,
-            "n_qubits":       req.n_qubits,
-            "qkdl_url":       qkdl_url,
-        },
-    )
-
-    #Notify Eve if present
-    #Eve receives session_open with role="monitor" so she knows to register
-    #as interceptor on the QKDL before Alice starts sending.
     if eve_node:
-        register_pending_session(eve_node.node_id, session_id, r=r)
-        _emit(
-            session_id, "session_open", target_role="monitor",
-            payload={
-                "role":     "monitor",
-                "n_qubits": req.n_qubits,
-                "qkdl_url": qkdl_url,
-            },
-        )
         METRICS["sessions_intercepted"] += 1
 
     logger.info(
@@ -348,11 +291,8 @@ async def join_session(session_id: str, req: SessionJoinReq):
     coord_ms = (time.time() - session["created_at"]) * 1000
     METRICS["coordination_latency_ms"].append(round(coord_ms, 2))
 
-    #Notify Alice - published to "sender" role.
-    _emit(
-        session_id, "receiver_joined", target_role="sender",
-        payload={"receiver_node_id": req.node_id},
-    )
+    _publish(session["sender_node_id"], "receiver_joined", session_id,
+             {"receiver_node_id": req.node_id})
 
     logger.info(f"[KME] Bob {req.node_id[:8]} joined session {session_id}")
 
@@ -388,19 +328,15 @@ async def next_qubit_batch(session_id: str):
 async def upload_measurements(
     session_id: str,
     upload:     MeasurementUpload,
-    background_tasks: BackgroundTasks,
 ):
     r = get_redis()
     _get_session_or_404(r, session_id)
     save_measurements(r, session_id, upload.model_dump())
     n = len(upload.measurements)
     update_session(r, session_id, n_delivered=n)
+    session = load_session(r, session_id)
+    _publish(session["sender_node_id"],   "measurements_ready", session_id, {"n_measurements": n})
 
-    #Notify Alice - published to "sender" role.
-    _emit(
-        session_id, "measurements_ready", target_role="sender",
-        payload={"n_measurements": n},
-    )
     logger.info(f"[KME] {n} measurements posted for session {session_id}")
     return {"session_id": session_id, "n_received": n}
 
@@ -417,17 +353,11 @@ async def get_measurements(session_id: str):
 async def upload_sift(
     session_id: str,
     upload:     SiftUpload,
-    background_tasks: BackgroundTasks,
 ):
     r       = get_redis()
     session = _get_session_or_404(r, session_id)
     save_sift_upload(r, session_id, upload.model_dump())
-
-    #Notify Bob - published to "receiver" role.
-    _emit(
-        session_id, "sift_ready", target_role="receiver",
-        payload={"sample_seed": upload.sample_seed},
-    )
+    _publish(session["receiver_node_id"], "sift_ready",         session_id, {"sample_seed": upload.sample_seed})
     return {"session_id": session_id, "stored": True}
 
 
@@ -490,17 +420,12 @@ async def publish_key(
             f"[KME] Session {session_id} aborted: {upload.error_message} "
             + (f"QBER={upload.qber*100:.2f}%" if upload.qber else "")
         )
-
-    #Notify Bob AND (if intercepted) Eve in one shot - this is exactly the
-    #"same event, multiple node_ids" pattern the old webhook code handled
-    #with two separate background_tasks.add_task(_notify, ...) calls.
-    #target_role="broadcast" delivers to every role's consumer group;
-    #only Bob and (if present) a registered Eve are actually listening on
-    #this session's stream, so it's equivalent in effect to the old
-    #explicit dual-notify, with one published event instead of two.
-    _emit(session_id, event, target_role="broadcast", payload=payload)
-
-    background_tasks.add_task(_stop_qkdl, session_id)
+    _publish(session["receiver_node_id"], event, session_id, payload)
+    _publish(session["sender_node_id"],   event, session_id, payload)  # new: Alice was never notified
+    eve_id = session.get("interceptor_node_id")
+    if eve_id:
+        _publish(eve_id, event, session_id, {**payload, "intercepted": True})
+    background_tasks.add_task(_stop_qkdl, session_id, EVE_GRACE_S if eve_id else 0.0)
     return {"session_id": session_id, "status": upload.status}
 
 
@@ -558,20 +483,6 @@ async def get_session(session_id: str):
     return SessionStatusResponse(**valid_data)
 
 
-@app.get("/sessions/{session_id}/events")
-async def get_session_events(session_id: str):
-    """
-    Full ordered event history for a session, read directly from its
-    Redis Stream. New endpoint enabled by the Streams migration - webhooks
-    had no equivalent (an HTTP POST leaves no trace once delivered). Useful
-    for the BB84 timeline figure and for debugging stuck sessions.
-    """
-    from kme.event_bus import session_history
-    r = get_redis()
-    _get_session_or_404(r, session_id)
-    return {"session_id": session_id, "events": session_history(session_id, r=r)}
-
-
 @app.get("/sessions")
 async def list_sessions(active_only: bool = True):
     r   = get_redis()
@@ -602,23 +513,7 @@ async def _init_qkdl(
     loss_rate:  float,
     distance_km: float,
     qkdl_url:   str,
-) -> bool:
-    """
-    Returns True once QKDL has confirmed the network is ready, False if it
-    never did after INIT_RETRIES attempts.
-
-    Called synchronously (awaited) from create_session BEFORE session_open
-    is published - not as a fire-and-forget background_task. This used to
-    run purely in the background while the 202 response (and therefore
-    session_open, sent right after, see the old race below) went out
-    immediately; with Streams' event delivery now taking single-digit
-    milliseconds, Bob could poll QKDL before this had even sent its first
-    HTTP request, hit a 404 (no NetworkSession registered yet), and give up
-    without retrying - a session that would never complete. Awaiting this
-    here means session_open is only ever published once QKDL has actually
-    confirmed the network exists, which removes the race at its source
-    instead of asking every consumer to tolerate "not ready yet" responses.
-    """
+) -> None:
     r = get_redis()
     last_err = None
 
@@ -686,8 +581,24 @@ async def _init_qkdl(
     _release_qkdl_lock(r, qkdl_url, session_id)
     return False
 
+async def _init_then_open(session_id, req, bob_id, eve_id, qkdl_url) -> None:
+    ok = await _init_qkdl(session_id, req.n_qubits, req.loss_rate, req.distance_km, qkdl_url)
+    if not ok:
+        _publish(req.sender_node_id, "session_aborted", session_id,
+                 {"reason": "QKDL init failed", "qber": 0.0})
+        return
+    if eve_id:   # Eve first: she must be registered before Alice sends
+        _publish(eve_id, "session_open", session_id,
+                 {"role": "monitor", "n_qubits": req.n_qubits, "qkdl_url": qkdl_url})
+    _publish(bob_id, "session_open", session_id,
+             {"role": "receiver", "sender_node_id": req.sender_node_id,
+              "n_qubits": req.n_qubits, "qkdl_url": qkdl_url})
 
-async def _stop_qkdl(session_id: str) -> None:
+EVE_GRACE_S=1.0
+async def _stop_qkdl(session_id: str, delay: float=0.0) -> None:
+    if delay:
+        await asyncio.sleep(delay)
+
     r        = get_redis()
     session  = load_session(r, session_id)
     qkdl_url = session.get("qkdl_url", QKDL_POOL[0]) if session else QKDL_POOL[0]
@@ -730,7 +641,7 @@ async def metrics():
         "avg_coordination_latency_ms":   avg(METRICS["coordination_latency_ms"]),
         "avg_batch_latency_ms":          avg(METRICS["batch_latency_ms"]),
         "registry_hits":                 METRICS["registry_hits"],
-        "stream_events":                 METRICS["stream_events"],
+        "bus_events":                METRICS["bus_events"],
         "active_nodes_peak":             METRICS["active_nodes_peak"],
         "active_sessions":               len(list_active_sessions(get_redis())),
         "qkdl_pool":                     qkdl_status,
