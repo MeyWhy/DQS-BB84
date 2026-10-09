@@ -23,11 +23,12 @@ def _kn(node_id: str) -> str: return f"kme:node:{node_id}"
 
 def register_node(r: redis.Redis, reg: NodeRegistration) -> NodeInfo:
     import uuid
-    node_id = str(uuid.uuid4())
+    existing = find_node_by_label(r, reg.label) if reg.label else None
+    node_id = (existing.node_id if existing and existing.role == reg.role
+               else str(uuid.uuid4()))
     info = NodeInfo(
         node_id=node_id,
         role=reg.role,
-        callback_url=reg.callback_url,
         label=reg.label or f"{reg.role.value}-{node_id[:8]}",
         metadata=reg.metadata,
         registered_at=time.time(),
@@ -66,17 +67,3 @@ def list_nodes(r: redis.Redis,
             nodes.append(n)
     return nodes
 
-
-#NOTE: notify_node() has been removed. It performed an httpx POST to a
-#node's callback_url ("/webhook") — the push-based delivery path that this
-#migration replaces entirely with kme/event_bus.py's Redis Streams
-#publish_event()/NodeStreamConsumer pull-based model (see kme/event_bus.py
-#module docstring for the full rationale). callback_url is still accepted
-#on NodeRegistration and stored for backward-compatible logging/dashboards,
-#but the KME no longer dials it for anything.
-#
-#kme/message_bus.py (the old, never-wired-in Pub/Sub MessageBus/
-#NodeSubscriber) is likewise superseded by kme/event_bus.py and should be
-#considered dead code — left in place only so a `git log` / diff shows the
-#exact migration path rather than a silent deletion. Safe to delete once
-#this migration is confirmed working end-to-end.
