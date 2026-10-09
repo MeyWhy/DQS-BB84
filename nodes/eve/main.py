@@ -4,13 +4,10 @@ Eve node that uses the intercept-resend eavesdropping type for BB84
 How it works :
 1.Alice calls post /sessions with interceptor_label="eve-1"
 
-2.KME stores eve_node_id in the session and registers the session as
-   pending pickup for Eve's node_id, then publishes a session_open event
-   to this session's Redis Stream with target_role="monitor". Eve's
-   BaseNode discovers the pending session (via wake-up + polling fallback,
-   see kme/event_bus.py) and starts pulling its events.
+2.KME stores eve_node_id in the session and fires a session_open webhook
+with role="monitor" to Eve so it can perceive the content of the session
 
-3.Eve receives the event -> calls POST /intercept/{session_id} on the
+3.Eve receives the webhook -> calls POST /intercept/{session_id} on the
    QKDL to register herself as a Midm
 
 4.From that point on, every qubit Alice sends is intercepted inside
@@ -46,7 +43,7 @@ logger   = logging.getLogger("eve")
 logging.basicConfig(level=logging.INFO)
 
 KME_URL = os.getenv("KME_URL",  "http://localhost:8000")
-MY_URL  = os.getenv("EVE_URL",  "http://localhost:8010")
+#MY_URL  = os.getenv("EVE_URL",  "http://localhost:8010")
 
 #How long Eve retries registering on the QKDL before giving up.
 #The QKDL session is created in a background task, so there's a small
@@ -66,8 +63,9 @@ class EveNode(BaseNode):
         self._eve_state: dict[str, dict] = {}
 
     
-    #Stream event handlers
     async def on_session_open(self, session_id: str, payload: dict) -> None:
+        if session_id in self._eve_state:
+            return
         role = payload.get("role", "")
         if role != "monitor":
             #Not our session — ignore
@@ -199,7 +197,6 @@ class EveNode(BaseNode):
         state = self._eve_state.get(session_id)
         if state:
             state["done"] = True
-        self.stop_listening(session_id)
 
     
     #Stats helper
