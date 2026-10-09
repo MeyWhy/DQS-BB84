@@ -27,7 +27,7 @@ class NodeRole(str, Enum):
 
 class NodeRegistration(BaseModel):
     role:         NodeRole
-    callback_url: str
+    #callback_url: str
     label:        str = ""
     metadata:     dict = Field(default_factory=dict)
 
@@ -35,7 +35,7 @@ class NodeRegistration(BaseModel):
 class NodeInfo(BaseModel):
     node_id:       str
     role:          NodeRole
-    callback_url:  str
+    #callback_url:  str
     label:         str  = ""
     metadata:      dict = Field(default_factory=dict)
     registered_at: float = 0.0
@@ -204,7 +204,7 @@ class SessionStatusResponse(BaseModel):
     def key_size(self) -> int: return self.n_sifted
 
 
-class WebhookEvent(BaseModel):
+class BusEvent(BaseModel):
     event:      str
     session_id: str
     payload:    dict = Field(default_factory=dict)
